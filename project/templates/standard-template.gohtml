@@ -1,0 +1,170 @@
+{{/* ****** BEGINNING OF HEAD SECTION ********/}}
+{{define "meta-title"}}
+    <meta charset="UTF-8">
+    <title>Ultimate Database</title>
+{{end}}
+
+{{define "pixel-dense"}}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+{{end}}
+
+{{define "fav-icon1"}}
+    <link rel="shortcut icon" type="image/png" href="img/favicons/DJ_500x500.png">
+{{end}}
+
+{{define "fonts1"}}
+    <link href="https://fonts.googleapis.com/css?family=Bebas+Neue|Bowlby+One+SC|Dosis|Nunito|Odibee+Sans|Open+Sans+Condensed:300&display=swap" rel="stylesheet">
+{{end}}
+
+{{define "media-queries"}}
+    <link rel="stylesheet" href="static/css/main.css">
+    <link rel="stylesheet" href="static/css/styling.css">
+    <link rel="stylesheet" media="(min-width: 600px)" href="static/css/mq_600.css">
+    <link rel="stylesheet" media="(min-width: 900px)" href="static/css/mq_900.css">
+    <link rel="stylesheet" media="(min-width: 1500px)" href="static/css/mq_1500.css">
+{{end}}
+
+{{define "javascript"}}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
+{{end}}
+
+{{/******* END OF HEAD SECTION *****/}}
+
+{{/******** BEGINNING OF HEADER SECTION ********/}}
+{{define "header_div"}}
+    <header>
+        <div class="header_div">
+            <div class="drop-down-link-divs">
+                <div class="nothing_box">
+                    
+                </div>
+                <div class="about_box">
+                    <a href="index.html" class="headerLinks">About Me</a>
+                </div>
+                <div class="link_box">
+                    <div class="dropdown">
+                        <button class="dropbtn">Check Out My Work!</button>
+                        <div class="dropdown-content">
+                            <a href="gallery.gohtml" class="headerLinks">Event Gallery</a>
+                            <a href="" class="headerLinks">DJ Mark Mixes(COMING SOON!)</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact_me_box">
+                    <a href="bookdjmark.gohtml" class="headerLinks">Book DJ Mark</a>
+                </div>
+            </div>
+        </div>
+    </header>
+{{end}}
+{{/******** END OF HEADER SECTION ********/}}
+
+{{/******** BEGINNING OF BODY SECTION *********/}}
+
+{{/* BEGINNING OF 'SIGN-IN' FORM DEFINITION */}}
+{{define "sign-in-form"}}
+    <div id="divform">
+        <form id="sign-in-form"
+        method="POST">
+            {{/* USERNAME */}}
+            <div class="labelDiv">
+                <p class="labelPText">
+                    USERNAME:
+                </p>
+            </div>
+            <div class="inputDiv">
+                <input type="text" name="username" id="inputTextMobileUN" required/>
+                <p class="form-field-err" id="username-err"></p>
+            </div>
+            {{/* PASSWORD */}}
+            <div class="labelDiv">
+                <p class="labelPText">
+                    PASSWORD:
+                </p>
+            </div>
+            <div class="inputDiv">
+                <input type="text" name="password" id="inputTextMobilePW" required/>
+                <p class="form-field-err" id="password-err"></p>
+            </div>
+            {{/* SUBMIT BUTTON */}}
+            <div class="fieldSection">
+                <button id="my-form-button">Submit</button>
+            </div>
+        </form>
+    </div>
+{{end}}
+{{/* ENDING OF THE 'SIGN-IN' FORM DEFINITION */}}
+
+{{/******** END OF BODY SECTION ********/}}
+
+{{/******* BEGINNING OF FOOTER SECTION ******/}}
+{{define "footer_div"}}
+    <footer>
+        <div class="footer_div">
+            <div class="namer_div">
+                <h1 class="namername">
+                    DJ Mark Bryant
+                </h1>
+            </div>
+            <div class="contact_slide_div">
+                {{/* Here's the images for Mark's Facebook */}}
+                <div class="contact_box">
+                    <div class="image_contact_holder">
+                        <a href="https://www.facebook.com/pg/strictlydj2019/services/" target="_blank">
+                            <img src="static/img/png/facebook_512x512.png"  class="image_contact" alt="facebook_image">
+                        </a>
+                    </div>
+                    <div class="text_contact_holder">
+                        <p class="text_contact">
+                            <a href="https://www.facebook.com/pg/strictlydj2019/services/" target="_blank">
+                                Facebook: @strictlydj2019
+                            </a>
+                        </p>
+                    </div>
+                </div>
+                {{/* Here's the images for Mark's Email */}}
+                <div class="contact_box">
+                    <div class="image_contact_holder">
+                        <img src="static/img/png/gmail_512x512.png" class="image_contact" alt="gmail_image">
+                    </div>
+                    <div class="text_contact_holder">
+                        <p class="text_contact">
+                            Email: Mark.j.bryant430@gmail.com
+                        </p>
+                    </div>
+                </div>
+                {{/* Here's the images for Mark's Phone Number */}}
+                <div class="contact_box">
+                    <div class="image_contact_holder">
+                        <img src="static/img/png/phone_512x512.png" class="image_contact" alt="phone_image">
+                    </div>
+                    <div class="text_contact_holder">
+                        <p class="text_contact">
+                            Phone: 999-999-9999
+                        </p>
+                    </div>
+                </div>
+                {{/* Here's the images for Mark's LinkedIn */}}
+                <div class="contact_box">
+                    <div class="image_contact_holder">
+                        <a href="https://www.linkedin.com/in/josephbk/" target="_blank">
+                            <img src="static/img/png/LI-In-Bug_635x540.png"  class="image_contact" alt="linkedIn_image">
+                        </a>
+                    </div>
+                    <div class="text_contact_holder">
+                        <p class="text_contact">
+                            LinkedIn: URL.COM
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+{{end}}
+{{/******** END OF FOOTER SECTION *******/}}
+
+
+{{/* TEST TEMPLATE BEGINNING */}}
+
+{{/* TEST TEMPLATE ENDING */}}

@@ -1,0 +1,67 @@
+/* SYTLING FOR THE FORMS */
+.divform {
+    /* Flexbox styling */
+    display: flex;
+    flex-flow: wrap;
+    align-content: center;
+    justify-content: center;
+    width: 100%;
+    /* styling */
+    padding: 1rem;
+    /* debug styling */
+    border: 2px dashed rgb(211, 207, 153);
+}
+
+#sign-in-form {
+
+}
+
+.labelDiv {
+    /* flexbox styling */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: flex-end;
+    align-content: center;
+    width: 45%;
+}
+
+.labelPText {
+    /* styling */
+    font-size: 1rem;
+    padding-right: 1rem;
+    font-family: 'Odibee Sans', sans-serif;
+    color: rgb(207, 157, 157);
+}
+
+.inputDiv {
+    /* flexbox styling */
+    display: flex;
+    flex-flow: wrap;
+    align-content: center;
+    justify-content: flex-start;
+    width: 45%;
+}
+
+#inputTextMobileUN{
+    /* font styling */
+    font-size: 1rem;
+    font-family: 'Nunito', sans-serif;
+}
+
+#inputTextMobilePW{
+    /* font styling */
+    font-size: 1rem;
+    font-family: 'Nunito', sans-serif;
+}
+
+#username-err {
+
+}
+
+#password-err {
+
+}
+
+.form-field-err {
+    font-size: 1rem;
+}
