@@ -61,7 +61,28 @@
 {{/******** END OF HEADER SECTION ********/}}
 
 {{/******** BEGINNING OF BODY SECTION *********/}}
+{{define "signup"}}
+    <div class="signup-ask-div">
+        <h2 class="signup-ask-text">
+                <a href="/signup">Sign Up!</a>
+        </h2>
+    </div>
+{{end}}
 
+{{/* BEGINNING OF 'SIGN-UP' FORM DEFINITION */}}
+{{define "signup-form"}}
+    <div id="divform">
+        <form id="signup-form"
+        method="post">
+            <input type="text" name="username" placeholder="username"><br>
+            <input type="text" name="password" placeholder="password"><br>
+            <input type="text" name="firstname" placeholder="first name"><br>
+            <input type="text" name="lastname" placeholder="last name"><br>
+            <input type="submit">
+        </form>
+    </div>
+{{end}}
+{{/* ENDING OF 'SIGN-UP' FORM DEFINITION */}}
 {{/* BEGINNING OF 'SIGN-IN' FORM DEFINITION */}}
 {{define "sign-in-form"}}
     <div id="divform">

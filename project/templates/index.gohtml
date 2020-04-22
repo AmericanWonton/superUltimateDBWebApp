@@ -16,9 +16,17 @@
     <body>
         {{/* Here is our header */}}
         
-        {{/* Here is our form asking us to sign in! */}}
-        {{template "sign-in-form"}}
-        
+        {{/* If the User session exists, (as in, we aren't passing in a 'nil' user),
+        then display it here. */}}
+        {{if .UserName}}
+            <br>
+            <p>Hey, here's your info, you should be logged in. We can sign you into stuff...</p>
+            {{/* Here is our form asking us to sign in! */}}
+            {{template "sign-in-form"}}
+            <br>
+        {{else}}
+            {{template "signup"}}
+        {{end}}
         {{/* Here is our footer */}}
         
     </body>
