@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
@@ -18,11 +19,21 @@ type user struct {
 	Password []byte
 	First    string
 	Last     string
+	Role     string
+}
+
+//Here's our session struct
+type session struct {
+	username     string
+	lastActivity time.Time
 }
 
 //Session Database info
-var dbUsers = map[string]user{}      // user ID, user
-var dbSessions = map[string]string{} // session ID, user ID
+var dbUsers = map[string]user{}       // user ID, user
+var dbSessions = map[string]session{} // session ID, session
+var dbSessionsCleaned time.Time
+
+const sessionLength int = 30 //Length of sessions
 
 /* TEMPLATE DEFINITION BEGINNING */
 var template1 *template.Template
@@ -48,18 +59,22 @@ func HandleError(w http.ResponseWriter, err error) {
 
 //Home page
 func homePage(w http.ResponseWriter, r *http.Request) {
-	/* Execute template, handle error */
+	//if User is already logged in, bring them to the mainPage!
 	aUser := getUser(w, r) //Get the User, if they exist
+	if alreadyLoggedIn(w, r) {
+		http.Redirect(w, r, "/mainPage", http.StatusSeeOther)
+		return
+	}
+	/* Execute template, handle error */
 	err1 := template1.ExecuteTemplate(w, "index.gohtml", aUser)
 	HandleError(w, err1)
 	fmt.Printf("Homepage Endpoint Hit\n")
-
 }
 
 //signUp
 func signUp(w http.ResponseWriter, req *http.Request) {
 	//See if user is already logged in
-	if alreadyLoggedIn(req) {
+	if alreadyLoggedIn(w, req) {
 		//If already logged in, put them back at the main menu
 		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
@@ -73,6 +88,7 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		password := req.FormValue("password")
 		firstname := req.FormValue("firstname")
 		lastname := req.FormValue("lastname")
+		role := req.FormValue("role")
 		// username taken?
 		/* We should probobly due some field validation with ajax and mongo... */
 		if _, ok := dbUsers[username]; ok {
@@ -85,15 +101,16 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 			Name:  "session",
 			Value: sID.String(),
 		}
+		newCookie.MaxAge = sessionLength
 		http.SetCookie(w, newCookie)
-		dbSessions[newCookie.Value] = username
+		dbSessions[newCookie.Value] = session{username, time.Now()}
 		// store user in dbUsers
 		bs, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
 		if err != nil {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
-		theUser = user{username, bs, firstname, lastname}
+		theUser = user{username, bs, firstname, lastname, role}
 		dbUsers[username] = theUser
 		// redirect
 		http.Redirect(w, req, "/", http.StatusSeeOther)
@@ -106,6 +123,20 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 	fmt.Printf("Signup Endpoint Hit\n")
 }
 
+//mainPage
+func mainPage(w http.ResponseWriter, req *http.Request) {
+	//if User is already logged in, bring them to the mainPage!
+	aUser := getUser(w, req) //Get the User, if they exist
+	if !alreadyLoggedIn(w, req) {
+		http.Redirect(w, req, "/homePage", http.StatusSeeOther)
+		return
+	}
+	/* Execute template, handle error */
+	err1 := template1.ExecuteTemplate(w, "index.gohtml", aUser)
+	HandleError(w, err1)
+	fmt.Printf("Homepage Endpoint Hit\n")
+}
+
 func handleRequests() {
 
 	myRouter := mux.NewRouter().StrictSlash(true)
@@ -113,6 +144,7 @@ func handleRequests() {
 	http.Handle("/favicon.ico", http.NotFoundHandler()) //For missing FavIcon
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/signup", signUp)
+	myRouter.HandleFunc("/mainPage", mainPage)
 	/* Handle all files in the static path */
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
@@ -121,15 +153,4 @@ func handleRequests() {
 
 func main() {
 	handleRequests()
-}
-
-//Need this to test bcrypt
-func testDebug2(w http.ResponseWriter, req *http.Request) {
-	password := "Uhhhhhhh"
-	bs, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-	fmt.Println(bs)
 }

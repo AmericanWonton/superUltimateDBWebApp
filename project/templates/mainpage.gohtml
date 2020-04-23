@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {{/* Here is our meta charset and title */}}
+        {{template "meta-title"}}
+        {{/* Here is our pixel density markup */}}
+        {{template "pixel-dense"}}
+        {{/* Here is our FavIcon */}}
+        {{template "fav-icon1"}}
+        {{/* Here are our fonts */}}
+        {{template "fonts1"}}
+        {{/* Here are our Media Query and stylesheets */}}
+        {{template "media-queries"}}
+        {{/* Here is our Javascript or additional code needed */}}
+    </head>
+    <body>
+        {{/* Here is our header */}}
+        
+        {{/* If the User session exists, (as in, we aren't passing in a 'nil' user),
+        then display it here. */}}
+        {{if .UserName}}
+            {{/* If the role is a User */}}
+            {{if .Role -eq "user"}}
+                <p>Hey, you're logged in, User! Now you can do stuff...</p>
+            {{/* If the role is an admin */}}
+            {{else if .Role -eq "admin"}}
+                <p>Hey, you're logged in, admin! Now you can do stuff...</p>
+            {{/* If the role is IT */}}
+            {{else if .Role -eq "IT"}}
+                <p>Hey, you're logged in, IT! Now you can do stuff...</p>
+            {{else}}
+                <p>Hey man, you shouldn't be here, you aren't logged in and assigned a Role!...</p>
+            {{end}}
+            {{/* Here is our form asking us to sign in! */}}
+            <br>
+        {{else}}
+            {{/* Whoops, User isn't properly signed on, they shouldn't be here... */}}
+        {{end}}
+
+        {{/* Here is our footer */}}
+        
+    </body>
+</html>
