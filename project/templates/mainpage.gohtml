@@ -19,14 +19,17 @@
         {{/* If the User session exists, (as in, we aren't passing in a 'nil' user),
         then display it here. */}}
         {{if .UserName}}
+            <p>Hey, here is our logged in User</p>
+            {{.}}
+            <br>
             {{/* If the role is a User */}}
-            {{if .Role -eq "user"}}
+            {{if (call .user.returnRoleUser "user")}}
                 <p>Hey, you're logged in, User! Now you can do stuff...</p>
             {{/* If the role is an admin */}}
-            {{else if .Role -eq "admin"}}
+            {{else if .user.returnRoleAdmin "admin"}}
                 <p>Hey, you're logged in, admin! Now you can do stuff...</p>
             {{/* If the role is IT */}}
-            {{else if .Role -eq "IT"}}
+            {{else if .user.returnRoleIT "IT"}}
                 <p>Hey, you're logged in, IT! Now you can do stuff...</p>
             {{else}}
                 <p>Hey man, you shouldn't be here, you aren't logged in and assigned a Role!...</p>
@@ -35,6 +38,7 @@
             <br>
         {{else}}
             {{/* Whoops, User isn't properly signed on, they shouldn't be here... */}}
+            <p>Hey, you should'nt be here!</p>
         {{end}}
 
         {{/* Here is our footer */}}

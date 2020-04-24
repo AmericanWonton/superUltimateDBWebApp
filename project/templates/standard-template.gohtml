@@ -68,6 +68,13 @@
         </h2>
     </div>
 {{end}}
+{{define "signin"}}
+    <div class="signin-ask-div">
+        <h2 class="signin-ask-text">
+            Sign-In!
+        </h2>
+    </div>
+{{end}}
 
 {{/* BEGINNING OF 'SIGN-UP' FORM DEFINITION */}}
 {{define "signup-form"}}
@@ -101,7 +108,7 @@
                 </p>
             </div>
             <div class="inputDiv">
-                <input type="text" name="username" id="inputTextMobileUN" required/>
+                <input type="text" name="username" placeholder="username" id="inputTextMobileUN" required/>
                 <p class="form-field-err" id="username-err"></p>
             </div>
             {{/* PASSWORD */}}
@@ -111,7 +118,7 @@
                 </p>
             </div>
             <div class="inputDiv">
-                <input type="text" name="password" id="inputTextMobilePW" required/>
+                <input type="text" name="password" placeholder="password" id="inputTextMobilePW" required/>
                 <p class="form-field-err" id="password-err"></p>
             </div>
             {{/* SUBMIT BUTTON */}}

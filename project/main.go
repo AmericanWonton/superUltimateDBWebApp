@@ -14,7 +14,7 @@ import (
 )
 
 //Here's our User struct
-type user struct {
+type User struct {
 	UserName string
 	Password []byte
 	First    string
@@ -29,7 +29,7 @@ type session struct {
 }
 
 //Session Database info
-var dbUsers = map[string]user{}       // user ID, user
+var dbUsers = map[string]User{}       // user ID, user
 var dbSessions = map[string]session{} // session ID, session
 var dbSessionsCleaned time.Time
 
@@ -39,8 +39,35 @@ const sessionLength int = 30 //Length of sessions
 var template1 *template.Template
 
 /* FUNCMAP DEFINITION */
+func (u User) ReturnRoleUser(user string) bool {
+	if strings.Compare(user, "user") == 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
+func (u User) ReturnRoleAdmin(admin string) bool {
+	if strings.Compare(admin, "admin") == 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
+func (u User) ReturnRoleIT(it string) bool {
+	if strings.Compare(it, "IT") == 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
 var funcMap = template.FuncMap{
-	"upperCase": strings.ToUpper, //upperCase is a key we can call inside of the template html file
+	"upperCase":       strings.ToUpper, //upperCase is a key we can call inside of the template html file
+	"returnRoleUser":  User.ReturnRoleUser,
+	"returnRoleAdmin": User.ReturnRoleAdmin,
+	"returnRoleIT":    User.ReturnRoleIT,
 }
 
 //Parse our templates
@@ -59,11 +86,44 @@ func HandleError(w http.ResponseWriter, err error) {
 
 //Home page
 func homePage(w http.ResponseWriter, r *http.Request) {
-	//if User is already logged in, bring them to the mainPage!
 	aUser := getUser(w, r) //Get the User, if they exist
-	if alreadyLoggedIn(w, r) {
-		http.Redirect(w, r, "/mainPage", http.StatusSeeOther)
-		return
+	//if User is already logged in, bring them to the mainPage!
+	/*
+		aUser := getUser(w, r) //Get the User, if they exist
+		if alreadyLoggedIn(w, r) {
+			http.Redirect(w, r, "/mainPage", http.StatusSeeOther)
+			return
+		}
+	*/
+	//If a User posts a form to log in!
+	if r.Method == http.MethodPost {
+		//Get Form Values
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+		//Search for Users in our Database. It fails out if Username and Password aren't there.
+		if loginUser, ok := dbUsers[username]; ok {
+			fmt.Printf("We found the Username %v\n", username)
+			//Check on Password
+			err := bcrypt.CompareHashAndPassword(loginUser.Password, []byte(password))
+			if err != nil {
+				http.Error(w, "Username and/or password do not match", http.StatusForbidden)
+				return
+			}
+			fmt.Printf("We found the password, %v, updating session. \n", password)
+			//User logged in, directing them to the mainpage
+			// create session
+			sID, _ := uuid.NewV4()
+			cookie := &http.Cookie{
+				Name:  "session",
+				Value: sID.String(),
+			}
+			cookie.MaxAge = sessionLength
+			http.SetCookie(w, cookie)
+			dbSessions[cookie.Value] = session{username, time.Now()}
+			//Send to the MainPage!
+			fmt.Printf("Executing the main page now with our logged in User!\n")
+			http.Redirect(w, r, "/mainPage", http.StatusSeeOther)
+		}
 	}
 	/* Execute template, handle error */
 	err1 := template1.ExecuteTemplate(w, "index.gohtml", aUser)
@@ -80,7 +140,7 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	//If User is NOT already logged in, wait till they post a form!
-	var theUser user
+	var theUser User
 	// process form submission
 	if req.Method == http.MethodPost {
 		// get form values
@@ -110,7 +170,7 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
-		theUser = user{username, bs, firstname, lastname, role}
+		theUser = User{username, bs, firstname, lastname, role}
 		dbUsers[username] = theUser
 		// redirect
 		http.Redirect(w, req, "/", http.StatusSeeOther)
@@ -128,11 +188,11 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 	//if User is already logged in, bring them to the mainPage!
 	aUser := getUser(w, req) //Get the User, if they exist
 	if !alreadyLoggedIn(w, req) {
-		http.Redirect(w, req, "/homePage", http.StatusSeeOther)
+		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
 	}
 	/* Execute template, handle error */
-	err1 := template1.ExecuteTemplate(w, "index.gohtml", aUser)
+	err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", aUser)
 	HandleError(w, err1)
 	fmt.Printf("Homepage Endpoint Hit\n")
 }

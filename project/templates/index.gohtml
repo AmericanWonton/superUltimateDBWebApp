@@ -22,10 +22,18 @@
             <br>
             <p>Hey, here's your info, you should be logged in. We can sign you into stuff...</p>
             {{/* Here is our form asking us to sign in! */}}
+            {{template "signup"}}
+            <br>
+            {{template "signin"}}
             {{template "sign-in-form"}}
             <br>
         {{else}}
+            <p>Good sire, it's my displeasure to inform you that you are NOT signed in.</p>
+            <br>
+            <p>You must either sign in below or sign up</p>
             {{template "signup"}}
+            {{template "signin"}}
+            {{template "sign-in-form"}}
         {{end}}
         {{/* Here is our footer */}}
         

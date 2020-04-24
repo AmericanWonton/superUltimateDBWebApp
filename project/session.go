@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func getUser(w http.ResponseWriter, req *http.Request) user {
+func getUser(w http.ResponseWriter, req *http.Request) User {
 	// get cookie
 	cookie, err := req.Cookie("session")
 	//If there is no session cookie, create a new session cookie
@@ -26,7 +26,7 @@ func getUser(w http.ResponseWriter, req *http.Request) user {
 	http.SetCookie(w, cookie) //Set the cookie to our grabbed cookie,(or new cookie)
 
 	// if the user exists already, get user
-	var theUser user
+	var theUser User
 	if session, ok := dbSessions[cookie.Value]; ok {
 		session.lastActivity = time.Now()
 		dbSessions[cookie.Value] = session
