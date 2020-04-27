@@ -22,6 +22,19 @@ type User struct {
 	Role     string
 }
 
+type hotdog struct {
+	User       User //The User whomst this hotdog belongs to
+	HotDogType string
+	Condiment  string
+	Calories   int
+}
+
+//Here is our ViewData struct
+type ViewData struct {
+	User     User
+	UserName string
+}
+
 //Here's our session struct
 type session struct {
 	username     string
@@ -39,24 +52,24 @@ const sessionLength int = 30 //Length of sessions
 var template1 *template.Template
 
 /* FUNCMAP DEFINITION */
-func (u User) ReturnRoleUser(user string) bool {
-	if strings.Compare(user, "user") == 0 {
+func (u User) ReturnRoleUser(theUser string) bool {
+	if strings.Compare(theUser, "user") == 0 {
 		return true
 	} else {
 		return false
 	}
 }
 
-func (u User) ReturnRoleAdmin(admin string) bool {
-	if strings.Compare(admin, "admin") == 0 {
+func (u User) ReturnRoleAdmin(theAdmin string) bool {
+	if strings.Compare(theAdmin, "admin") == 0 {
 		return true
 	} else {
 		return false
 	}
 }
 
-func (u User) ReturnRoleIT(it string) bool {
-	if strings.Compare(it, "IT") == 0 {
+func (u User) ReturnRoleIT(theIT string) bool {
+	if strings.Compare(theIT, "IT") == 0 {
 		return true
 	} else {
 		return false
@@ -65,9 +78,9 @@ func (u User) ReturnRoleIT(it string) bool {
 
 var funcMap = template.FuncMap{
 	"upperCase":       strings.ToUpper, //upperCase is a key we can call inside of the template html file
-	"returnRoleUser":  User.ReturnRoleUser,
-	"returnRoleAdmin": User.ReturnRoleAdmin,
-	"returnRoleIT":    User.ReturnRoleIT,
+	"ReturnRoleUser":  User.ReturnRoleUser,
+	"ReturnRoleAdmin": User.ReturnRoleAdmin,
+	"ReturnRoleIT":    User.ReturnRoleIT,
 }
 
 //Parse our templates
@@ -123,6 +136,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 			//Send to the MainPage!
 			fmt.Printf("Executing the main page now with our logged in User!\n")
 			http.Redirect(w, r, "/mainPage", http.StatusSeeOther)
+			return
 		}
 	}
 	/* Execute template, handle error */
@@ -186,13 +200,21 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 //mainPage
 func mainPage(w http.ResponseWriter, req *http.Request) {
 	//if User is already logged in, bring them to the mainPage!
-	aUser := getUser(w, req) //Get the User, if they exist
+	aUser := getUser(w, req)              //Get the User, if they exist
+	vd := ViewData{aUser, aUser.UserName} //POSSIBLY DEBUG
 	if !alreadyLoggedIn(w, req) {
 		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
 	}
 	/* Execute template, handle error */
-	err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", aUser)
+	/* DEGUG STUFF */
+	fmt.Println("Is this a problem area?....")
+	/*
+		err1 :=  template.Must(template1.Clone()).Funcs(template1.FuncMap{
+			"is"
+		})
+	*/
+	err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 	HandleError(w, err1)
 	fmt.Printf("Homepage Endpoint Hit\n")
 }

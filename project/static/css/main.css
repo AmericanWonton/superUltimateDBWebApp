@@ -81,3 +81,23 @@
 .signin-ask-text {
     font-size: 2rem;
 }
+
+/* MainPage Layout */
+.actionDiv {
+    width: 100%;
+}
+
+.actionimg {
+    width: 15vw;
+    height: 15vh;
+}
+
+.actionInstructionText {
+    font-size: 1rem;
+}
+
+#actionChoice {
+    width: 5vw;
+    height: 5vh;
+    font-size: 1rem;
+}

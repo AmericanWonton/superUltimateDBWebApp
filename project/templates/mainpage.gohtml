@@ -18,27 +18,17 @@
         
         {{/* If the User session exists, (as in, we aren't passing in a 'nil' user),
         then display it here. */}}
-        {{if .UserName}}
-            <p>Hey, here is our logged in User</p>
-            {{.}}
-            <br>
+        {{if .User.Role}}
             {{/* If the role is a User */}}
-            {{if (call .user.returnRoleUser "user")}}
-                <p>Hey, you're logged in, User! Now you can do stuff...</p>
-            {{/* If the role is an admin */}}
-            {{else if .user.returnRoleAdmin "admin"}}
-                <p>Hey, you're logged in, admin! Now you can do stuff...</p>
-            {{/* If the role is IT */}}
-            {{else if .user.returnRoleIT "IT"}}
-                <p>Hey, you're logged in, IT! Now you can do stuff...</p>
+            {{if ReturnRoleUser .User "user"}}
+                <p>Hey, you're logged in, {{.User.Role}}! Now you can do stuff...</p>
+            {{else if ReturnRoleAdmin .User "admin"}}
+                <p>Hey, you're logged in {{.User.Role}}! Now you can admin stuff!</p>
+            {{else if ReturnRoleIT .User "IT"}}
+                <p>Hey, you're logged in {{.User.Role}}! Now you can do IT stuff!</p>
             {{else}}
-                <p>Hey man, you shouldn't be here, you aren't logged in and assigned a Role!...</p>
+                <p>Whoops! Error here! Go back!</p>
             {{end}}
-            {{/* Here is our form asking us to sign in! */}}
-            <br>
-        {{else}}
-            {{/* Whoops, User isn't properly signed on, they shouldn't be here... */}}
-            <p>Hey, you should'nt be here!</p>
         {{end}}
 
         {{/* Here is our footer */}}

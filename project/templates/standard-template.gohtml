@@ -27,6 +27,7 @@
 {{define "javascript"}}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
+    <script src="static/js/foodExecutor.js"></script>
 {{end}}
 
 {{/******* END OF HEAD SECTION *****/}}
@@ -89,7 +90,7 @@
             <select name="role" id="sr">
                 <option value="user">user</option>
                 <option value="admin">admin</option>
-                <option value="it">IT</option>
+                <option value="IT">IT</option>
             </select>
             <input type="submit">
         </form>
@@ -129,7 +130,27 @@
     </div>
 {{end}}
 {{/* ENDING OF THE 'SIGN-IN' FORM DEFINITION */}}
+{{/* BEGINNING OF USER ACTION PAGE */}}
+    <div class="actionDiv">
+        <img src="static/images/jpg/hide-pain-harold.jpg"  class="actionimg" alt="harold">
+        <br><br>
+        <p class="actionInstructionText">Okay User, what data would you like to read/make?</p>
+        <br>
+        <button id="actionChoice" onclick="revealFoodForm(0)">
+            HOTDOG
+        </button>
+        <br>
+        <button id="actionChoice" onclick="revealFoodForm(1)">
+            HAMBURGER
+        </button>
+    </div>
+{{/* ENDING OF USER ACTION PAGE */}}
+{{/* BEGINNING OF ADMIN ACTION PAGE */}}
 
+{{/*ENDING OF ADMIN ACTION PAGE */}}
+{{/* BEGINNING OF IT ACTION PAGE */}}
+
+{{/* ENDING OF IT ACTION PAGE */}}
 {{/******** END OF BODY SECTION ********/}}
 
 {{/******* BEGINNING OF FOOTER SECTION ******/}}
