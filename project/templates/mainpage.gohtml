@@ -12,6 +12,7 @@
         {{/* Here are our Media Query and stylesheets */}}
         {{template "media-queries"}}
         {{/* Here is our Javascript or additional code needed */}}
+        <script src="script/js/foodExecutor.js"></script>
     </head>
     <body>
         {{/* Here is our header */}}
@@ -22,10 +23,13 @@
             {{/* If the role is a User */}}
             {{if ReturnRoleUser .User "user"}}
                 <p>Hey, you're logged in, {{.User.Role}}! Now you can do stuff...</p>
+                {{template "user-action"}}
             {{else if ReturnRoleAdmin .User "admin"}}
                 <p>Hey, you're logged in {{.User.Role}}! Now you can admin stuff!</p>
+                
             {{else if ReturnRoleIT .User "IT"}}
                 <p>Hey, you're logged in {{.User.Role}}! Now you can do IT stuff!</p>
+                
             {{else}}
                 <p>Whoops! Error here! Go back!</p>
             {{end}}

@@ -22,11 +22,20 @@ type User struct {
 	Role     string
 }
 
-type hotdog struct {
+type Hotdog struct {
 	User       User //The User whomst this hotdog belongs to
 	HotDogType string
 	Condiment  string
 	Calories   int
+	Name       string
+}
+
+type Hamburger struct {
+	User       User //The User whomst this hotdog belongs to
+	BurgerType string
+	Condiment  string
+	Calories   int
+	Name       string
 }
 
 //Here is our ViewData struct
