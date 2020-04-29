@@ -236,8 +236,8 @@ func handleRequests() {
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/signup", signUp)
 	myRouter.HandleFunc("/mainPage", mainPage)
-	/* Handle all files in the static path */
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	//Serve our CSS files...
+	myRouter.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("."+"/static/"))))
 
 	log.Fatal(http.ListenAndServe(":8080", myRouter))
 }
