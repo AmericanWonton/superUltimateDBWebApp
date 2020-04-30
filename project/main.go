@@ -1,12 +1,15 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
 	"text/template"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
@@ -54,6 +57,10 @@ type session struct {
 var dbUsers = map[string]User{}       // user ID, user
 var dbSessions = map[string]session{} // session ID, session
 var dbSessionsCleaned time.Time
+
+//mySQL database declarations
+var db *sql.DB
+var err error
 
 const sessionLength int = 30 //Length of sessions
 
@@ -243,5 +250,14 @@ func handleRequests() {
 }
 
 func main() {
+	//Handle Requests
 	handleRequests()
+	//open SQL connection
+	db, err = sql.Open("mysql",
+		"joek1:fartghookthestrong69@tcp(food-database.cd8ujtto1hfj.us-east-2.rds.amazonaws.com)/food-database-schema?charset=utf8")
+	check(err)
+	defer db.Close()
+
+	err = db.Ping()
+	check(err)
 }
