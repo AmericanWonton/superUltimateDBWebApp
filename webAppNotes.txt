@@ -1,0 +1,50 @@
+PURPOSE: This is an app for testing the following: 
+1. Creation of a web page with a User sign on,(with pages you cannot 
+access without a session ID and proper login credentails in our
+database).
+2. The creation of a MongoDB, with CRUD operations made through 
+restful API calls.
+2.5(optional). The creation of a MySQL database with CRUD operations 
+made through a restful API call.
+3. A display of DB information in a concise, neat format,
+displayed using Golang's WebDev tutorial.
+4. Use of docker to deploy this app on an Amazon Web Server,
+(along with MongoDB).
+
+
+TO BE DONE: 
+
+1.Create App with User sign on:
+User sign in seems to be working, now I need to have a log out function.
+
+2. Create MongoDB functionality:
+
+2.5(optional) Create mySQL functionality
+
+3. Display DB information through go webDev 
+
+4. Deploy this webApp to AWS with Docker 
+
+
+
+
+
+EXTERIOR NOTES:
+1. Errors in Chrome Values for sytlesheets...apprently we need to switch the 'type' to something:
+https://github.com/froala/angular-froala/issues/170. I'm not quite sure this is the correct fix...
+Okay no, THIS is the correct fix: https://golangcode.com/serve-static-assets-using-the-mux-router/
+
+2. Credentials for Amazon SQLDB creation.
+DB Master Username: joek1
+Password: fartghookthestrong69
+VPC Group: food-security
+Port: 3306
+Schema: food-database-schema
+EndPoint: food-database.cd8ujtto1hfj.us-east-2.rds.amazonaws.com
+In the future, set the 'publicly accessible' tag to NO. Also, you can't use the MySQl on the work machine, it 
+refuses the connection...probobly a company policy thing
+Click little Database Icon for a new 'Schema'
+Create the schema, open it, then right click tables, new table to create a table
+For MySQl, we need to go get these packages: go get github.com/go-sql-driver/mysql
+the structure for the database opening is below: 
+db, err = sql.Open("mysql", "databaseUsername:the-database-password@tcp(the-amazon-database-endpoint:portNum-3306)/schemaName?charset=utf8")
