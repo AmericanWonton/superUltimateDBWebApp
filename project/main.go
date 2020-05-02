@@ -2,13 +2,16 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
 	"text/template"
 	"time"
 
+	_ "github.com/go-mysql/errors"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/gorilla/mux"
@@ -25,20 +28,21 @@ type User struct {
 	Role     string
 }
 
+//Below is our struct for Hotdogs/Hamburgers
 type Hotdog struct {
-	User       User //The User whomst this hotdog belongs to
-	HotDogType string
-	Condiment  string
-	Calories   int
-	Name       string
+	User       User   `json:"User"` //The User whomst this hotdog belongs to
+	HotDogType string `json:"HotDogType"`
+	Condiment  string `json:"Condiment"`
+	Calories   int    `json:"Calories"`
+	Name       string `json:"Name"`
 }
 
 type Hamburger struct {
-	User       User //The User whomst this hotdog belongs to
-	BurgerType string
-	Condiment  string
-	Calories   int
-	Name       string
+	User       User   `json:"User"` //The User whomst this hotdog belongs to
+	BurgerType string `json:"BurgerType"`
+	Condiment  string `json:"Condiment"`
+	Calories   int    `json:"Calories"`
+	Name       string `json:"Name"`
 }
 
 //Here is our ViewData struct
@@ -159,6 +163,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	err1 := template1.ExecuteTemplate(w, "index.gohtml", aUser)
 	HandleError(w, err1)
 	fmt.Printf("Homepage Endpoint Hit\n")
+	getHotDogsAll(w, r)
 }
 
 //signUp
@@ -235,6 +240,77 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 	fmt.Printf("Homepage Endpoint Hit\n")
 }
 
+//POST mainpage
+func postHotDog(w http.ResponseWriter, req *http.Request) {
+
+}
+
+//GET mainpage
+func getHotDogSingular(w http.ResponseWriter, req *http.Request) {
+	//Get the string map of our variables from the request
+	fmt.Println("Finding hotdog singular")
+	//Collect JSON from Postman or wherever
+	reqBody, _ := ioutil.ReadAll(req.Body)
+	fmt.Printf("Here's our body: \n%v\n", reqBody)
+	//Marshal it into our type
+	var postedHotDog Hotdog
+	json.Unmarshal(reqBody, &postedHotDog)
+	fmt.Printf("Here is our postedHotDog: %v\n", postedHotDog)
+
+	rows, err := db.Query(`SELECT * FROM hot_dogs WHERE NAME = 'THE HOT AND READY';`)
+	check(err)
+	defer rows.Close()
+	var id int64
+	var theUser string
+	var dogType string
+	var condiment string
+	var calories int
+	var hotdogName string
+	count := 0
+	for rows.Next() {
+		err = rows.Scan(&id, &theUser, &dogType, &condiment, &calories, &hotdogName)
+		check(err)
+		fmt.Printf("Retrieved Record: %v\n", hotdogName)
+		count++
+	}
+	//If nothing returned from the rows
+	if count == 0 {
+		fmt.Printf("Nothing returned for this query.\n")
+		return
+	} else {
+		//Assign the returned name to our object
+		fmt.Printf("Hotdog name is: %v\n", hotdogName)
+		//Compare to see if the name matches the name we posted
+		if strings.Compare(postedHotDog.Name, hotdogName) == 0 {
+			fmt.Printf("Hey, our query %v matches our posted JSON, %v \n", hotdogName, postedHotDog.Name)
+		} else {
+			fmt.Printf("Whooops, our query, %v, does not match our JSON, %v\n", hotdogName, postedHotDog.Name)
+		}
+	}
+}
+
+func getHotDogsAll(w http.ResponseWriter, req *http.Request) {
+	rows, err := db.Query(`SELECT TYPE FROM hot_dogs;`)
+	check(err)
+	defer rows.Close()
+	// data to be used in query
+	var s, name string
+	s = "RETRIEVED RECORDS:\n"
+
+	// query
+	/* From the documentation, Next returns the next row in the line of rows we asked for from the 'rows' variable above.
+	It returns false if there's no row up next, (so basically, it's really good for loops) */
+	for rows.Next() {
+		/* Scan copies the columns in the current row and copies them to a destination. So we set the destination,
+		(that 'name' string variable above), and point it to that */
+		err = rows.Scan(&name)
+		check(err)       //Check to make sure there was no error doing that above.
+		s += name + "\n" //We keep adding the name returned and a newline for printing later.
+	}
+
+	fmt.Printf("Here's the records, fucker: \n%v\n", s)
+}
+
 func handleRequests() {
 
 	myRouter := mux.NewRouter().StrictSlash(true)
@@ -243,6 +319,10 @@ func handleRequests() {
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/signup", signUp)
 	myRouter.HandleFunc("/mainPage", mainPage)
+	//Database Stuff
+	myRouter.HandleFunc("/mainPage", postHotDog).Methods("POST")              //Post a hotdog!
+	myRouter.HandleFunc("/scadoop", getHotDogsAll).Methods("GET")             //Get ALL Hotdogs!
+	myRouter.HandleFunc("/getHDogSingular", getHotDogSingular).Methods("GET") //Get a SINGULAR hotdog
 	//Serve our CSS files...
 	myRouter.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("."+"/static/"))))
 
@@ -250,8 +330,6 @@ func handleRequests() {
 }
 
 func main() {
-	//Handle Requests
-	handleRequests()
 	//open SQL connection
 	db, err = sql.Open("mysql",
 		"joek1:fartghookthestrong69@tcp(food-database.cd8ujtto1hfj.us-east-2.rds.amazonaws.com)/food-database-schema?charset=utf8")
@@ -260,4 +338,29 @@ func main() {
 
 	err = db.Ping()
 	check(err)
+
+	//DEBUG
+	elHotDog := Hotdog{
+		User{"butthole", []byte("dingus"), "First", "Last", "Role"},
+		"dogtype",
+		"condiment",
+		650,
+		"Name",
+	}
+
+	q, err := json.Marshal(elHotDog)
+	if err != nil {
+		fmt.Println("There's an error marshalling.")
+	}
+	fmt.Printf("Here's our JSON: %v\n", string(q))
+
+	//Handle Requests
+	handleRequests()
+}
+
+//Check errors in our mySQL errors
+func check(err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
 }
