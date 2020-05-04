@@ -48,6 +48,5 @@ Create the schema, open it, then right click tables, new table to create a table
 For MySQl, we need to go get these packages: go get github.com/go-sql-driver/mysql
 the structure for the database opening is below: 
 db, err = sql.Open("mysql", "databaseUsername:the-database-password@tcp(the-amazon-database-endpoint:portNum-3306)/schemaName?charset=utf8")
-Todd's example to handle errors dosne't seem to be working...I just pulled a 'panic' example from this wiki instead: 
 https://github.com/go-sql-driver/mysql/wiki/Examples
 Once you wanna do error handling, follow this: https://stackoverflow.com/questions/27644009/handling-dynamic-errors-in-go-specifically-database-sql-package

@@ -81,7 +81,8 @@
     <div id="divform">
         <form id="signup-form"
         method="post">
-            <input type="text" name="username" placeholder="username"><br>
+            <input type="text" id="username" name="username" placeholder="username"><br>
+            <p id="form-input-info">Username taken!</p>
             <input type="text" name="password" placeholder="password"><br>
             <input type="text" name="firstname" placeholder="first name"><br>
             <input type="text" name="lastname" placeholder="last name"><br>
@@ -91,10 +92,65 @@
                 <option value="admin">admin</option>
                 <option value="IT">IT</option>
             </select>
-            <input type="submit">
+            <input id="submit_button" type="submit">
         </form>
     </div>
 {{end}}
+{{/* SIGN-UP FORM AJAX BEGINNING */}}
+{{define "ajax-signup"}}
+    {{/* On load, query available Usernames */}}
+    <script>
+        var theForm = document.querySelector('#signup-form');
+        var userName = document.querySelector('#username');
+        var usernameErr = document.querySelector('#form-input-info');
+
+        
+        /* Query the database on page load */
+         window.addEventListener('DOMContentLoaded', function(){
+            //Hide the error message, usernameErr
+            usernameErr.textContent = "";
+            //Loading Database Usernames
+            console.log("Loading Database Usernames.");
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/loadUsernames', true);
+            xhr.addEventListener('readystatechange', function(){
+                if(xhr.readyState == XMLHttpRequest.DONE && xhr.status === 200) {
+                    var item = xhr.responseText;
+                    console.log(item);
+                    if (item == 'true') {
+                        console.log("We successfully loaded all the data");
+                    } else {
+                        console.log("Data was NOT successfully loaded.");
+                    }
+                }
+            });
+            xhr.send(userName.value);
+        });
+
+        /* Check the database for Username when the key is pressed! */
+        username.addEventListener('input', function(){
+            console.log(username.value);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/checkUsername', true);
+            xhr.addEventListener('readystatechange', function(){
+                if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                    var item = xhr.responseText;
+                    console.log(item);
+                    if (item == 'true') {
+                        usernameErr.textContent = 'Username taken - Try another name!';
+                        document.querySelector('#submit_button').disabled = true;
+                    } else {
+                        usernameErr.textContent = '';
+                        document.querySelector('#submit_button').disabled = false;
+                    }
+                }
+            });
+            xhr.send(userName.value);
+        });
+    </script>
+    
+{{end}}
+{{/* SIGN-UP FORM AJAX ENDING */}}
 {{/* ENDING OF 'SIGN-UP' FORM DEFINITION */}}
 {{/* BEGINNING OF 'SIGN-IN' FORM DEFINITION */}}
 {{define "sign-in-form"}}

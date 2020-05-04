@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -26,6 +28,7 @@ type User struct {
 	First    string
 	Last     string
 	Role     string
+	UserID   int
 }
 
 //Below is our struct for Hotdogs/Hamburgers
@@ -35,6 +38,7 @@ type Hotdog struct {
 	Condiment  string `json:"Condiment"`
 	Calories   int    `json:"Calories"`
 	Name       string `json:"Name"`
+	UserID     int    `json:"UserID"`
 }
 
 type Hamburger struct {
@@ -43,6 +47,7 @@ type Hamburger struct {
 	Condiment  string `json:"Condiment"`
 	Calories   int    `json:"Calories"`
 	Name       string `json:"Name"`
+	UserID     int    `json:"UserID"`
 }
 
 //Here is our ViewData struct
@@ -205,7 +210,52 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
-		theUser = User{username, bs, firstname, lastname, role}
+		//Make User and USERID
+		goodNum := false
+		theID := 0
+		row, err := db.Query(`SELECT USER_ID FROM hot_dogs;`)
+		check(err)
+		defer row.Close()
+
+		for goodNum == false {
+			//Build the random, unique integer to be assigned to this User
+			goodNumFound := true //A second checker to break this loop
+			randInt := 0         //The random integer added onto ID
+			var databaseID int   //The ID returned from the database while searching
+			randIntString := ""  //The integer built through a string...
+			min, max := 0, 9     //The min and Max value for our randInt
+			for i := 0; i < 8; i++ {
+				randInt = rand.Intn(max-min) + min
+				randIntString = randIntString + strconv.Itoa(randInt)
+			}
+			theID, err = strconv.Atoi(randIntString)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			//Check to see if the built number is taken.
+			for row.Next() {
+				err = row.Scan(&databaseID)
+				check(err)
+				if databaseID == theID {
+					//Found the number, need to create another one!
+					fmt.Printf("Found the ID, %v, in the database: %v. Creating another one...\n",
+						theID, databaseID)
+					goodNumFound = false
+					break
+				} else {
+
+				}
+			}
+			//Final check to see if we need to go through this loop again
+			if goodNumFound == false {
+				goodNum = false
+			} else {
+				goodNum = true
+			}
+		}
+
+		theUser = User{username, bs, firstname, lastname, role, theID}
 		dbUsers[username] = theUser
 		// redirect
 		http.Redirect(w, req, "/", http.StatusSeeOther)
@@ -323,6 +373,9 @@ func handleRequests() {
 	myRouter.HandleFunc("/mainPage", postHotDog).Methods("POST")              //Post a hotdog!
 	myRouter.HandleFunc("/scadoop", getHotDogsAll).Methods("GET")             //Get ALL Hotdogs!
 	myRouter.HandleFunc("/getHDogSingular", getHotDogSingular).Methods("GET") //Get a SINGULAR hotdog
+	//Validation Stuff
+	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
+	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames
 	//Serve our CSS files...
 	myRouter.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("."+"/static/"))))
 
@@ -341,11 +394,12 @@ func main() {
 
 	//DEBUG
 	elHotDog := Hotdog{
-		User{"butthole", []byte("dingus"), "First", "Last", "Role"},
+		User{"butthole", []byte("dingus"), "First", "Last", "Role", 38298457},
 		"dogtype",
 		"condiment",
 		650,
 		"Name",
+		38298457,
 	}
 
 	q, err := json.Marshal(elHotDog)
