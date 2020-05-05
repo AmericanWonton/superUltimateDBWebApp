@@ -18,8 +18,15 @@ func checkUsername(w http.ResponseWriter, req *http.Request) {
 	}
 
 	sbs := string(bs)
-	fmt.Println("USERNAME: ", sbs)
-	fmt.Fprint(w, usernameMap[sbs])
+
+	if len(sbs) <= 0 {
+		fmt.Fprint(w, "TooShort")
+	} else if len(sbs) > 20 {
+		fmt.Fprint(w, "TooLong")
+	} else {
+		fmt.Println("USERNAME: ", sbs)
+		fmt.Fprint(w, usernameMap[sbs])
+	}
 }
 
 //Loads all our Usernames when the document loads.
@@ -39,8 +46,8 @@ func loadUsernames(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if err != nil {
-		fmt.Fprint(w, false)
+		fmt.Fprint(w, "false")
 	} else {
-		fmt.Fprint(w, true)
+		fmt.Fprint(w, "true")
 	}
 }

@@ -81,11 +81,14 @@
     <div id="divform">
         <form id="signup-form"
         method="post">
-            <input type="text" id="username" name="username" placeholder="username"><br>
-            <p id="form-input-info">Username taken!</p>
-            <input type="text" name="password" placeholder="password"><br>
-            <input type="text" name="firstname" placeholder="first name"><br>
-            <input type="text" name="lastname" placeholder="last name"><br>
+            <input type="text" id="username" name="username" placeholder="username" minlength=1 maxlength=20 required><br>
+            <p id="form-input-info">Username taken or not entered!</p>
+            <input type="text" id="password" name="password" placeholder="password" minlength=8 maxlength=20 required><br>
+            <p id="form-input-info2">Password must be longer than 8 characters and contain 1 number, with no special characters</p>
+            <input type="text" id="firstname" name="firstname" placeholder="first name" minlength=1 maxlength=20 required><br>
+            <p id="form-input-info3">Please enter a first name</p>
+            <input type="text" id="lastname" name="lastname" placeholder="last name" minlength=1 maxlength=20 required><br>
+            <p id="form-input-info4">Please enter a first name</p>
             <label for="sr">Role</label>
             <select name="role" id="sr">
                 <option value="user">user</option>
@@ -102,13 +105,22 @@
     <script>
         var theForm = document.querySelector('#signup-form');
         var userName = document.querySelector('#username');
+        var password = document.querySelector('#password');
+        var fName = document.querySelector('#firstname');
+        var lName = document.querySelector('#lastname');
         var usernameErr = document.querySelector('#form-input-info');
+        var passwordErr = document.querySelector('#form-input-info2');
+        var fNameErr = document.querySelector('#form-input-info3');
+        var lNameErr = document.querySelector('#form-input-info4');
 
         
         /* Query the database on page load */
          window.addEventListener('DOMContentLoaded', function(){
-            //Hide the error message, usernameErr
+            //Hide all error messages, 
             usernameErr.textContent = "";
+            passwordErr.textContent = "";
+            fNameErr.textContent = "";
+            lNameErr.textContent = "";
             //Loading Database Usernames
             console.log("Loading Database Usernames.");
             var xhr = new XMLHttpRequest();
@@ -136,7 +148,13 @@
                 if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
                     var item = xhr.responseText;
                     console.log(item);
-                    if (item == 'true') {
+                    if (item == 'TooShort') {
+                        usernameErr.textContent = 'Please enter a Username';
+                        document.querySelector('#submit_button').disabled = true;
+                    } else if (item == 'TooLong'){
+                        usernameErr.textContent = 'Username must be under 20 characters';
+                        document.querySelector('#submit_button').disabled = true;
+                    } else if (item == 'true') {
                         usernameErr.textContent = 'Username taken - Try another name!';
                         document.querySelector('#submit_button').disabled = true;
                     } else {
@@ -146,6 +164,54 @@
                 }
             });
             xhr.send(userName.value);
+        });
+
+        /*Check to see if password is an appropriate length! */
+        password.addEventListener('input', function(){
+            passString = password.value;
+            console.log(passString);
+            if (passString.length <= 0) {
+                passwordErr.textContent = 'Please enter a password';
+                document.querySelector('#submit_button').disabled = true;
+            } else if (passString.length > 20){
+                passwordErr.textContent = 'Password must be under 20 characters.';
+                document.querySelector('#submit_button').disabled = true;
+            } else {
+                passwordErr.textContent = '';
+                document.querySelector('#submit_button').disabled = false;
+            }
+        });
+
+        /*Check to see if firstname is okay */
+        fName.addEventListener('input', function(){
+            fnameString = fName.value;
+            console.log(fnameString);
+            if (fnameString.length <= 0) {
+                fNameErr.textContent = 'Please enter a firstname!';
+                document.querySelector('#submit_button').disabled = true;
+            } else if (fnameString.length > 20){
+                fNameErr.textContent = 'Firstname must be less than 20 characters.';
+                document.querySelector('#submit_button').disabled = true;
+            } else {
+                fNameErr.textContent = '';
+                document.querySelector('#submit_button').disabled = false;
+            }
+        });
+
+        /*Check to see if lastname is okay */
+        lName.addEventListener('input', function(){
+            lnameString = lName.value;
+            console.log(lnameString);
+            if (lnameString.length <= 0) {
+                lNameErr.textContent = 'Please enter a lastname!';
+                document.querySelector('#submit_button').disabled = true;
+            } else if (lnameString > 20){
+                lNameErr.textContent = 'Last name cannot be more than 20 characters.';
+                document.querySelector('#submit_button').disabled = true;
+            } else {
+                lNameErr.textContent = '';
+                document.querySelector('#submit_button').disabled = false;
+            }
         });
     </script>
     

@@ -190,11 +190,12 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		lastname := req.FormValue("lastname")
 		role := req.FormValue("role")
 		// username taken?
-		/* We should probobly due some field validation with ajax and mongo... */
+		/* We have field validation with Ajax...do we need this?
 		if _, ok := dbUsers[username]; ok {
 			http.Error(w, "Username already taken", http.StatusForbidden)
 			return
 		}
+		*/
 		// create session
 		sID, _ := uuid.NewV4()
 		newCookie := &http.Cookie{
@@ -213,7 +214,7 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		//Make User and USERID
 		goodNum := false
 		theID := 0
-		row, err := db.Query(`SELECT USER_ID FROM hot_dogs;`)
+		row, err := db.Query(`SELECT user_id FROM users;`)
 		check(err)
 		defer row.Close()
 
@@ -254,6 +255,21 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 				goodNum = true
 			}
 		}
+
+		//Add User to the SQL Database
+		ourInsertStatement := `INSERT INTO users VALUES ("` + username + `", "` + password + `", "` + firstname + `", "` +
+			lastname + `", "` + role + `", "` + strconv.Itoa(theID) + `");`
+		stmt, err := db.Prepare(ourInsertStatement)
+		check(err)
+		defer stmt.Close()
+
+		r, err := stmt.Exec()
+		check(err)
+
+		n, err := r.RowsAffected()
+		check(err)
+
+		fmt.Fprintln(w, "INSERTED RECORD", n)
 
 		theUser = User{username, bs, firstname, lastname, role, theID}
 		dbUsers[username] = theUser
