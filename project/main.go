@@ -24,7 +24,7 @@ import (
 //Here's our User struct
 type User struct {
 	UserName string
-	Password []byte
+	Password string //This was formally a []byte but we are changing our code to fit the database better
 	First    string
 	Last     string
 	Role     string
@@ -33,12 +33,11 @@ type User struct {
 
 //Below is our struct for Hotdogs/Hamburgers
 type Hotdog struct {
-	User       User   `json:"User"` //The User whomst this hotdog belongs to
 	HotDogType string `json:"HotDogType"`
 	Condiment  string `json:"Condiment"`
 	Calories   int    `json:"Calories"`
 	Name       string `json:"Name"`
-	UserID     int    `json:"UserID"`
+	UserID     int    `json:"UserID"` //User WHOMST this hotDog belongs to
 }
 
 type Hamburger struct {
@@ -142,7 +141,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		if loginUser, ok := dbUsers[username]; ok {
 			fmt.Printf("We found the Username %v\n", username)
 			//Check on Password
-			err := bcrypt.CompareHashAndPassword(loginUser.Password, []byte(password))
+			err := bcrypt.CompareHashAndPassword([]byte(loginUser.Password), []byte(password))
 			if err != nil {
 				http.Error(w, "Username and/or password do not match", http.StatusForbidden)
 				return
@@ -271,7 +270,7 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 
 		fmt.Fprintln(w, "INSERTED RECORD", n)
 
-		theUser = User{username, bs, firstname, lastname, role, theID}
+		theUser = User{username, string(bs), firstname, lastname, role, theID}
 		dbUsers[username] = theUser
 		// redirect
 		http.Redirect(w, req, "/", http.StatusSeeOther)
@@ -308,7 +307,32 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 
 //POST mainpage
 func postHotDog(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("Inserting hotdog record.")
+	//Collect JSON from Postman or wherever
+	reqBody, _ := ioutil.ReadAll(req.Body)
+	//Marshal it into our type
+	var postedHotDog Hotdog
+	json.Unmarshal(reqBody, &postedHotDog)
+	//Debug
+	fmt.Printf("Here is our hotdog: \n%v\n", postedHotDog)
+	/*
+		sqlStatement := "INSERT INTO hot_dogs (TYPE, CONDIMENT, CALORIES, NAME, USER_ID) VALUES" +
+			"(" + "\"" + postedHotDog.HotDogType + "\", \"" + postedHotDog.Condiment + "\", \"" +
+			string(postedHotDog.Calories) + "\", \"" + postedHotDog.Name + "\", \"" + string(postedHotDog.UserID) +
+			"\");"
+		fmt.Printf("Here is our sql statement:\n\n%v\n", sqlStatement)
+	*/
+	stmt, err := db.Prepare("INSERT INTO hot_dogs (TYPE, CONDIMENT, CALORIES, NAME, USER_ID) VALUES (:TYPE, :CONDIMENT, :CALORIES, :NAME, :USER_ID)")
+	defer stmt.Close()
 
+	r, err := stmt.Exec(sql.Named("TYPE", postedHotDog.HotDogType), sql.Named("CONDIMENT", postedHotDog.Condiment),
+		sql.Named("CALORIES", postedHotDog.Calories), sql.Named("NAME", postedHotDog.Name), sql.Named("USER_ID", postedHotDog.UserID))
+	check(err)
+
+	n, err := r.RowsAffected()
+	check(err)
+
+	fmt.Fprintln(w, "INSERTED RECORD", n)
 }
 
 //GET mainpage
@@ -323,7 +347,7 @@ func getHotDogSingular(w http.ResponseWriter, req *http.Request) {
 	json.Unmarshal(reqBody, &postedHotDog)
 	fmt.Printf("Here is our postedHotDog: %v\n", postedHotDog)
 
-	rows, err := db.Query(`SELECT * FROM hot_dogs WHERE NAME = 'THE HOT AND READY';`)
+	rows, err := db.Query(`SELECT * FROM hot_dogs WHERE NAME = 'HOT_AND_READY';`)
 	check(err)
 	defer rows.Close()
 	var id int64
@@ -332,9 +356,10 @@ func getHotDogSingular(w http.ResponseWriter, req *http.Request) {
 	var condiment string
 	var calories int
 	var hotdogName string
+	var userID string
 	count := 0
 	for rows.Next() {
-		err = rows.Scan(&id, &theUser, &dogType, &condiment, &calories, &hotdogName)
+		err = rows.Scan(&id, &theUser, &dogType, &condiment, &calories, &hotdogName, &userID)
 		check(err)
 		fmt.Printf("Retrieved Record: %v\n", hotdogName)
 		count++
@@ -353,6 +378,9 @@ func getHotDogSingular(w http.ResponseWriter, req *http.Request) {
 			fmt.Printf("Whooops, our query, %v, does not match our JSON, %v\n", hotdogName, postedHotDog.Name)
 		}
 	}
+	//DEBUG, need to see how rows are returned.
+	fmt.Printf("Here is our rows returned:\nID:%v\nTheUser:%v\nDog Type:%v\nCondiment:%v\nCalories:%v\nHotdogname:%v\nuserID: %v\n",
+		id, theUser, dogType, condiment, calories, hotdogName, userID)
 }
 
 func getHotDogsAll(w http.ResponseWriter, req *http.Request) {
@@ -386,7 +414,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/signup", signUp)
 	myRouter.HandleFunc("/mainPage", mainPage)
 	//Database Stuff
-	myRouter.HandleFunc("/mainPage", postHotDog).Methods("POST")              //Post a hotdog!
+	myRouter.HandleFunc("/postHotDog", postHotDog).Methods("POST")            //Post a hotdog!
 	myRouter.HandleFunc("/scadoop", getHotDogsAll).Methods("GET")             //Get ALL Hotdogs!
 	myRouter.HandleFunc("/getHDogSingular", getHotDogSingular).Methods("GET") //Get a SINGULAR hotdog
 	//Validation Stuff
@@ -408,7 +436,7 @@ func main() {
 	err = db.Ping()
 	check(err)
 
-	//DEBUG
+	/* DEBUG
 	elHotDog := Hotdog{
 		User{"butthole", []byte("dingus"), "First", "Last", "Role", 38298457},
 		"dogtype",
@@ -423,6 +451,30 @@ func main() {
 		fmt.Println("There's an error marshalling.")
 	}
 	fmt.Printf("Here's our JSON: %v\n", string(q))
+	*/
+	/*
+		quotes := "quatation marks"
+		bigPeener := "Here's my\"" + quotes + "\""
+		fmt.Println(bigPeener)
+	*/
+	/* DEBUG
+	bs, err := bcrypt.GenerateFromPassword([]byte("pWord2"), bcrypt.MinCost)
+	if err != nil {
+		return
+	}
+	fmt.Printf("Our hashed password is: %v\n", bs)
+
+	err2 := bcrypt.CompareHashAndPassword(bs, []byte("pWord2"))
+	if err != nil {
+		return
+	}
+	fmt.Printf("Err2 is %v\n", err2)
+
+	theBSString := string(bs)
+	fmt.Printf("Here's our byte array as a string:\n%v\n", theBSString)
+	theStringBS := []byte(theBSString)
+	fmt.Printf("Here's our string BS back to a BS: \n%v\n", theStringBS)
+	*/
 
 	//Handle Requests
 	handleRequests()
