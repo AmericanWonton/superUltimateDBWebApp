@@ -141,13 +141,11 @@
 
         /* Check the database for Username when the key is pressed! */
         username.addEventListener('input', function(){
-            console.log(username.value);
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/checkUsername', true);
             xhr.addEventListener('readystatechange', function(){
                 if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
                     var item = xhr.responseText;
-                    console.log(item);
                     if (item == 'TooShort') {
                         usernameErr.textContent = 'Please enter a Username';
                         document.querySelector('#submit_button').disabled = true;
@@ -169,7 +167,6 @@
         /*Check to see if password is an appropriate length! */
         password.addEventListener('input', function(){
             passString = password.value;
-            console.log(passString);
             if (passString.length <= 0) {
                 passwordErr.textContent = 'Please enter a password';
                 document.querySelector('#submit_button').disabled = true;
@@ -185,7 +182,6 @@
         /*Check to see if firstname is okay */
         fName.addEventListener('input', function(){
             fnameString = fName.value;
-            console.log(fnameString);
             if (fnameString.length <= 0) {
                 fNameErr.textContent = 'Please enter a firstname!';
                 document.querySelector('#submit_button').disabled = true;
@@ -201,7 +197,6 @@
         /*Check to see if lastname is okay */
         lName.addEventListener('input', function(){
             lnameString = lName.value;
-            console.log(lnameString);
             if (lnameString.length <= 0) {
                 lNameErr.textContent = 'Please enter a lastname!';
                 document.querySelector('#submit_button').disabled = true;

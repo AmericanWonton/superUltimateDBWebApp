@@ -50,3 +50,6 @@ the structure for the database opening is below:
 db, err = sql.Open("mysql", "databaseUsername:the-database-password@tcp(the-amazon-database-endpoint:portNum-3306)/schemaName?charset=utf8")
 https://github.com/go-sql-driver/mysql/wiki/Examples
 Once you wanna do error handling, follow this: https://stackoverflow.com/questions/27644009/handling-dynamic-errors-in-go-specifically-database-sql-package
+
+3. Here's the RIGHT WAY to use insert statements with Golang mySQL:
+https://www.golangprograms.com/example-of-golang-crud-using-mysql-from-scratch.html

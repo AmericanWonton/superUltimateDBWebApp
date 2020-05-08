@@ -41,12 +41,11 @@ type Hotdog struct {
 }
 
 type Hamburger struct {
-	User       User   `json:"User"` //The User whomst this hotdog belongs to
 	BurgerType string `json:"BurgerType"`
 	Condiment  string `json:"Condiment"`
 	Calories   int    `json:"Calories"`
 	Name       string `json:"Name"`
-	UserID     int    `json:"UserID"`
+	UserID     int    `json:"UserID"` //User WHOMST this hotDog belongs to
 }
 
 //Here is our ViewData struct
@@ -125,49 +124,73 @@ func HandleError(w http.ResponseWriter, err error) {
 func homePage(w http.ResponseWriter, r *http.Request) {
 	aUser := getUser(w, r) //Get the User, if they exist
 	//if User is already logged in, bring them to the mainPage!
-	/*
-		aUser := getUser(w, r) //Get the User, if they exist
-		if alreadyLoggedIn(w, r) {
-			http.Redirect(w, r, "/mainPage", http.StatusSeeOther)
-			return
-		}
-	*/
+
 	//If a User posts a form to log in!
+	//Search for Users in Database, send JSON version of User
 	if r.Method == http.MethodPost {
 		//Get Form Values
 		username := r.FormValue("username")
 		password := r.FormValue("password")
-		//Search for Users in our Database. It fails out if Username and Password aren't there.
-		if loginUser, ok := dbUsers[username]; ok {
-			fmt.Printf("We found the Username %v\n", username)
-			//Check on Password
-			err := bcrypt.CompareHashAndPassword([]byte(loginUser.Password), []byte(password))
-			if err != nil {
-				http.Error(w, "Username and/or password do not match", http.StatusForbidden)
-				return
-			}
-			fmt.Printf("We found the password, %v, updating session. \n", password)
-			//User logged in, directing them to the mainpage
-			// create session
-			sID, _ := uuid.NewV4()
-			cookie := &http.Cookie{
-				Name:  "session",
-				Value: sID.String(),
-			}
-			cookie.MaxAge = sessionLength
-			http.SetCookie(w, cookie)
-			dbSessions[cookie.Value] = session{username, time.Now()}
-			//Send to the MainPage!
-			fmt.Printf("Executing the main page now with our logged in User!\n")
-			http.Redirect(w, r, "/mainPage", http.StatusSeeOther)
+		bs, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
+		if err != nil {
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
+		}
+		//Query database for those username and password
+		fmt.Printf("DEBUG: Finding User in database with Username, %v, and Password, %v\n", username, string(bs))
+		rows, err := db.Query(`SELECT * FROM users WHERE USERNAME = ? AND PASSWORD = ?;`, username, string(bs))
+		check(err)
+		defer rows.Close()
+		//Count to see if password is found or not
+		var returnedUsername string = ""
+		var returnedPassword string = ""
+		var returnedFName string = ""
+		var returnedLName string = ""
+		var returnedRole string = ""
+		var returnedUserID int = 0
+		for rows.Next() {
+			//assign variable
+			err = rows.Scan(&returnedUsername, &returnedPassword, returnedFName, returnedLName, returnedRole, returnedUserID)
+			fmt.Printf("DEBUG returnedUsername: %v\n", returnedUsername)
+			fmt.Printf("DEBUG returnedPassword: %v\n", returnedPassword)
+			check(err)
+		}
+		//Count to see if password/Username returned at all
+		if (strings.Compare(returnedUsername, "") == 0) || (strings.Compare(returnedPassword, "") == 0) {
+			fmt.Printf("Username, %v and %v, and Password, %v and %v not Found!\n", returnedUsername, "", returnedPassword, "")
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return //DEBUG Not sure if this is needed or wanted
+		} else {
+			//Check to see if password and Username returned
+			if (strings.Compare(username, returnedUsername) == 0) && (strings.Compare(returnedPassword, string(bs)) == 0) {
+				//Username matched, good stuff
+				//User logged in, directing them to the mainpage
+				//Going to main page, passing values
+				fmt.Printf("Executing the main page now with our logged in User!\n")
+				theUser := User{username, string(bs), returnedFName, returnedLName, returnedRole, returnedUserID}
+				dbUsers[username] = theUser
+				// create session
+				sID, _ := uuid.NewV4()
+				cookie := &http.Cookie{
+					Name:  "session",
+					Value: sID.String(),
+				}
+				cookie.MaxAge = sessionLength
+				http.SetCookie(w, cookie)
+				dbSessions[cookie.Value] = session{username, time.Now()}
+				http.Redirect(w, r, "/mainPage", http.StatusSeeOther)
+				return
+			} else {
+				//Passwords do not match
+				fmt.Printf("Username, %v and %v or password, %v and %v, did not match!\n", username, returnedUsername,
+					returnedPassword, string(bs))
+			}
 		}
 	}
 	/* Execute template, handle error */
 	err1 := template1.ExecuteTemplate(w, "index.gohtml", aUser)
 	HandleError(w, err1)
 	fmt.Printf("Homepage Endpoint Hit\n")
-	getHotDogsAll(w, r)
 }
 
 //signUp
@@ -211,6 +234,7 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 		//Make User and USERID
+		fmt.Println("DEBUG: Getting good, unique, UserID")
 		goodNum := false
 		theID := 0
 		row, err := db.Query(`SELECT user_id FROM users;`)
@@ -254,22 +278,22 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 				goodNum = true
 			}
 		}
-
+		fmt.Println("Adding User data to database")
 		//Add User to the SQL Database
-		ourInsertStatement := `INSERT INTO users VALUES ("` + username + `", "` + password + `", "` + firstname + `", "` +
-			lastname + `", "` + role + `", "` + strconv.Itoa(theID) + `");`
-		stmt, err := db.Prepare(ourInsertStatement)
-		check(err)
+		stmt, err := db.Prepare("INSERT INTO users(USERNAME, PASSWORD, FIRSTNAME, LASTNAME, ROLE, USER_ID) VALUES(?,?,?,?,?,?)")
 		defer stmt.Close()
-
-		r, err := stmt.Exec()
+		/*
+			r, err := stmt.Exec(username, string(bs), firstname, lastname, role, theID)
+			check(err)
+		*/
+		r, err := stmt.Exec(username, string(bs), firstname, lastname, role, theID)
 		check(err)
 
 		n, err := r.RowsAffected()
 		check(err)
 
-		fmt.Fprintln(w, "INSERTED RECORD", n)
-
+		fmt.Printf("Inserted Record: %v\n", n)
+		//DEBUG, don't know if we need below
 		theUser = User{username, string(bs), firstname, lastname, role, theID}
 		dbUsers[username] = theUser
 		// redirect
@@ -286,27 +310,20 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 //mainPage
 func mainPage(w http.ResponseWriter, req *http.Request) {
 	//if User is already logged in, bring them to the mainPage!
-	aUser := getUser(w, req)              //Get the User, if they exist
+	aUser := getUser(w, req) //Get the User, if they exist
+	fmt.Printf("Here is our User:\n%v\n", aUser)
 	vd := ViewData{aUser, aUser.UserName} //POSSIBLY DEBUG
 	if !alreadyLoggedIn(w, req) {
 		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
 	}
-	/* Execute template, handle error */
-	/* DEGUG STUFF */
-	fmt.Println("Is this a problem area?....")
-	/*
-		err1 :=  template.Must(template1.Clone()).Funcs(template1.FuncMap{
-			"is"
-		})
-	*/
 	err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 	HandleError(w, err1)
 	fmt.Printf("Homepage Endpoint Hit\n")
 }
 
 //POST mainpage
-func postHotDog(w http.ResponseWriter, req *http.Request) {
+func insertHotDog(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Inserting hotdog record.")
 	//Collect JSON from Postman or wherever
 	reqBody, _ := ioutil.ReadAll(req.Body)
@@ -315,24 +332,49 @@ func postHotDog(w http.ResponseWriter, req *http.Request) {
 	json.Unmarshal(reqBody, &postedHotDog)
 	//Debug
 	fmt.Printf("Here is our hotdog: \n%v\n", postedHotDog)
-	/*
-		sqlStatement := "INSERT INTO hot_dogs (TYPE, CONDIMENT, CALORIES, NAME, USER_ID) VALUES" +
-			"(" + "\"" + postedHotDog.HotDogType + "\", \"" + postedHotDog.Condiment + "\", \"" +
-			string(postedHotDog.Calories) + "\", \"" + postedHotDog.Name + "\", \"" + string(postedHotDog.UserID) +
-			"\");"
-		fmt.Printf("Here is our sql statement:\n\n%v\n", sqlStatement)
-	*/
-	stmt, err := db.Prepare("INSERT INTO hot_dogs (TYPE, CONDIMENT, CALORIES, NAME, USER_ID) VALUES (:TYPE, :CONDIMENT, :CALORIES, :NAME, :USER_ID)")
+
+	stmt, err := db.Prepare("INSERT INTO hot_dogs(TYPE, CONDIMENT, CALORIES, NAME, USER_ID) VALUES(?,?,?,?,?)")
 	defer stmt.Close()
 
-	r, err := stmt.Exec(sql.Named("TYPE", postedHotDog.HotDogType), sql.Named("CONDIMENT", postedHotDog.Condiment),
-		sql.Named("CALORIES", postedHotDog.Calories), sql.Named("NAME", postedHotDog.Name), sql.Named("USER_ID", postedHotDog.UserID))
+	r, err := stmt.Exec(postedHotDog.HotDogType, postedHotDog.Condiment, postedHotDog.Calories, postedHotDog.Name, postedHotDog.UserID)
 	check(err)
 
 	n, err := r.RowsAffected()
 	check(err)
 
 	fmt.Fprintln(w, "INSERTED RECORD", n)
+}
+
+//UPDATE hotdog
+func updateHotDog(w http.ResponseWriter, req *http.Request) {
+	//if hotdog name is "Name", update it to "a special name"
+	boringName, coolName := "Name", "Cool Name"
+
+	stmt, err := db.Prepare("UPDATE hot_dogs SET NAME=? WHERE NAME=?")
+	check(err)
+
+	r, err := stmt.Exec(coolName, boringName)
+	check(err)
+
+	n, err := r.RowsAffected()
+	check(err)
+
+	fmt.Fprintln(w, "INSERTED RECORD", n)
+}
+
+//DELETE hotdog
+func deleteHotDog(w http.ResponseWriter, req *http.Request) {
+	badName := "Weiner Name"
+	delDog, err := db.Prepare("DELETE FROM hot_dogs WHERE NAME=?")
+	check(err)
+
+	r, err := delDog.Exec(badName)
+	check(err)
+
+	n, err := r.RowsAffected()
+	check(err)
+
+	fmt.Fprintln(w, "DELETED RECORD", n)
 }
 
 //GET mainpage
@@ -414,7 +456,9 @@ func handleRequests() {
 	myRouter.HandleFunc("/signup", signUp)
 	myRouter.HandleFunc("/mainPage", mainPage)
 	//Database Stuff
-	myRouter.HandleFunc("/postHotDog", postHotDog).Methods("POST")            //Post a hotdog!
+	myRouter.HandleFunc("/deleteHotDog", deleteHotDog).Methods("POST")
+	myRouter.HandleFunc("/updateHotDog", updateHotDog).Methods("POST")
+	myRouter.HandleFunc("/insertHotDog", insertHotDog).Methods("POST")        //Post a hotdog!
 	myRouter.HandleFunc("/scadoop", getHotDogsAll).Methods("GET")             //Get ALL Hotdogs!
 	myRouter.HandleFunc("/getHDogSingular", getHotDogSingular).Methods("GET") //Get a SINGULAR hotdog
 	//Validation Stuff
@@ -435,10 +479,8 @@ func main() {
 
 	err = db.Ping()
 	check(err)
-
 	/* DEBUG
 	elHotDog := Hotdog{
-		User{"butthole", []byte("dingus"), "First", "Last", "Role", 38298457},
 		"dogtype",
 		"condiment",
 		650,
