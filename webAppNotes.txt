@@ -53,3 +53,7 @@ Once you wanna do error handling, follow this: https://stackoverflow.com/questio
 
 3. Here's the RIGHT WAY to use insert statements with Golang mySQL:
 https://www.golangprograms.com/example-of-golang-crud-using-mysql-from-scratch.html
+
+4. Role Definition
+A User can: 1. See ALL of the hotdogs/hamburgers they made, and can update THEIR hamburgers or hotdogs.
+2. Delete any Hotdogs/Hamburgers THEY made. 3. Add a hotdog or a Hamburger to THEIR list 

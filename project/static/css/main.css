@@ -120,3 +120,9 @@
 #foodForm {
     
 }
+
+#submitButton {
+    width: 5vw;
+    height: 5vh;
+    font-size: 1rem;
+}

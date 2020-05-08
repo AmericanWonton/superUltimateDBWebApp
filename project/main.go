@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -18,7 +19,6 @@ import (
 
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
-	"golang.org/x/crypto/bcrypt"
 )
 
 //Here's our User struct
@@ -131,17 +131,13 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		//Get Form Values
 		username := r.FormValue("username")
 		password := r.FormValue("password")
-		bs, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
-		if err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
-		}
 		//Query database for those username and password
-		fmt.Printf("DEBUG: Finding User in database with Username, %v, and Password, %v\n", username, string(bs))
-		rows, err := db.Query(`SELECT * FROM users WHERE USERNAME = ? AND PASSWORD = ?;`, username, string(bs))
+		fmt.Printf("DEBUG: Finding User in database with Username, %v\n", username)
+		rows, err := db.Query(`SELECT * FROM users WHERE USERNAME = ?;`, username)
 		check(err)
 		defer rows.Close()
 		//Count to see if password is found or not
+		var returnedTableID int = 0
 		var returnedUsername string = ""
 		var returnedPassword string = ""
 		var returnedFName string = ""
@@ -150,7 +146,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		var returnedUserID int = 0
 		for rows.Next() {
 			//assign variable
-			err = rows.Scan(&returnedUsername, &returnedPassword, returnedFName, returnedLName, returnedRole, returnedUserID)
+			err = rows.Scan(&returnedTableID, &returnedUsername, &returnedPassword, &returnedFName, &returnedLName, &returnedRole, &returnedUserID)
 			fmt.Printf("DEBUG returnedUsername: %v\n", returnedUsername)
 			fmt.Printf("DEBUG returnedPassword: %v\n", returnedPassword)
 			check(err)
@@ -161,29 +157,41 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return //DEBUG Not sure if this is needed or wanted
 		} else {
-			//Check to see if password and Username returned
-			if (strings.Compare(username, returnedUsername) == 0) && (strings.Compare(returnedPassword, string(bs)) == 0) {
-				//Username matched, good stuff
-				//User logged in, directing them to the mainpage
-				//Going to main page, passing values
-				fmt.Printf("Executing the main page now with our logged in User!\n")
-				theUser := User{username, string(bs), returnedFName, returnedLName, returnedRole, returnedUserID}
-				dbUsers[username] = theUser
-				// create session
-				sID, _ := uuid.NewV4()
-				cookie := &http.Cookie{
-					Name:  "session",
-					Value: sID.String(),
+			//Check to see if Username returned
+			if strings.Compare(username, returnedUsername) == 0 {
+				//Checking to see if password matches as well
+				fmt.Printf("DEBUG: We are now decoding the string byte to byte array: %v\n", returnedPassword)
+				theReturnedByte, err := hex.DecodeString(returnedPassword)
+				if err != nil {
+					log.Fatal(err)
 				}
-				cookie.MaxAge = sessionLength
-				http.SetCookie(w, cookie)
-				dbSessions[cookie.Value] = session{username, time.Now()}
-				http.Redirect(w, r, "/mainPage", http.StatusSeeOther)
-				return
+				if strings.Compare(string(theReturnedByte), password) != 0 {
+					//Password not found/not hashed correctly
+					fmt.Printf("The hashed strings aren't compatable: %v %v\n", string(theReturnedByte), password)
+					http.Redirect(w, r, "/", http.StatusSeeOther)
+					return
+				} else {
+					//Username matched, password matched good stuff
+					//User logged in, directing them to the mainpage
+					//Going to main page, passing values
+					theUser := User{username, returnedPassword, returnedFName, returnedLName, returnedRole, returnedUserID}
+					dbUsers[username] = theUser
+					// create session
+					sID, _ := uuid.NewV4()
+					cookie := &http.Cookie{
+						Name:  "session",
+						Value: sID.String(),
+					}
+					cookie.MaxAge = sessionLength
+					http.SetCookie(w, cookie)
+					dbSessions[cookie.Value] = session{username, time.Now()}
+					http.Redirect(w, r, "/mainPage", http.StatusSeeOther)
+					return
+				}
 			} else {
 				//Passwords do not match
-				fmt.Printf("Username, %v and %v or password, %v and %v, did not match!\n", username, returnedUsername,
-					returnedPassword, string(bs))
+				fmt.Printf("Username, %v and %v or password, %v, did not match!\n", username, returnedUsername,
+					returnedPassword)
 			}
 		}
 	}
@@ -228,11 +236,6 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		http.SetCookie(w, newCookie)
 		dbSessions[newCookie.Value] = session{username, time.Now()}
 		// store user in dbUsers
-		bs, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
-		if err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
-		}
 		//Make User and USERID
 		fmt.Println("DEBUG: Getting good, unique, UserID")
 		goodNum := false
@@ -282,11 +285,10 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		//Add User to the SQL Database
 		stmt, err := db.Prepare("INSERT INTO users(USERNAME, PASSWORD, FIRSTNAME, LASTNAME, ROLE, USER_ID) VALUES(?,?,?,?,?,?)")
 		defer stmt.Close()
-		/*
-			r, err := stmt.Exec(username, string(bs), firstname, lastname, role, theID)
-			check(err)
-		*/
-		r, err := stmt.Exec(username, string(bs), firstname, lastname, role, theID)
+		bsString := []byte(password)                  //Encode Password
+		encodedString := hex.EncodeToString(bsString) //Encode Password Pt2
+		fmt.Printf("DEBUG: We are encoding our byte slice to a string: %v\n", encodedString)
+		r, err := stmt.Exec(username, encodedString, firstname, lastname, role, theID)
 		check(err)
 
 		n, err := r.RowsAffected()
@@ -294,7 +296,7 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 
 		fmt.Printf("Inserted Record: %v\n", n)
 		//DEBUG, don't know if we need below
-		theUser = User{username, string(bs), firstname, lastname, role, theID}
+		theUser = User{username, encodedString, firstname, lastname, role, theID}
 		dbUsers[username] = theUser
 		// redirect
 		http.Redirect(w, req, "/", http.StatusSeeOther)

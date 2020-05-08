@@ -24,7 +24,6 @@ func checkUsername(w http.ResponseWriter, req *http.Request) {
 	} else if len(sbs) > 20 {
 		fmt.Fprint(w, "TooLong")
 	} else {
-		fmt.Println("USERNAME: ", sbs)
 		fmt.Fprint(w, usernameMap[sbs])
 	}
 }

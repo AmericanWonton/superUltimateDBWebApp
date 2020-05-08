@@ -32,6 +32,7 @@ function revealFoodForm(foodChoice) {
         var submitButton = document.createElement("button");
         submitButton.setAttribute("id", "submitButton");
 
+
         theForm.appendChild(user);
         theForm.appendChild(hDogType);
         theForm.appendChild(condimentType);
@@ -43,7 +44,11 @@ function revealFoodForm(foodChoice) {
         //Dispaly the form to click on
         theDiv.style.display = "block";
 
-
+        //Ajax functionality for submitting forms
+        theForm.addEventListener('onclick', function(){
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/checkUsername', true);
+        });
 
     } else if (foodChoice == 1) {
         /* For Hamburger Selection */
@@ -86,4 +91,6 @@ function revealFoodForm(foodChoice) {
     } else {
         console.log("Whoops, we got a problem. Wrong food choice came in.")
     }
+
+
 }
