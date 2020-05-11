@@ -99,7 +99,10 @@
 #actionChoice {
     width: 5vw;
     height: 5vh;
+    /* styling */
     font-size: 1rem;
+    margin: 2em;
+    padding: 2em;
 }
 
 #foodFormDiv {
@@ -122,7 +125,10 @@
 }
 
 #submitButton {
-    width: 5vw;
-    height: 5vh;
+    width: 10vw;
+    height: 10vh;
     font-size: 1rem;
+    /* styling */
+    padding: 2em;
+    margin: 2em;
 }

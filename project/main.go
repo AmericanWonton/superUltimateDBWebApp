@@ -324,29 +324,6 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 	fmt.Printf("Homepage Endpoint Hit\n")
 }
 
-//POST mainpage
-func insertHotDog(w http.ResponseWriter, req *http.Request) {
-	fmt.Println("Inserting hotdog record.")
-	//Collect JSON from Postman or wherever
-	reqBody, _ := ioutil.ReadAll(req.Body)
-	//Marshal it into our type
-	var postedHotDog Hotdog
-	json.Unmarshal(reqBody, &postedHotDog)
-	//Debug
-	fmt.Printf("Here is our hotdog: \n%v\n", postedHotDog)
-
-	stmt, err := db.Prepare("INSERT INTO hot_dogs(TYPE, CONDIMENT, CALORIES, NAME, USER_ID) VALUES(?,?,?,?,?)")
-	defer stmt.Close()
-
-	r, err := stmt.Exec(postedHotDog.HotDogType, postedHotDog.Condiment, postedHotDog.Calories, postedHotDog.Name, postedHotDog.UserID)
-	check(err)
-
-	n, err := r.RowsAffected()
-	check(err)
-
-	fmt.Fprintln(w, "INSERTED RECORD", n)
-}
-
 //UPDATE hotdog
 func updateHotDog(w http.ResponseWriter, req *http.Request) {
 	//if hotdog name is "Name", update it to "a special name"
