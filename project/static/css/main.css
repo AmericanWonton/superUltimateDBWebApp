@@ -152,3 +152,65 @@
     /* debug */
     border: 1px solid green;
 }
+
+#hdogSeer {
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+
+    /* styling */
+    display: none;
+    /* debug */
+    border: 1px solid purple;
+}
+
+#hotDogDisplay {
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+
+    /* styling */
+    padding: 1em;
+    margin: 1em;
+    /* debug */
+    border: 1px solid black;
+}
+
+#hamSeer {
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+
+    /* styling */
+    display: none;
+    /* debug */
+    border: 1px solid blue;
+}
+
+#hamDisplay {
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+
+    /* styling */
+    padding: 1em;
+    margin: 1em;
+    /* debug */
+    border: 1px solid black;
+}

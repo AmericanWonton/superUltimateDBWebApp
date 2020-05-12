@@ -24,9 +24,9 @@
             {{if ReturnRoleUser .User "user"}}
                 <p>Hey, you're logged in, {{.User.Role}}! Now you can do stuff...</p>
                 {{$theID := .User.UserID}}
+                {{template "user-action"}}
                 {{template "foodExecutor" $theID}}
                 {{template "foodSeer" $theID}}
-                {{template "user-action"}}
             {{else if ReturnRoleAdmin .User "admin"}}
                 <p>Hey, you're logged in {{.User.Role}}! Now you can admin stuff!</p>
                 

@@ -124,6 +124,26 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	}
 
 	//Assemble data to send back
+	type data struct {
+		SuccessMessage string      `json:"SuccessMessage"`
+		TheHotDogs     []Hotdog    `json:"TheHotDogs"`
+		TheHamburgers  []Hamburger `json:"TheHamburgers:`
+	}
+	//Check to see if we have any data to submit
+	sendData := data{
+		SuccessMessage: "Success",
+		TheHotDogs:     hotDogSlice,
+		TheHamburgers:  hamburgerSlice,
+	}
 
-	fmt.Fprintf(w, "FUCKING MESSAGE TO SEND")
+	if len(sendData.TheHotDogs) <= 0 && len(sendData.TheHamburgers) <= 0 {
+		sendData.SuccessMessage = "Failure"
+	}
+
+	dataJSON, err := json.Marshal(sendData)
+	if err != nil {
+		fmt.Println("There's an error marshalling.")
+	}
+
+	fmt.Fprintf(w, string(dataJSON))
 }
