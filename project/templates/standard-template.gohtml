@@ -255,7 +255,12 @@
         <p class="actionInstructionText">Okay User, what data would you like to read/make?</p>
         <br>
         {{/* See food section...maybe update it too */}}
-        <p class="actionInstructionText">SEE MY FOOD</p>
+        <button id="actionInstructionButton">
+            SEE MY FOOD
+        </button>
+        <div id="foodSeer">
+
+        </div>
         {{/* Make food section */}}
         <p class="actionInstructionText">MAKE FOOD</p>
         <br>
@@ -510,6 +515,53 @@
                 console.log("Whoops, we got a problem. Wrong food choice came in.")
             }
         }
+    </script>
+{{end}}
+{{/* Food Seer */}}
+{{define "foodSeer"}}
+    <script>
+        var seeFoodButton = document.getElementById("actionInstructionButton");
+        var foodSeerDiv = document.getElementById("foodSeer");
+        var userID = {{.}};
+        //On clicked, get all data food data for this User
+        seeFoodButton.addEventListener("click", function(){
+            console.log("Button clicked, retrieving food data for this User: " + userID);
+            //JSON string creation
+            var toSend = {
+                HotDogType: "",
+                Condiment: "",
+                Calories: 0,
+                Name: "",
+                UserID: 0
+            };
+            toSend.UserID = userID;
+            var jsonString = JSON.stringify(toSend);
+            console.log(jsonString);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/getAllFoodUser', true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.addEventListener('readystatechange', function(){
+                if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                    var item = xhr.responseText;
+                    if (item == 'FUCKING MESSAGE TO SEND') {
+                        //Data inserted properly; put the data into the div to display
+                        var debugSuccessMSG = document.createElement("p");
+                        debugSuccessMSG.setAttribute("id", "debugSuccessMSG");
+                        debugSuccessMSG.style.fontsize = "1rem";
+                        foodSeerDiv.appendChild(debugSuccessMSG);
+                        alert("The data was sent")
+                    } else if (item == 'Unsuccessful Insert'){
+                        //Data NOT inserted properly
+                        
+                    } else {
+                        //No appropriate Response recieved
+                        
+                    }
+                }
+            });
+            xhr.send(jsonString);
+        });
     </script>
 {{end}}
 {{/* AJAX/ JAVASCRIPT ENDING */}}

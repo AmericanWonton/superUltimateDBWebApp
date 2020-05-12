@@ -439,6 +439,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/updateHotDog", updateHotDog).Methods("POST")
 	myRouter.HandleFunc("/insertHotDog", insertHotDog).Methods("POST")        //Post a hotdog!
 	myRouter.HandleFunc("/scadoop", getHotDogsAll).Methods("GET")             //Get ALL Hotdogs!
+	myRouter.HandleFunc("/getAllFoodUser", getAllFoodUser).Methods("GET")     //Get all foods for a User ID
 	myRouter.HandleFunc("/getHDogSingular", getHotDogSingular).Methods("GET") //Get a SINGULAR hotdog
 	//Validation Stuff
 	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
