@@ -51,13 +51,10 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("Here is our byte slice: %v\n", bs)
 
 	//Marshal it into our type
 	var theUser User
 	json.Unmarshal(bs, &theUser)
-	//Debug
-	fmt.Printf("DEBUG: Here is our User: \n%v\n", theUser)
 
 	//Declare variables for hotdog
 	var h_id int64

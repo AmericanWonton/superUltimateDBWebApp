@@ -178,8 +178,8 @@
     width: 100%;
 
     /* styling */
-    padding: 1em;
-    margin: 1em;
+    padding: .2em;
+    margin: .2em;
     /* debug */
     border: 1px solid black;
 }
@@ -209,8 +209,73 @@
     width: 100%;
 
     /* styling */
-    padding: 1em;
-    margin: 1em;
+    padding: .2em;
+    margin: .2em;
     /* debug */
     border: 1px solid black;
+}
+
+#itemDisplay {
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 15%;
+
+    /* styling */
+    padding: .2em;
+    margin: .2em;
+    /* debug */
+    border: 1px solid red;
+}
+
+#itemDisplayText {
+    /* styling */
+    font-size: .5rem;
+}
+
+#updateDisplayDiv {
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: column wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 10%;
+    /* styling */
+
+    /* debug */
+    border: 1px solid orangered;
+}
+
+#udContainerDiv {
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+
+    /* styling */
+
+    /* debug */
+    border: 1px solid pink;
+}
+
+#udfTypeDiv {
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+
+    /* styling */
+
+    /* debug */
+    border: 1px solid teal;
 }
