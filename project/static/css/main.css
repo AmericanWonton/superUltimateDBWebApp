@@ -153,6 +153,21 @@
     border: 1px solid green;
 }
 
+#foodUpdater {
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+
+    /* styling */
+    display: none;
+    /* debug */
+    border: 1px solid magenta;
+}
+
 #hdogSeer {
     /* Flex-box formatting */
     display: flex;

@@ -259,6 +259,19 @@
             SEE MY FOOD
         </button>
         <div id="foodSeer">
+            <div id="foodUpdater">
+                <select name="foodChoice" id="foodChoice">
+                    <option value="hotdog">hotdog</option>
+                    <option value="hamburger">hamburger</option>
+                </select>
+                <input type="number" id="foodID" name="foodID" placeholder="foodNumber" minlength=1 maxlength=20>
+                <input type="text" id="foodType" name="foodType" placeholder="foodType" minlength=1 maxlength=48>
+                <input type="text" id="condimentType" name="condimentType" placeholder="condimentType" minlength=1 maxlength=48>
+                <input type="number" id="calories" name="calories" placeholder="calories" minlength=1 maxlength=8>
+                <input type="text" id="foodName" name="foodName" placeholder="foodName" minlength=1 maxlength=48>
+                <input id="food_UpdateBtn" type="submit">
+                <input id="food_deleteBtn" type="submit">
+            </div>
             <div id="hdogSeer">
 
             </div>
@@ -527,20 +540,42 @@
     <script>
         var seeFoodButton = document.getElementById("actionInstructionButton");
         var foodSeerDiv = document.getElementById("foodSeer");
+        var foodUpdater = document.getElementById("foodUpdater");
         var hdogSeerDiv = document.getElementById("hdogSeer");
         var hamSeerDiv = document.getElementById("hamSeer");
+        var hotdogIDArray = new Array(); //Declare Array for id reference use
+        var hamburgerIDArray = new Array(); //Declare Array for id reference use
+        var hamburgerChoice = 1; //When the User updates data, this displays the seletced Burger Choices
+        var hotDogChoice = 1; //When the User updates data, this displays the seletced Hotdog Choices
         var userID = {{.}};
+        var toSend = {
+            UserName: "",
+            Password: "", //This was formally a []byte but we are changing our code to fit the database better
+            First:    "",
+            Last:     "",
+            Role:     "",
+            UserID:   0
+        };
+        //DEBUG
+        var toSend2 = {
+            HotDogType: "",
+            Condiment: "",
+            Calories: 0,
+            Name: "",
+            UserID: 0
+        }; //JSON string creation
+
+        function foodUpdater(whichFood, whichChoice, theHDArray, theHamburgArray, hamburgObj, hotdogObj){
+            console.log("DEBUG: Reached the foodUpdater.");
+        }
+
+        function foodDeleter(whichFood, whichChoice, theHDArray, theHamburgArray, hamburgObj, hotdogObj){
+            console.log("DEBUG: Reached the foodDeleter.");
+        }
+        
         //On clicked, get all data food data for this User
         seeFoodButton.addEventListener("click", function(){
             console.log("Button clicked, retrieving food data for this User: " + userID);
-            //JSON string creation
-            var toSend = {
-                HotDogType: "",
-                Condiment: "",
-                Calories: 0,
-                Name: "",
-                UserID: 0
-            };
             toSend.UserID = userID;
             var jsonString = JSON.stringify(toSend);
 
@@ -552,78 +587,33 @@
                     var item = xhr.responseText;
                     var dataOBJ = JSON.parse(item);
                     if (dataOBJ.SuccessMessage == "Success") {
-                        //Display all Hamburgers
-                        for (var x = 0; x < dataOBJ.TheHamburgers.length; x++){
-                            //Declare variables for Hamburger section
-                            var hamDisplayDiv = document.createElement("div"); //Create Div
-                            hamDisplayDiv.setAttribute("id", "hamDisplay");
+                        //Update Hotdog and Hamburger Arrays
+                        for (var x = 0; x < dataOBJ.ID_Hamburgers.length; x++) {
+                            hamburgerIDArray.push(dataOBJ.ID_Hamburgers[x]);
+                            hamburgerChoice = hamburgerChoice + 1;
+                        }
+                        for (var y = 0; y < dataOBJ.ID_HotDogs.length; y++) {
+                            hotdogIDArray.push(dataOBJ.ID_HotDogs[y]);
+                            hotDogChoice = hotDogChoice + 1;
+                        }
 
-                            //Create Update Display Box for Hamburger
-                            var updateDisplayDiv = document.createElement("div");
-                            updateDisplayDiv.setAttribute("id", "updateDisplayDiv");
-                            //udContainerDiv
-                            var udContainerDiv = document.createElement("div");
-                            udContainerDiv.setAttribute("id", "udContainerDiv");
-                            //Create udcTextDiv and add Burger Type text to it
-                            var udcTextDiv = document.createElement("div");
-                            udcTextDiv.setAttribute("id", "udcTextDiv");
-                            var udcText = document.createElement("p");
-                            udcText.setAttribute("id", "udcText");
-                            udcText.innerHTML = "Edit Burger Type";
-                            udcTextDiv.appendChild(udcText); //Append the text to the div
-                            udContainerDiv.appendChild(udcTextDiv); //Add the udctextDiv to the udContainerDiv
-                            //Create udcInputDiv and add Input to it
-                            var udcInputDiv = document.createElement("div");
-                            udcInputDiv.setAttribute("id", "udcInputDiv");
-                            var udcInput = document.createElement("input");
-                            udcInput.setAttribute("type", "text");
-                            udcInput.setAttribute("id", "udcInput");
-                            udcInput.setAttribute("maxlength", 48);
-                            udcInput.setAttribute("name", "udcInput");
-                            udcInput.setAttribute("placeholder", "Hamburger Type");
-                            udcInputDiv.append(udcInput); //Append the input to the input div
-                            udContainerDiv.appendChild(udcInputDiv); //Add the udcInputDiv to the udContainer Div
+                        //Display all Hamburgers
+                        for (var y = 0; y < dataOBJ.ID_Hamburgers.length; y++) {
+                            //Capture Burger Object for easier display
+                            var updateBurgerItem = {
+                                BurgerType: dataOBJ.TheHamburgers[y].BurgerType,
+                                Condiment: dataOBJ.TheHamburgers[y].Condiment,
+                                Calories: dataOBJ.TheHamburgers[y].Calories,
+                                Name: dataOBJ.TheHamburgers[y].Name,
+                                UserID: dataOBJ.TheHamburgers[y].UserID,
+                                DataupdateID: hamburgerIDArray[y]
+                            }; // This is for what button is selected
 
                             
-
-
-
-                            //Burger Type
-                            var itemDisplayDiv = document.createElement("div");
-                            itemDisplayDiv.setAttribute("id", "itemDisplay");
-                            var itemDisplayText = document.createElement("p");
-                            itemDisplayText.setAttribute("id", "itemDisplayText");
-                            itemDisplayText.innerHTML = dataOBJ.TheHamburgers[x].BurgerType;
-                            itemDisplayDiv.appendChild(itemDisplayText);
-                            hamDisplayDiv.appendChild(itemDisplayDiv);
-                            //Condiment Type
-                            itemDisplayDiv = document.createElement("div");
-                            itemDisplayDiv.setAttribute("id", "itemDisplay");
-                            itemDisplayText = document.createElement("p");
-                            itemDisplayText.setAttribute("id", "itemDisplayText");
-                            itemDisplayText.innerHTML = dataOBJ.TheHamburgers[x].Condiment;
-                            itemDisplayDiv.appendChild(itemDisplayText);
-                            hamDisplayDiv.appendChild(itemDisplayDiv);
-                            //Calories Type
-                            itemDisplayDiv = document.createElement("div");
-                            itemDisplayDiv.setAttribute("id", "itemDisplay");
-                            itemDisplayText = document.createElement("p");
-                            itemDisplayText.setAttribute("id", "itemDisplayText");
-                            itemDisplayText.innerHTML = dataOBJ.TheHamburgers[x].Calories;
-                            itemDisplayDiv.appendChild(itemDisplayText);
-                            hamDisplayDiv.appendChild(itemDisplayDiv);
-                            //Name Type
-                            itemDisplayDiv = document.createElement("div");
-                            itemDisplayDiv.setAttribute("id", "itemDisplay");
-                            itemDisplayText = document.createElement("p");
-                            itemDisplayText.setAttribute("id", "itemDisplayText");
-                            itemDisplayText.innerHTML = dataOBJ.TheHamburgers[x].Name;
-                            itemDisplayDiv.appendChild(itemDisplayText);
-                            hamDisplayDiv.appendChild(itemDisplayDiv);
-                            //Add the Div and display it
-                            hamSeerDiv.appendChild(hamDisplayDiv);
-                            hamSeerDiv.style.display = "block";
                         }
+                        hamSeerDiv.style.display = "block";
+                        
+                        
                         //Display all HotDogs
                         for (var i = 0; i < dataOBJ.TheHotDogs.length; i++) {
                             

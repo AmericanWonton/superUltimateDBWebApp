@@ -147,8 +147,6 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() {
 			//assign variable
 			err = rows.Scan(&returnedTableID, &returnedUsername, &returnedPassword, &returnedFName, &returnedLName, &returnedRole, &returnedUserID)
-			fmt.Printf("DEBUG returnedUsername: %v\n", returnedUsername)
-			fmt.Printf("DEBUG returnedPassword: %v\n", returnedPassword)
 			check(err)
 		}
 		//Count to see if password/Username returned at all
@@ -160,7 +158,6 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 			//Check to see if Username returned
 			if strings.Compare(username, returnedUsername) == 0 {
 				//Checking to see if password matches as well
-				fmt.Printf("DEBUG: We are now decoding the string byte to byte array: %v\n", returnedPassword)
 				theReturnedByte, err := hex.DecodeString(returnedPassword)
 				if err != nil {
 					log.Fatal(err)
@@ -312,8 +309,7 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 //mainPage
 func mainPage(w http.ResponseWriter, req *http.Request) {
 	//if User is already logged in, bring them to the mainPage!
-	aUser := getUser(w, req) //Get the User, if they exist
-	fmt.Printf("Here is our User:\n%v\n", aUser)
+	aUser := getUser(w, req)              //Get the User, if they exist
 	vd := ViewData{aUser, aUser.UserName} //POSSIBLY DEBUG
 	if !alreadyLoggedIn(w, req) {
 		http.Redirect(w, req, "/", http.StatusSeeOther)
@@ -321,7 +317,6 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 	}
 	err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 	HandleError(w, err1)
-	fmt.Printf("Homepage Endpoint Hit\n")
 }
 
 //UPDATE hotdog

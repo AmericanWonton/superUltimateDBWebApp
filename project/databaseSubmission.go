@@ -57,7 +57,7 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	json.Unmarshal(bs, &theUser)
 
 	//Declare variables for hotdog
-	var h_id int64
+	var h_id int
 	var h_dogType string
 	var h_condiment string
 	var h_calories int
@@ -65,7 +65,7 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	var h_userID int
 
 	//Declare variables for hotdog
-	var ham_id int64
+	var ham_id int
 	var ham_type string
 	var ham_condiment string
 	var ham_calories int
@@ -75,13 +75,24 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	//Declare all our our hotdog/hamburger collections returned
 	var hotDogSlice []Hotdog
 	var hamburgerSlice []Hamburger
+	var hotDogIDSlice []int
+	var hamburgIDSlice []int
+
+	//Assemble data to send back
+	type data struct {
+		SuccessMessage string      `json:"SuccessMessage"`
+		TheHotDogs     []Hotdog    `json:"TheHotDogs"`
+		TheHamburgers  []Hamburger `json:"TheHamburgers:`
+		ID_HotDogs     []int       `json:"ID_HotDogs"`
+		ID_Hamburgers  []int       `json:"ID_Hamburgers"`
+	}
 
 	//Counter for food returned
 	dogCounter := 0
 	hamCounter := 0
 
 	//Get HotDogs
-	hrows, err1 := db.Query(`SELECT * FROM hot_dogs WHERE USER_ID=?;`, theUser.UserID)
+	hrows, err1 := db.Query(`SELECT * FROM hot_dogs WHERE USER_ID=? ORDER BY USER_ID;`, theUser.UserID)
 	check(err1)
 	defer hrows.Close()
 
@@ -97,11 +108,13 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 			UserID:     h_userID,
 		}
 		hotDogSlice = append(hotDogSlice, newHotDog)
+		hotDogIDSlice = append(hotDogIDSlice, h_id)
+
 		dogCounter = dogCounter + 1
 	}
 
 	//Get Hamburgers
-	hamrows, err2 := db.Query(`SELECT * FROM hamburgers WHERE USER_ID=?`, theUser.UserID)
+	hamrows, err2 := db.Query(`SELECT * FROM hamburgers WHERE USER_ID=? ORDER BY USER_ID`, theUser.UserID)
 	check(err2)
 	defer hamrows.Close()
 
@@ -117,20 +130,17 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 			UserID:     ham_userID,
 		}
 		hamburgerSlice = append(hamburgerSlice, newHamburger)
+		hamburgIDSlice = append(hamburgIDSlice, ham_id)
 		hamCounter = hamCounter + 1
 	}
 
-	//Assemble data to send back
-	type data struct {
-		SuccessMessage string      `json:"SuccessMessage"`
-		TheHotDogs     []Hotdog    `json:"TheHotDogs"`
-		TheHamburgers  []Hamburger `json:"TheHamburgers:`
-	}
 	//Check to see if we have any data to submit
 	sendData := data{
 		SuccessMessage: "Success",
 		TheHotDogs:     hotDogSlice,
 		TheHamburgers:  hamburgerSlice,
+		ID_HotDogs:     hotDogIDSlice,
+		ID_Hamburgers:  hamburgIDSlice,
 	}
 
 	if len(sendData.TheHotDogs) <= 0 && len(sendData.TheHamburgers) <= 0 {
@@ -141,6 +151,8 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println("There's an error marshalling.")
 	}
+
+	fmt.Printf("DEBUG: ID_Hamburgers:\n%v", sendData.ID_Hamburgers)
 
 	fmt.Fprintf(w, string(dataJSON))
 }
