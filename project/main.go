@@ -401,6 +401,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/deleteFood", deleteFood).Methods("POST")
 	myRouter.HandleFunc("/updateFood", updateFood).Methods("POST")
 	myRouter.HandleFunc("/insertHotDog", insertHotDog).Methods("POST")        //Post a hotdog!
+	myRouter.HandleFunc("/insertHamburger", insertHamburger).Methods("POST")  //Post a hamburger!
 	myRouter.HandleFunc("/scadoop", getHotDogsAll).Methods("GET")             //Get ALL Hotdogs!
 	myRouter.HandleFunc("/getAllFoodUser", getAllFoodUser).Methods("POST")    //Get all foods for a User ID
 	myRouter.HandleFunc("/getHDogSingular", getHotDogSingular).Methods("GET") //Get a SINGULAR hotdog

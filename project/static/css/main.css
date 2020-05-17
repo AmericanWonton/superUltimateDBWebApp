@@ -183,22 +183,6 @@
     border: 1px solid purple;
 }
 
-#hotDogDisplay {
-    /* Flex-box formatting */
-    display: flex;
-    flex-flow: wrap;
-    justify-content: center;
-    align-content: center;
-    align-items: center;
-    width: 100%;
-
-    /* styling */
-    padding: .2em;
-    margin: .2em;
-    /* debug */
-    border: 1px solid black;
-}
-
 #hamSeer {
     /* Flex-box formatting */
     display: flex;
@@ -214,57 +198,6 @@
     border: 1px solid blue;
 }
 
-#hamDisplay {
-    /* Flex-box formatting */
-    display: flex;
-    flex-flow: wrap;
-    justify-content: center;
-    align-content: center;
-    align-items: center;
-    width: 100%;
-
-    /* styling */
-    padding: .2em;
-    margin: .2em;
-    /* debug */
-    border: 1px solid black;
-}
-
-#itemDisplay {
-    /* Flex-box formatting */
-    display: flex;
-    flex-flow: wrap;
-    justify-content: center;
-    align-content: center;
-    align-items: center;
-    width: 15%;
-
-    /* styling */
-    padding: .2em;
-    margin: .2em;
-    /* debug */
-    border: 1px solid red;
-}
-
-#itemDisplayText {
-    /* styling */
-    font-size: .5rem;
-}
-
-#updateDisplayDiv {
-    /* Flex-box formatting */
-    display: flex;
-    flex-flow: column wrap;
-    justify-content: center;
-    align-content: center;
-    align-items: center;
-    width: 10%;
-    /* styling */
-
-    /* debug */
-    border: 1px solid orangered;
-}
-
 #udContainerDiv {
     /* Flex-box formatting */
     display: flex;
@@ -275,12 +208,13 @@
     width: 100%;
 
     /* styling */
-
+    margin: .5em;
+    padding: .5em;
     /* debug */
-    border: 1px solid pink;
+    border: 1px solid black;
 }
 
-#udfTypeDiv {
+#udcFieldInfoTxtDiv {
     /* Flex-box formatting */
     display: flex;
     flex-flow: wrap;
@@ -290,7 +224,31 @@
     width: 100%;
 
     /* styling */
-
+    margin: .3em;
+    padding: .3em;
     /* debug */
-    border: 1px solid teal;
+    border: 1px solid rgb(21, 175, 202);
+}
+
+#udcfText {
+    /* styling */
+    margin: .1em;
+    padding: .1em;
+    font-size: 1rem;
+}
+
+#udcFieldInfoTxtDiv{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+
+    /* styling */
+    margin: .3em;
+    padding: .3em;
+    /* debug */
+    border: 1px solid rgb(151, 21, 202);
 }

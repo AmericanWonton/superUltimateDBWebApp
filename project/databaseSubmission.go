@@ -10,7 +10,7 @@ import (
 const successMessage string = "Successful Insert"
 const failureMessage string = "Unsuccessful Insert"
 
-//POST mainpage
+//POST hotdog, Mainpage
 func insertHotDog(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Inserting hotdog record.")
 	//Collect JSON from Postman or wherever
@@ -27,6 +27,38 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 	defer stmt.Close()
 
 	r, err := stmt.Exec(postedHotDog.HotDogType, postedHotDog.Condiment, postedHotDog.Calories, postedHotDog.Name, postedHotDog.UserID)
+	check(err)
+
+	n, err := r.RowsAffected()
+	check(err)
+
+	fmt.Printf("DEBUG: %v rows effected.\n", n)
+
+	if err != nil {
+		fmt.Fprint(w, failureMessage)
+	} else {
+		fmt.Fprint(w, successMessage)
+	}
+}
+
+//POST hotdog, Mainpage
+func insertHamburger(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("Inserting hamburger record.")
+	//Collect JSON from Postman or wherever
+	//Get the byte slice from the request body ajax
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//Marshal it into our type
+	var postedHamburger Hamburger
+	json.Unmarshal(bs, &postedHamburger)
+
+	stmt, err := db.Prepare("INSERT INTO hamburgers(TYPE, CONDIMENT, CALORIES, NAME, USER_ID) VALUES(?,?,?,?,?)")
+	defer stmt.Close()
+
+	r, err := stmt.Exec(postedHamburger.BurgerType, postedHamburger.Condiment,
+		postedHamburger.Calories, postedHamburger.Name, postedHamburger.UserID)
 	check(err)
 
 	n, err := r.RowsAffected()
@@ -89,7 +121,7 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	hamCounter := 0
 
 	//Get HotDogs
-	hrows, err1 := db.Query(`SELECT * FROM hot_dogs WHERE USER_ID=? ORDER BY USER_ID;`, theUser.UserID)
+	hrows, err1 := db.Query(`SELECT * FROM hot_dogs WHERE USER_ID=? ORDER BY ID;`, theUser.UserID)
 	check(err1)
 	defer hrows.Close()
 
@@ -111,7 +143,7 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	}
 
 	//Get Hamburgers
-	hamrows, err2 := db.Query(`SELECT * FROM hamburgers WHERE USER_ID=? ORDER BY USER_ID`, theUser.UserID)
+	hamrows, err2 := db.Query(`SELECT * FROM hamburgers WHERE USER_ID=? ORDER BY ID`, theUser.UserID)
 	check(err2)
 	defer hamrows.Close()
 
@@ -264,5 +296,4 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 	} else {
 		fmt.Fprintln(w, "FOOD UPDATE INCOMPLETE")
 	}
-
 }
