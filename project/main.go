@@ -319,38 +319,6 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 	HandleError(w, err1)
 }
 
-//UPDATE hotdog
-func updateHotDog(w http.ResponseWriter, req *http.Request) {
-	//if hotdog name is "Name", update it to "a special name"
-	boringName, coolName := "Name", "Cool Name"
-
-	stmt, err := db.Prepare("UPDATE hot_dogs SET NAME=? WHERE NAME=?")
-	check(err)
-
-	r, err := stmt.Exec(coolName, boringName)
-	check(err)
-
-	n, err := r.RowsAffected()
-	check(err)
-
-	fmt.Fprintln(w, "INSERTED RECORD", n)
-}
-
-//DELETE hotdog
-func deleteHotDog(w http.ResponseWriter, req *http.Request) {
-	badName := "Weiner Name"
-	delDog, err := db.Prepare("DELETE FROM hot_dogs WHERE NAME=?")
-	check(err)
-
-	r, err := delDog.Exec(badName)
-	check(err)
-
-	n, err := r.RowsAffected()
-	check(err)
-
-	fmt.Fprintln(w, "DELETED RECORD", n)
-}
-
 //GET mainpage
 func getHotDogSingular(w http.ResponseWriter, req *http.Request) {
 	//Get the string map of our variables from the request
@@ -430,8 +398,8 @@ func handleRequests() {
 	myRouter.HandleFunc("/signup", signUp)
 	myRouter.HandleFunc("/mainPage", mainPage)
 	//Database Stuff
-	myRouter.HandleFunc("/deleteHotDog", deleteHotDog).Methods("POST")
-	myRouter.HandleFunc("/updateHotDog", updateHotDog).Methods("POST")
+	myRouter.HandleFunc("/deleteFood", deleteFood).Methods("POST")
+	myRouter.HandleFunc("/updateFood", updateFood).Methods("POST")
 	myRouter.HandleFunc("/insertHotDog", insertHotDog).Methods("POST")        //Post a hotdog!
 	myRouter.HandleFunc("/scadoop", getHotDogsAll).Methods("GET")             //Get ALL Hotdogs!
 	myRouter.HandleFunc("/getAllFoodUser", getAllFoodUser).Methods("POST")    //Get all foods for a User ID

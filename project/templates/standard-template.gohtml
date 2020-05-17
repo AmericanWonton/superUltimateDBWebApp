@@ -543,8 +543,12 @@
         var foodUpdater = document.getElementById("foodUpdater");
         var hdogSeerDiv = document.getElementById("hdogSeer");
         var hamSeerDiv = document.getElementById("hamSeer");
+        var foodUpdateBtn = document.getElementById("food_UpdateBtn");
+        var foodDeleteBtn = document.getElementById("food_deleteBtn");
         var hotdogIDArray = new Array(); //Declare Array for id reference use
         var hamburgerIDArray = new Array(); //Declare Array for id reference use
+        var hotdogsArray = new Array(); //All the hot dog object arrays
+        var hamburgArray = new Array(); //All the hamburger object arrays
         var hamburgerChoice = 1; //When the User updates data, this displays the seletced Burger Choices
         var hotDogChoice = 1; //When the User updates data, this displays the seletced Hotdog Choices
         var userID = {{.}};
@@ -556,21 +560,81 @@
             Role:     "",
             UserID:   0
         };
-        //DEBUG
-        var toSend2 = {
+        var aHotDog = {
             HotDogType: "",
             Condiment: "",
             Calories: 0,
             Name: "",
             UserID: 0
-        }; //JSON string creation
+        }
+        var aHamburger = {
+            BurgerType: "",
+            Condiment: "",
+            Calories: 0,
+            Name: "",
+            UserID: 0
+        }
+        
 
-        function foodUpdater(whichFood, whichChoice, theHDArray, theHamburgArray, hamburgObj, hotdogObj){
+        function foodUpdater(whichFood, whichChoice, hamburgObj, hotdogObj){
             console.log("DEBUG: Reached the foodUpdater.");
+            var foodUpdate = {
+                FoodType: whichFood,
+                FoodID: whichChoice,
+                TheHamburger: hamburgObj,
+                TheHotDog: hotdogObj
+            }; //Make JSON to send to food API
+
+            var jsonString = JSON.stringify(foodDeletion);
+
+            //Call Ajax to delete the foodRecord
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/updateFood', true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.addEventListener('readystatechange', function(){
+                if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                    var item = xhr.responseText;
+                    
+                }
+            });
+            xhr.send(jsonString);
         }
 
-        function foodDeleter(whichFood, whichChoice, theHDArray, theHamburgArray, hamburgObj, hotdogObj){
+        function foodDeleter(whichFood, whichChoice){
             console.log("DEBUG: Reached the foodDeleter.");
+            var foodDeletion = {
+                FoodType: whichFood,
+                FoodID: whichChoice
+            }; //Make JSON to send to food API
+
+            var jsonString = JSON.stringify(foodDeletion);
+
+            //Call Ajax to delete the foodRecord
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/deleteFood', true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.addEventListener('readystatechange', function(){
+                if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                    var item = xhr.responseText;
+                    if (item == "DELETED HOTDOG RECORD"){
+                        console.log(item);
+                        alert(item);
+                        location.reload(true);
+                    }else if (item == "DELETED HAMBURGER RECORD"){
+                        console.log(item);
+                        alert(item);
+                        location.reload(true);
+                    } else if (item == "FOOD DELETION INCOMPLETE") {
+                        console.log(item);
+                        alert(item);
+                        location.reload(true);
+                    } else {
+                        console.log("Unexpected output at foodDeletion function.");
+                        location.reload(true);
+                    }
+                }
+            });
+            xhr.send(jsonString);
         }
         
         //On clicked, get all data food data for this User
@@ -591,10 +655,22 @@
                         for (var x = 0; x < dataOBJ.ID_Hamburgers.length; x++) {
                             hamburgerIDArray.push(dataOBJ.ID_Hamburgers[x]);
                             hamburgerChoice = hamburgerChoice + 1;
+                            aHamburger.BurgerType = dataOBJ.TheHamburgers[x].BurgerType;
+                            aHamburger.Condiment = dataOBJ.TheHamburgers[x].Condiment;
+                            aHamburger.Calories = dataOBJ.TheHamburgers[x].Calories;
+                            aHamburger.Name = dataOBJ.TheHamburgers[x].Name;
+                            aHamburger.UserID = dataOBJ.TheHamburgers[x].UserID;
+                            hotdogsArray.push(aHamburger); //Add the Hamburger to the Hamburger array
                         }
                         for (var y = 0; y < dataOBJ.ID_HotDogs.length; y++) {
                             hotdogIDArray.push(dataOBJ.ID_HotDogs[y]);
                             hotDogChoice = hotDogChoice + 1;
+                            aHotDog.HotDogType = dataOBJ.TheHotDogs[x].HotDogType;
+                            aHotDog.Condiment = dataOBJ.TheHotDogs[x].Condiment;
+                            aHotDog.Calories = dataOBJ.TheHotDogs[x].Calories;
+                            aHotDog.Name = dataOBJ.TheHotDogs[x].Name;
+                            aHotDog.UserID = dataOBJ.TheHotDogs[x].UserID;
+                            hotdogsArray.push(aHotDog); //Add the hotdog to the hotdog array
                         }
 
                         //Display all Hamburgers
@@ -628,6 +704,95 @@
             });
             xhr.send(jsonString);
         });
+        //Call the food deleter function to run a query and delete food,(if the selection is appropriate)
+        foodDeleteBtn.addEventListener("click", function(){
+            //Declare input variable names to work with
+            var foodChoice = document.getElementById("foodChoice");
+            var foodID = document.getElementById("foodID");
+            
+
+            //Assign fields to pass to food deleter
+            if (foodChoice.value == "hotdog"){
+                //See if the foodID field was assigned correctly
+                if (foodID.value < 0 || foodID.value > hotdogsArray.length - 1){
+                    //bad selection
+                    console.log("User inputted a wrong selection: " + foodID.value);
+                    alert("Please choose an ID for hotdog listed below.");
+                    location.reload(true);
+                } else {    
+                    //Good Selection
+                    foodDeleter(foodChoice.value, hotdogIDArray[foodID.value]);
+                }
+            } else if (foodChoice.value == "hamburger"){
+                //See if the foodID field was assigned correctly
+                if (foodID.value < 0 || foodID.value > hamburgArray.length - 1){
+                    //bad selection
+                    console.log("User inputted a wrong selection: " + foodID.value);
+                    alert("Please choose an ID for hotdog listed below.");
+                    
+                } else {    
+                    //Good Selection
+                    foodDeleter(foodChoice.value, hamburgerIDArray[foodID.value]);
+                }
+            } else {
+                console.log("Error, User selected nothing in the foodchoice" +
+                " field or wrong value got put in place.");
+                alert("Please select hamburger or hotdog food to delete.");
+                location.reload(true);
+            }
+        });
+
+        foodUpdateBtn.addEventListener("click", function(){
+            //Declare input variable names to work with
+            var foodChoice = document.getElementById("foodChoice");
+            var foodID = document.getElementById("foodID");
+            var foodType = document.getElementById("foodType");
+            var condimentType = docuemnt.getElementById("condimentType");
+            var calories = document.getElementById("calories");
+            var foodName = document.getElementById("foodName");
+
+            //Assign fields to pass to food deleter
+            if (foodChoice.value == "hotdog"){
+                //See if the foodID field was assigned correctly
+                if (foodID.value < 0 || foodID.value > hotdogsArray.length - 1){
+                    //bad selection
+                    console.log("User inputted a wrong selection: " + foodID.value);
+                    alert("Please choose an ID for hotdog listed below.");
+                    location.reload(true);
+                } else {    
+                    //Good Selection
+                    aHotDog.HotDogType = foodType.value;
+                    aHotDog.Condiment = condimentType.value;
+                    aHotDog.Calories = calories.value;
+                    aHotDog.Name = foodName.value;
+                    aHotDog.UserID = userID;
+                    foodUpdater(foodChoice.value, hotdogIDArray[foodID.value], aHamburger, aHotDog);
+                }
+            } else if (foodChoice.value == "hamburger"){
+                //See if the foodID field was assigned correctly
+                if (foodID.value < 0 || foodID.value > hamburgArray.length - 1){
+                    //bad selection
+                    console.log("User inputted a wrong selection: " + foodID.value);
+                    alert("Please choose an ID for hotdog listed below.");
+                    location.reload(true);
+                } else {    
+                    //Good Selection
+                    aHamburger.BurgerType = foodType.value;
+                    aHamburger.Condiment = condimentType.value;
+                    aHamburger.Calories = calories.value;
+                    aHamburger.Name = foodName.value;
+                    aHamburger.UserID = userID;
+                    foodUpdater(foodChoice.value, hamburgerIDArray[foodID.value], aHamburger, aHotDog);
+                }
+            } else {
+                console.log("Error, User selected nothing in the foodchoice" +
+                " field or wrong value got put in place.");
+                alert("Please select hamburger or hotdog food to update.");
+                location.reload(true);
+            }
+        });
+
+
     </script>
 {{end}}
 {{/* AJAX/ JAVASCRIPT ENDING */}}

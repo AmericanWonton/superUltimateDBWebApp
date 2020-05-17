@@ -19,12 +19,9 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("Here is our byte slice: %v\n", bs)
 	//Marshal it into our type
 	var postedHotDog Hotdog
 	json.Unmarshal(bs, &postedHotDog)
-	//Debug
-	fmt.Printf("DEBUG: Here is our hotdog: \n%v\n", postedHotDog)
 
 	stmt, err := db.Prepare("INSERT INTO hot_dogs(TYPE, CONDIMENT, CALORIES, NAME, USER_ID) VALUES(?,?,?,?,?)")
 	defer stmt.Close()
@@ -155,4 +152,117 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	fmt.Printf("DEBUG: ID_Hamburgers:\n%v", sendData.ID_Hamburgers)
 
 	fmt.Fprintf(w, string(dataJSON))
+}
+
+//DELETE hotdog
+func deleteFood(w http.ResponseWriter, req *http.Request) {
+	type foodDeletion struct {
+		FoodType string `json:"FoodType"`
+		FoodID   string `json:"FoodID"`
+	}
+	//Unwrap from JSON
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//Marshal it into our type
+	var theFoodDeletion foodDeletion
+	json.Unmarshal(bs, &theFoodDeletion)
+
+	//Determine if this is a hotdog or hamburger deletion
+	sqlStatement := ""
+	if theFoodDeletion.FoodType == "hotdog" {
+		sqlStatement = "DELETE FROM hot_dogs WHERE ID=?"
+		delDog, err := db.Prepare(sqlStatement)
+		check(err)
+
+		r, err := delDog.Exec(theFoodDeletion.FoodID)
+		check(err)
+
+		n, err := r.RowsAffected()
+		check(err)
+
+		fmt.Printf("%v\n", n)
+
+		fmt.Fprintln(w, "DELETED HOTDOG RECORD")
+	} else if theFoodDeletion.FoodType == "hamburger" {
+		sqlStatement = "DELETE FROM hamburgers WHERE ID=?"
+		delDog, err := db.Prepare(sqlStatement)
+		check(err)
+
+		r, err := delDog.Exec(theFoodDeletion.FoodID)
+		check(err)
+
+		n, err := r.RowsAffected()
+		check(err)
+
+		fmt.Printf("%v\n", n)
+
+		fmt.Fprintln(w, "DELETED HAMBURGER RECORD")
+	} else {
+		fmt.Fprintln(w, "FOOD DELETION INCOMPLETE")
+	}
+}
+
+//UPDATE FOOD
+func updateFood(w http.ResponseWriter, req *http.Request) {
+
+	type foodUpdate struct {
+		FoodType     string    `json:"FoodType"`
+		FoodID       string    `json:"FoodID"`
+		TheHamburger Hamburger `json:"TheHamburger"`
+		TheHotDog    Hotdog    `json:"TheHotDog"`
+	}
+	//Unwrap from JSON
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//Marshal it into our type
+	var thefoodUpdate foodUpdate
+	json.Unmarshal(bs, &thefoodUpdate)
+
+	//Determine if this is a hotdog or hamburger update
+	if thefoodUpdate.FoodType == "hotdog" {
+		var updatedHotdog Hotdog = thefoodUpdate.TheHotDog
+		sqlStatement := "UPDATE hot_dogs SET TYPE=?, CONDIMENT=?, CALORIES=?," +
+			"NAME=? USER_ID=? WHERE ID=?"
+
+		stmt, err := db.Prepare(sqlStatement)
+		check(err)
+
+		r, err := stmt.Exec(updatedHotdog.HotDogType, updatedHotdog.Condiment,
+			updatedHotdog.Calories, updatedHotdog.Name, updatedHotdog.UserID)
+		check(err)
+
+		n, err := r.RowsAffected()
+		check(err)
+
+		fmt.Printf("%v\n", n)
+
+		fmt.Fprintln(w, "UPDATED HOTDOG RECORD")
+
+	} else if thefoodUpdate.FoodType == "hamburger" {
+		var updatedHamburger Hamburger = thefoodUpdate.TheHamburger
+		sqlStatement := "UPDATE hamburgers SET TYPE=?, CONDIMENT=?, CALORIES=?," +
+			"NAME=? USER_ID=? WHERE ID=?"
+
+		stmt, err := db.Prepare(sqlStatement)
+		check(err)
+
+		r, err := stmt.Exec(updatedHamburger.BurgerType, updatedHamburger.Condiment,
+			updatedHamburger.Calories, updatedHamburger.Name, updatedHamburger.UserID)
+		check(err)
+
+		n, err := r.RowsAffected()
+		check(err)
+
+		fmt.Printf("%v\n", n)
+
+		fmt.Fprintln(w, "UPDATED HAMBURGER RECORD")
+	} else {
+		fmt.Fprintln(w, "FOOD UPDATE INCOMPLETE")
+	}
+
 }
