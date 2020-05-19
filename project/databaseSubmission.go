@@ -23,6 +23,11 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 	var postedHotDog Hotdog
 	json.Unmarshal(bs, &postedHotDog)
 
+	//Protections for the hotdog name
+	if postedHotDog.HotDogType == "DEBUGTYPE" {
+		postedHotDog.HotDogType = "NONE"
+	}
+
 	stmt, err := db.Prepare("INSERT INTO hot_dogs(TYPE, CONDIMENT, CALORIES, NAME, USER_ID) VALUES(?,?,?,?,?)")
 	defer stmt.Close()
 
@@ -53,6 +58,11 @@ func insertHamburger(w http.ResponseWriter, req *http.Request) {
 	//Marshal it into our type
 	var postedHamburger Hamburger
 	json.Unmarshal(bs, &postedHamburger)
+
+	//Protections for the hamburger name
+	if postedHamburger.BurgerType == "DEBUGTYPE" {
+		postedHamburger.BurgerType = "NONE"
+	}
 
 	stmt, err := db.Prepare("INSERT INTO hamburgers(TYPE, CONDIMENT, CALORIES, NAME, USER_ID) VALUES(?,?,?,?,?)")
 	defer stmt.Close()
@@ -174,6 +184,30 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 
 	if len(sendData.TheHotDogs) <= 0 && len(sendData.TheHamburgers) <= 0 {
 		sendData.SuccessMessage = "Failure"
+	} else if len(sendData.ID_HotDogs) == 0 {
+		hotDogIDSlice = append(hotDogIDSlice, -1) //This is a code fix for null slices getting passed
+		sendData.ID_HotDogs = hotDogIDSlice
+		debugHotDog := Hotdog{
+			HotDogType: "DEBUGTYPE",
+			Condiment:  "DEBUGCONDIMENT",
+			Calories:   0,
+			Name:       "DEBUGNAME",
+			UserID:     0,
+		}
+		hotDogSlice = append(hotDogSlice, debugHotDog)
+		sendData.TheHotDogs = hotDogSlice
+	} else if len(sendData.ID_Hamburgers) == 0 {
+		hamburgIDSlice = append(hamburgIDSlice, -1) //This is a code fix for null slices getting passed
+		sendData.ID_Hamburgers = hamburgIDSlice
+		debugHamburger := Hamburger{
+			BurgerType: "DEBUGTYPE",
+			Condiment:  "DEBUGCONDIMENT",
+			Calories:   0,
+			Name:       "DEBUGNAME",
+			UserID:     0,
+		}
+		hamburgerSlice = append(hamburgerSlice, debugHamburger)
+		sendData.TheHamburgers = hamburgerSlice
 	}
 
 	dataJSON, err := json.Marshal(sendData)
@@ -190,7 +224,7 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 func deleteFood(w http.ResponseWriter, req *http.Request) {
 	type foodDeletion struct {
 		FoodType string `json:"FoodType"`
-		FoodID   string `json:"FoodID"`
+		FoodID   int    `json:"FoodID"`
 	}
 	//Unwrap from JSON
 	bs, err := ioutil.ReadAll(req.Body)
@@ -216,7 +250,7 @@ func deleteFood(w http.ResponseWriter, req *http.Request) {
 
 		fmt.Printf("%v\n", n)
 
-		fmt.Fprintln(w, "DELETED HOTDOG RECORD")
+		fmt.Fprintln(w, 1)
 	} else if theFoodDeletion.FoodType == "hamburger" {
 		sqlStatement = "DELETE FROM hamburgers WHERE ID=?"
 		delDog, err := db.Prepare(sqlStatement)
@@ -230,9 +264,9 @@ func deleteFood(w http.ResponseWriter, req *http.Request) {
 
 		fmt.Printf("%v\n", n)
 
-		fmt.Fprintln(w, "DELETED HAMBURGER RECORD")
+		fmt.Fprintln(w, 2)
 	} else {
-		fmt.Fprintln(w, "FOOD DELETION INCOMPLETE")
+		fmt.Fprintln(w, 3)
 	}
 }
 

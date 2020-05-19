@@ -208,8 +208,8 @@
     width: 100%;
 
     /* styling */
-    margin: .5em;
-    padding: .5em;
+    margin: 1em;
+    padding: 1em;
     /* debug */
     border: 1px solid black;
 }
@@ -221,34 +221,18 @@
     justify-content: center;
     align-content: center;
     align-items: center;
-    width: 100%;
+    width: 45%;
 
     /* styling */
-    margin: .3em;
-    padding: .3em;
+    margin: 1em;
+    padding: 1em;
     /* debug */
     border: 1px solid rgb(21, 175, 202);
 }
 
 #udcfText {
     /* styling */
-    margin: .1em;
-    padding: .1em;
+    margin: .5em;
+    padding: .5em;
     font-size: 1rem;
-}
-
-#udcFieldInfoTxtDiv{
-    /* Flex-box formatting */
-    display: flex;
-    flex-flow: wrap;
-    justify-content: center;
-    align-content: center;
-    align-items: center;
-    width: 100%;
-
-    /* styling */
-    margin: .3em;
-    padding: .3em;
-    /* debug */
-    border: 1px solid rgb(151, 21, 202);
 }
