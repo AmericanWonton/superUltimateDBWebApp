@@ -275,7 +275,7 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 
 	type foodUpdate struct {
 		FoodType     string    `json:"FoodType"`
-		FoodID       string    `json:"FoodID"`
+		FoodID       int       `json:"FoodID"`
 		TheHamburger Hamburger `json:"TheHamburger"`
 		TheHotDog    Hotdog    `json:"TheHotDog"`
 	}
@@ -288,18 +288,22 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 	//Marshal it into our type
 	var thefoodUpdate foodUpdate
 	json.Unmarshal(bs, &thefoodUpdate)
+	fmt.Printf("%v\n", thefoodUpdate)
+
+	sqlStatement := ""
 
 	//Determine if this is a hotdog or hamburger update
 	if thefoodUpdate.FoodType == "hotdog" {
 		var updatedHotdog Hotdog = thefoodUpdate.TheHotDog
-		sqlStatement := "UPDATE hot_dogs SET TYPE=?, CONDIMENT=?, CALORIES=?," +
-			"NAME=? USER_ID=? WHERE ID=?"
+		sqlStatement = "UPDATE hot_dogs SET TYPE=?, CONDIMENT=?, CALORIES=?," +
+			"NAME=?, USER_ID=? WHERE ID=?"
 
 		stmt, err := db.Prepare(sqlStatement)
 		check(err)
 
 		r, err := stmt.Exec(updatedHotdog.HotDogType, updatedHotdog.Condiment,
-			updatedHotdog.Calories, updatedHotdog.Name, updatedHotdog.UserID)
+			updatedHotdog.Calories, updatedHotdog.Name, updatedHotdog.UserID,
+			thefoodUpdate.FoodID)
 		check(err)
 
 		n, err := r.RowsAffected()
@@ -307,18 +311,19 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 
 		fmt.Printf("%v\n", n)
 
-		fmt.Fprintln(w, "UPDATED HOTDOG RECORD")
+		fmt.Fprintln(w, 1)
 
 	} else if thefoodUpdate.FoodType == "hamburger" {
 		var updatedHamburger Hamburger = thefoodUpdate.TheHamburger
-		sqlStatement := "UPDATE hamburgers SET TYPE=?, CONDIMENT=?, CALORIES=?," +
-			"NAME=? USER_ID=? WHERE ID=?"
+		sqlStatement = "UPDATE hamburgers SET TYPE=?, CONDIMENT=?, CALORIES=?," +
+			"NAME=?, USER_ID=? WHERE ID=?"
 
 		stmt, err := db.Prepare(sqlStatement)
 		check(err)
 
 		r, err := stmt.Exec(updatedHamburger.BurgerType, updatedHamburger.Condiment,
-			updatedHamburger.Calories, updatedHamburger.Name, updatedHamburger.UserID)
+			updatedHamburger.Calories, updatedHamburger.Name, updatedHamburger.UserID,
+			thefoodUpdate.FoodID)
 		check(err)
 
 		n, err := r.RowsAffected()
@@ -326,8 +331,8 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 
 		fmt.Printf("%v\n", n)
 
-		fmt.Fprintln(w, "UPDATED HAMBURGER RECORD")
+		fmt.Fprintln(w, 2)
 	} else {
-		fmt.Fprintln(w, "FOOD UPDATE INCOMPLETE")
+		fmt.Fprintln(w, 3)
 	}
 }

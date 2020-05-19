@@ -645,39 +645,42 @@
         }
         
 
-        function foodUpdater(whichFood, whichChoice, hamburgObj, hotdogObj){
+        function foodChanger(whichFood, whichChoice, hamburgObj, hotdogObj){
             console.log("DEBUG: Reached the foodUpdater.");
+            //Make JSON to send to food API
             var foodUpdate = {
                 FoodType: whichFood,
                 FoodID: whichChoice,
                 TheHamburger: hamburgObj,
                 TheHotDog: hotdogObj
-            }; //Make JSON to send to food API
+            };
 
-            var jsonString = JSON.stringify(foodDeletion);
-
+            var jsonString = JSON.stringify(foodUpdate);
             //Call Ajax to delete the foodRecord
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/updateFood', true);
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.addEventListener('readystatechange', function(){
-                if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
                     var item = xhr.responseText;
-                    if (item == "UPDATED HOTDOG RECORD") {
+                    console.log("DEBUG: " + item);
+                    if (item == 1) {
+                        //Hotdog Update
                         console.log(item);
-                        alert(item);
-                        location.reload(true);
-                    } else if (item == "UPDATED HAMBURGER RECORD") {
+                        //alert(item);
+                        //location.reload(true);
+                    } else if (item == 2) {
+                        //Hamburger Update
                         console.log(item);
-                        alert(item);
-                        location.reload(true);
-                    } else if (item == "FOOD UPDATE INCOMPLETE") {
+                        //alert(item);
+                        //location.reload(true);
+                    } else if (item == 3) {
                         console.log(item);
-                        alert(item);
-                        location.reload(true);
+                        //alert(item);
+                        //location.reload(true);
                     } else {
                         console.log("Unexpected output at foodUpdater function.");
-                        location.reload(true);
+                        //location.reload(true);
                     }
                 }
             });
@@ -725,7 +728,6 @@
         
         //On clicked, get all data food data for this User
         seeFoodButton.addEventListener("click", function(){
-            console.log("Button clicked, retrieving food data for this User: " + userID);
             toSend.UserID = userID;
             var jsonString = JSON.stringify(toSend);
 
@@ -736,7 +738,6 @@
                 if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
                     var item = xhr.responseText;
                     var dataOBJ = JSON.parse(item);
-                    console.log("DEBUG: " + dataOBJ.ID_HotDogs);
                     if (dataOBJ.SuccessMessage == "Success") {
                         //Clear all arrays, just in case
                         hotdogIDArray = []; //Declare Array for id reference use
@@ -747,7 +748,6 @@
                         hdogSeer.innerHTML = ""; //Clear hotdog div
                         var hotdogsGoodCount = true; //Used for not displaying hotdogs
                         var hamburgerGoodCount = true; //Used for displaying hotdogs
-                        console.log("DEBUG: BOUT TO LOOK AT EMPTY HOTDOGS");
                         //Update Hotdog and Hamburger Arrays
                         if (dataOBJ.TheHamburgers[0].BurgerType == "DEBUGTYPE"){
                             console.log("DEBUG: We have no burgers to deliver");
@@ -1031,49 +1031,51 @@
             //Declare input variable names to work with
             var foodChoice = document.getElementById("foodChoice");
             var foodID = document.getElementById("foodID");
+            var foodIDNumber = Number(foodID.value);
             var foodType = document.getElementById("foodType");
             var condimentType = document.getElementById("condimentType");
             var calories = document.getElementById("calories");
+            var caloriesNumber = Number(calories.value);
             var foodName = document.getElementById("foodName");
 
             //Assign fields to pass to food deleter
             if (foodChoice.value == "hotdog"){
                 //See if the foodID field was assigned correctly
-                if (foodID.value < 0 || foodID.value > hotdogsArray.length - 1){
+                if (foodIDNumber < 0 || foodIDNumber > hotdogsArray.length - 1){
                     //bad selection
-                    console.log("User inputted a wrong selection: " + foodID.value);
+                    console.log("User inputted a wrong selection: " + foodIDNumber);
                     alert("Please choose an ID for hotdog listed below.");
-                    location.reload(true);
+                    //location.reload(true);
                 } else {    
                     //Good Selection
                     aHotDog.HotDogType = foodType.value;
                     aHotDog.Condiment = condimentType.value;
-                    aHotDog.Calories = calories.value;
+                    aHotDog.Calories = caloriesNumber;
                     aHotDog.Name = foodName.value;
                     aHotDog.UserID = userID;
-                    foodUpdater(foodChoice.value, hotdogIDArray[foodID.value], aHamburger, aHotDog);
+                    foodChanger(foodChoice.value, hotdogIDArray[foodIDNumber], aHamburger, aHotDog);
                 }
             } else if (foodChoice.value == "hamburger"){
                 //See if the foodID field was assigned correctly
-                if (foodID.value < 0 || foodID.value > hamburgArray.length - 1){
+                if (foodIDNumber < 0 || foodIDNumber > hamburgArray.length - 1){
                     //bad selection
-                    console.log("User inputted a wrong selection: " + foodID.value);
+                    console.log("User inputted a wrong selection: " + foodIDNumber);
                     alert("Please choose an ID for hotdog listed below.");
-                    location.reload(true);
+                    //location.reload(true);
                 } else {    
                     //Good Selection
                     aHamburger.BurgerType = foodType.value;
                     aHamburger.Condiment = condimentType.value;
-                    aHamburger.Calories = calories.value;
+                    aHamburger.Calories = caloriesNumber;
                     aHamburger.Name = foodName.value;
                     aHamburger.UserID = userID;
-                    foodUpdater(foodChoice.value, hamburgerIDArray[foodID.value], aHamburger, aHotDog);
+                    foodChanger(foodChoice.value, hamburgArray[foodIDNumber], aHamburger, aHotDog);
                 }
             } else {
                 console.log("Error, User selected nothing in the foodchoice" +
                 " field or wrong value got put in place.");
                 alert("Please select hamburger or hotdog food to update.");
-                location.reload(true);
+                //location.reload(true);
             }
         });
 

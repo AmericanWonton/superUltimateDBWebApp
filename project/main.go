@@ -69,7 +69,7 @@ var dbSessionsCleaned time.Time
 var db *sql.DB
 var err error
 
-const sessionLength int = 30 //Length of sessions
+const sessionLength int = 180 //Length of sessions
 
 /* TEMPLATE DEFINITION BEGINNING */
 var template1 *template.Template
@@ -399,7 +399,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/mainPage", mainPage)
 	//Database Stuff
 	myRouter.HandleFunc("/deleteFood", deleteFood).Methods("POST")
-	myRouter.HandleFunc("/updateFood", updateFood).Methods("POST")
+	myRouter.HandleFunc("/updateFood", updateFood).Methods("POST")            //Update a certain food item
 	myRouter.HandleFunc("/insertHotDog", insertHotDog).Methods("POST")        //Post a hotdog!
 	myRouter.HandleFunc("/insertHamburger", insertHamburger).Methods("POST")  //Post a hamburger!
 	myRouter.HandleFunc("/scadoop", getHotDogsAll).Methods("GET")             //Get ALL Hotdogs!
