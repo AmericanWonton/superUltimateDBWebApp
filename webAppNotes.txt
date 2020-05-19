@@ -57,3 +57,7 @@ https://www.golangprograms.com/example-of-golang-crud-using-mysql-from-scratch.h
 4. Role Definition
 A User can: 1. See ALL of the hotdogs/hamburgers they made, and can update THEIR hamburgers or hotdogs.
 2. Delete any Hotdogs/Hamburgers THEY made. 3. Add a hotdog or a Hamburger to THEIR list 
+
+New found factiods:
+
+1. Passing variables to Javascript: https://stackoverflow.com/questions/37426563/pass-golang-variables-into-javascript

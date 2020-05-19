@@ -288,12 +288,13 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 	//Marshal it into our type
 	var thefoodUpdate foodUpdate
 	json.Unmarshal(bs, &thefoodUpdate)
-	fmt.Printf("%v\n", thefoodUpdate)
+	fmt.Printf("DEBUG:\n%v\n", thefoodUpdate)
 
 	sqlStatement := ""
 
 	//Determine if this is a hotdog or hamburger update
 	if thefoodUpdate.FoodType == "hotdog" {
+		fmt.Printf("DEBUG: Updating hotdog at id: %v\n", thefoodUpdate.FoodID)
 		var updatedHotdog Hotdog = thefoodUpdate.TheHotDog
 		sqlStatement = "UPDATE hot_dogs SET TYPE=?, CONDIMENT=?, CALORIES=?," +
 			"NAME=?, USER_ID=? WHERE ID=?"
@@ -314,6 +315,7 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintln(w, 1)
 
 	} else if thefoodUpdate.FoodType == "hamburger" {
+		fmt.Printf("DEBUG: Updating a hamburger at spot: %v\n", thefoodUpdate.FoodID)
 		var updatedHamburger Hamburger = thefoodUpdate.TheHamburger
 		sqlStatement = "UPDATE hamburgers SET TYPE=?, CONDIMENT=?, CALORIES=?," +
 			"NAME=?, USER_ID=? WHERE ID=?"
