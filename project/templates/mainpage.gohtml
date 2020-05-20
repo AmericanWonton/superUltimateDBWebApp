@@ -25,60 +25,13 @@
             {{if ReturnRoleUser .User "user"}}
                 <p>Hey, you're logged in, {{.User.Role}}! Now you can do stuff...</p>
                 {{$theID := .User.UserID}}
+                {{template "user-action"}}
                 {{template "foodExecutor" $theID}}
                 {{template "foodSeer" $theID}}
-                <div class="actionDiv">
-                    <img src="static/images/jpg/hide-pain-harold.jpg"  class="actionimg" alt="harold">
-                    <br><br>
-                    <p class="actionInstructionText">Okay User, what data would you like to read/make?</p>
-                    <br>
-                    {{/* See food section...maybe update it too */}}
-                    <button id="actionInstructionButton">
-                        SEE MY FOOD
-                    </button>
-                    <div id="foodSeer">
-                        <div id="foodUpdater">
-                            <select name="foodChoice" id="foodChoice">
-                                <option value="hotdog">hotdog</option>
-                                <option value="hamburger">hamburger</option>
-                            </select>
-                            <input type="number" id="foodID" name="foodID" placeholder="foodNumber" minlength=1 maxlength=20>
-                            <input type="text" id="foodType" name="foodType" placeholder="foodType" minlength=1 maxlength=48>
-                            <input type="text" id="condimentType" name="condimentType" placeholder="condimentType" minlength=1 maxlength=48>
-                            <input type="number" id="calories" name="calories" placeholder="calories" minlength=1 maxlength=8>
-                            <input type="text" id="foodName" name="foodName" placeholder="foodName" minlength=1 maxlength=48>
-                            <button id="food_UpdateBtn">
-                                Update Food
-                            </button>
-                            <button id="food_deleteBtn">
-                                Delete food
-                            </button>
-                        </div>
-                        <div id="hamSeer">
-
-                        </div>
-                        <div id="hdogSeer">
-
-                        </div>
-                    </div>
-                    {{/* Make food section */}}
-                    <p class="actionInstructionText">MAKE FOOD</p>
-                    <br>
-                    <button id="actionChoice" onclick="revealFoodForm(0)">
-                        MAKE HOTDOG
-                    </button>
-                    <br>
-                    <button id="actionChoice" onclick="revealFoodForm(1)">
-                        MAKE HAMBURGER
-                    </button>
-                    <div id="foodFormDiv">
-                        
-                    </div>
-                    <br>  
-                </div>
-                {{template "user-action"}}
             {{else if ReturnRoleAdmin .User "admin"}}
                 <p>Hey, you're logged in {{.User.Role}}! Now you can admin stuff!</p>
+                {{$theID := .User.UserID}}
+                {{template "admin-action"}}
                 
             {{else if ReturnRoleIT .User "IT"}}
                 <p>Hey, you're logged in {{.User.Role}}! Now you can do IT stuff!</p>

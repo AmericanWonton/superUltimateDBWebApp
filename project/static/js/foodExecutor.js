@@ -90,6 +90,7 @@ function revealFoodForm(foodChoice) {
                         nameType.value = "";
                         alert("Hotdog submitted successfully!")
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
+                        location.reload(true); //Reload Page
                     } else if (item == 'Unsuccessful Insert'){
                         //Data NOT inserted properly
                         hDogType.value = "";
@@ -98,10 +99,12 @@ function revealFoodForm(foodChoice) {
                         nameType.value = "";
                         alert("There was an issue submitting your hotdog :(")
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
+                        location.reload(true); //Reload Page
                     } else {
                         //No appropriate Response recieved
                         alert("Error submitting data, please send again.")
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
+                        location.reload(true); //Reload Page
                     }
                 }
             });
@@ -196,6 +199,7 @@ function revealFoodForm(foodChoice) {
                         nameType.value = "";
                         alert("Hamburger submitted successfully!")
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
+                        location.reload(true); //Reload Page
                     } else if (item == 'Unsuccessful Insert'){
                         //Data NOT inserted properly
                         hamburgType.value = "";
@@ -204,15 +208,16 @@ function revealFoodForm(foodChoice) {
                         nameType.value = "";
                         alert("There was an issue submitting your hamburger :(")
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
+                        location.reload(true); //Reload Page
                     } else {
                         //No appropriate Response recieved
                         alert("Error submitting data, please send again.")
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
+                        location.reload(true); //Reload Page
                     }
                 }
             });
             xhr.send(jsonString);
-            
         });
         //Append "Form Data"
         theDiv.appendChild(hamburgType);
@@ -224,5 +229,6 @@ function revealFoodForm(foodChoice) {
         theDiv.style.display = "block";
     } else {
         console.log("Whoops, we got a problem. Wrong food choice came in.")
+        location.reload(true); //Reload Page
     }
 }
