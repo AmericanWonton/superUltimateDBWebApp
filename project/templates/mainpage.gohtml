@@ -29,10 +29,11 @@
                 {{template "foodExecutor" $theID}}
                 {{template "foodSeer" $theID}}
             {{else if ReturnRoleAdmin .User "admin"}}
-                <p>Hey, you're logged in {{.User.Role}}! Now you can admin stuff!</p>
+                <p>Hey, you're logged in {{.User.Role}}! Now you can admin stuff! {{.User.UserID}}</p>
                 {{$theID := .User.UserID}}
                 {{template "admin-action"}}
-                
+                {{template "foodExecutor" $theID}}
+                {{template "foodSeer" $theID}}
             {{else if ReturnRoleIT .User "IT"}}
                 <p>Hey, you're logged in {{.User.Role}}! Now you can do IT stuff!</p>
                 
