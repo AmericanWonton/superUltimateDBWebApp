@@ -20,27 +20,29 @@
         
         {{/* If the User session exists, (as in, we aren't passing in a 'nil' user),
         then display it here. */}}
-        {{if .User.Role}}
+        {{if .Role}}
+            {{$theRole := .Role}}
             {{/* If the role is a User */}}
-            {{if ReturnRoleUser .User "user"}}
-                <p>Hey, you're logged in, {{.User.Role}}! Now you can do stuff...</p>
+            {{if eq $theRole "user"}}
+                <p>Hey, you're logged in, {{$theRole}}! Now you can do stuff...</p>
                 {{$theID := .User.UserID}}
                 {{template "user-action"}}
                 {{template "foodExecutor" $theID}}
                 {{template "foodSeer" $theID}}
-            {{else if ReturnRoleAdmin .User "admin"}}
-                <p>Hey, you're logged in {{.User.Role}}! Now you can admin stuff! {{.User.UserID}}</p>
+            {{else if eq $theRole "admin"}}
+                <p>Hey, you're logged in {{$theRole}}! Now you can admin stuff!</p>
                 {{$theID := .User.UserID}}
                 {{template "admin-action"}}
                 {{template "foodExecutor" $theID}}
                 {{template "foodSeer" $theID}}
-            {{else if ReturnRoleIT .User "IT"}}
+            {{else if eq $theRole "IT"}}
                 <p>Hey, you're logged in {{.User.Role}}! Now you can do IT stuff!</p>
-                
             {{else}}
                 <p>Whoops! Error here! Go back!</p>
             {{end}}
         {{end}}
+        
+
 
         {{/* Here is our footer */}}
         

@@ -258,6 +258,9 @@
         <button id="actionInstructionButton">
             SEE MY FOOD
         </button>
+        <button id="actionInstructionButton2">
+            Hide food
+        </button>
         <div id="foodSeer">
             <div id="foodUpdater">
                 <select name="foodChoice" id="foodChoice">
@@ -302,6 +305,7 @@
     <script type="text/javascript">
         //On clicked, get all data food data for this User
         var seeFoodButton = document.getElementById("actionInstructionButton");
+        var hideFoodButton = document.getElementById("actionInstructionButton2");
         var foodSeerDiv = document.getElementById("foodSeer");
         var foodUpdater = document.getElementById("foodUpdater");
         var hdogSeerDiv = document.getElementById("hdogSeer");
@@ -661,6 +665,10 @@
                 location.reload(true);
             }
         });
+        //Hide all foods
+        hideFoodButton.addEventListener("click", function(){
+            location.reload(true);
+        });
     </script>
 {{end}}
 {{/* ENDING OF USER ACTION PAGE */}}
@@ -668,7 +676,7 @@
 {{define "admin-action"}}
     {{/* Divs for javascript refference*/}}
     <div class="actionDiv">
-        <img src="static/images/jpg/IT-GUY.jpg"  class="actionimg" alt="admin">
+        <img src="static/images/png/System-Administrator-01.png"  class="actionimg" alt="admin">
         <br><br>
         <p class="actionInstructionText">Okay Admin, what data would you like to read/make?</p>
         <br>
@@ -679,6 +687,9 @@
         <br>
         <button id="actionInstructionButton">
             SEE FOOD
+        </button>
+        <button id="actionInstructionButton2">
+            Hide food
         </button>
         <input type="number" id="userID" name="userID" placeholder="userID" maxlength=8>
         <div id="foodSeer">
@@ -709,11 +720,11 @@
         {{/* Make food section */}}
         <p class="actionInstructionText">MAKE FOOD</p>
         <br>
-        <button id="actionChoice" onclick="revealFoodForm(0)">
+        <button id="actionChoice" onclick="revealFoodForm(2)">
             MAKE HOTDOG
         </button>
         <br>
-        <button id="actionChoice" onclick="revealFoodForm(1)">
+        <button id="actionChoice" onclick="revealFoodForm(3)">
             MAKE HAMBURGER
         </button>
         <div id="foodFormDiv">
@@ -724,6 +735,7 @@
     <script>
         //On clicked, get all data food data for this User
         var seeFoodButton = document.getElementById("actionInstructionButton");
+        var hideFoodButton = document.getElementById("actionInstructionButton2");
         var userIDInput = document.getElementById("userID");
         var foodSeerDiv = document.getElementById("foodSeer");
         var foodUpdater = document.getElementById("foodUpdater");
@@ -735,7 +747,12 @@
         //When clicked, see all food options
         seeFoodButton.addEventListener("click", function(){
             var theUserID = Number(userIDInput.value);
-            toSend.UserID = userID;
+            if (userIDInput.value.length == 0){
+                theUserID = 0;
+            } else {
+
+            }
+            toSend.UserID = theUserID;
             var jsonString = JSON.stringify(toSend);
 
             var xhr = new XMLHttpRequest();
@@ -878,6 +895,22 @@
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
+                                //Create UserID info section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "UserID";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHamburgers[y].UserID;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
                                 //All the divs fields for the container are added. Add this to the hamseer!
                                 hamSeerDiv.appendChild(udContainerDiv);
                             }
@@ -971,6 +1004,22 @@
                                 var udcfText = document.createElement("p");
                                 udcfText.setAttribute("id", "udcfText");
                                 udcfText.innerHTML = dataOBJ.TheHotDogs[i].Name;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create UserID info section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "UserID";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHotDogs[i].UserID;
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
@@ -1086,6 +1135,12 @@
                 location.reload(true);
             }
         });
+
+        //Hide all foods
+        hideFoodButton.addEventListener("click", function(){
+            location.reload(true);
+        });
+
 
     </script>
 {{end}}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 const successMessage string = "Successful Insert"
@@ -24,7 +25,7 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 	json.Unmarshal(bs, &postedHotDog)
 
 	//Protections for the hotdog name
-	if postedHotDog.HotDogType == "DEBUGTYPE" {
+	if strings.Compare(postedHotDog.HotDogType, "DEBUGTYPE") == 0 {
 		postedHotDog.HotDogType = "NONE"
 	}
 
@@ -60,9 +61,11 @@ func insertHamburger(w http.ResponseWriter, req *http.Request) {
 	json.Unmarshal(bs, &postedHamburger)
 
 	//Protections for the hamburger name
-	if postedHamburger.BurgerType == "DEBUGTYPE" {
+	if strings.Compare(postedHamburger.BurgerType, "DEBUGTYPE") == 0 {
 		postedHamburger.BurgerType = "NONE"
 	}
+
+	fmt.Printf("DEBUG: HERE IS OUR postedHamburger: \n%v\n", postedHamburger)
 
 	stmt, err := db.Prepare("INSERT INTO hamburgers(TYPE, CONDIMENT, CALORIES, NAME, USER_ID) VALUES(?,?,?,?,?)")
 	defer stmt.Close()
@@ -130,47 +133,93 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	dogCounter := 0
 	hamCounter := 0
 
-	//Get HotDogs
-	hrows, err1 := db.Query(`SELECT * FROM hot_dogs WHERE USER_ID=? ORDER BY ID;`, theUser.UserID)
-	check(err1)
-	defer hrows.Close()
+	//If no User ID is submitted, then just food for ALL Users
+	if theUser.UserID == 0 {
+		//Get HotDogs
+		hrows, err1 := db.Query(`SELECT * FROM hot_dogs ORDER BY ID;`)
+		check(err1)
+		defer hrows.Close()
 
-	for hrows.Next() {
-		err = hrows.Scan(&h_id, &h_dogType, &h_condiment, &h_calories, &h_hotdogName, &h_userID)
-		check(err) //Check to make sure there was no error doing that above.
-		//Add Hotdog to a new Hotdog and add to slice
-		var newHotDog Hotdog = Hotdog{
-			HotDogType: h_dogType,
-			Condiment:  h_condiment,
-			Calories:   h_calories,
-			Name:       h_hotdogName,
-			UserID:     h_userID,
+		for hrows.Next() {
+			err = hrows.Scan(&h_id, &h_dogType, &h_condiment, &h_calories, &h_hotdogName, &h_userID)
+			check(err) //Check to make sure there was no error doing that above.
+			//Add Hotdog to a new Hotdog and add to slice
+			var newHotDog Hotdog = Hotdog{
+				HotDogType: h_dogType,
+				Condiment:  h_condiment,
+				Calories:   h_calories,
+				Name:       h_hotdogName,
+				UserID:     h_userID,
+			}
+			hotDogSlice = append(hotDogSlice, newHotDog)
+			hotDogIDSlice = append(hotDogIDSlice, h_id)
+
+			dogCounter = dogCounter + 1
 		}
-		hotDogSlice = append(hotDogSlice, newHotDog)
-		hotDogIDSlice = append(hotDogIDSlice, h_id)
 
-		dogCounter = dogCounter + 1
-	}
+		//Get Hamburgers
+		hamrows, err2 := db.Query(`SELECT * FROM hamburgers ORDER BY ID`)
+		check(err2)
+		defer hamrows.Close()
 
-	//Get Hamburgers
-	hamrows, err2 := db.Query(`SELECT * FROM hamburgers WHERE USER_ID=? ORDER BY ID`, theUser.UserID)
-	check(err2)
-	defer hamrows.Close()
-
-	for hamrows.Next() {
-		err = hamrows.Scan(&ham_id, &ham_type, &ham_condiment, &ham_calories, &ham_name, &ham_userID)
-		check(err) //Check to make sure there was no error doing that above.
-		//Add Hamburger to a new Hamburger and add to slice
-		var newHamburger Hamburger = Hamburger{
-			BurgerType: ham_type,
-			Condiment:  ham_condiment,
-			Calories:   ham_calories,
-			Name:       ham_name,
-			UserID:     ham_userID,
+		for hamrows.Next() {
+			err = hamrows.Scan(&ham_id, &ham_type, &ham_condiment, &ham_calories, &ham_name, &ham_userID)
+			check(err) //Check to make sure there was no error doing that above.
+			//Add Hamburger to a new Hamburger and add to slice
+			var newHamburger Hamburger = Hamburger{
+				BurgerType: ham_type,
+				Condiment:  ham_condiment,
+				Calories:   ham_calories,
+				Name:       ham_name,
+				UserID:     ham_userID,
+			}
+			hamburgerSlice = append(hamburgerSlice, newHamburger)
+			hamburgIDSlice = append(hamburgIDSlice, ham_id)
+			hamCounter = hamCounter + 1
 		}
-		hamburgerSlice = append(hamburgerSlice, newHamburger)
-		hamburgIDSlice = append(hamburgIDSlice, ham_id)
-		hamCounter = hamCounter + 1
+	} else {
+		//Get HotDogs
+		hrows, err1 := db.Query(`SELECT * FROM hot_dogs WHERE USER_ID=? ORDER BY ID;`, theUser.UserID)
+		check(err1)
+		defer hrows.Close()
+
+		for hrows.Next() {
+			err = hrows.Scan(&h_id, &h_dogType, &h_condiment, &h_calories, &h_hotdogName, &h_userID)
+			check(err) //Check to make sure there was no error doing that above.
+			//Add Hotdog to a new Hotdog and add to slice
+			var newHotDog Hotdog = Hotdog{
+				HotDogType: h_dogType,
+				Condiment:  h_condiment,
+				Calories:   h_calories,
+				Name:       h_hotdogName,
+				UserID:     h_userID,
+			}
+			hotDogSlice = append(hotDogSlice, newHotDog)
+			hotDogIDSlice = append(hotDogIDSlice, h_id)
+
+			dogCounter = dogCounter + 1
+		}
+
+		//Get Hamburgers
+		hamrows, err2 := db.Query(`SELECT * FROM hamburgers WHERE USER_ID=? ORDER BY ID`, theUser.UserID)
+		check(err2)
+		defer hamrows.Close()
+
+		for hamrows.Next() {
+			err = hamrows.Scan(&ham_id, &ham_type, &ham_condiment, &ham_calories, &ham_name, &ham_userID)
+			check(err) //Check to make sure there was no error doing that above.
+			//Add Hamburger to a new Hamburger and add to slice
+			var newHamburger Hamburger = Hamburger{
+				BurgerType: ham_type,
+				Condiment:  ham_condiment,
+				Calories:   ham_calories,
+				Name:       ham_name,
+				UserID:     ham_userID,
+			}
+			hamburgerSlice = append(hamburgerSlice, newHamburger)
+			hamburgIDSlice = append(hamburgIDSlice, ham_id)
+			hamCounter = hamCounter + 1
+		}
 	}
 
 	//Check to see if we have any data to submit
@@ -214,8 +263,6 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println("There's an error marshalling.")
 	}
-
-	fmt.Printf("DEBUG: ID_Hamburgers:\n%v", sendData.ID_Hamburgers)
 
 	fmt.Fprintf(w, string(dataJSON))
 }

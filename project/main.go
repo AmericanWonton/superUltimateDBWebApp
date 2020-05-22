@@ -52,6 +52,7 @@ type Hamburger struct {
 type ViewData struct {
 	User     User
 	UserName string
+	Role     string
 }
 
 //Here's our session struct
@@ -77,6 +78,7 @@ var template1 *template.Template
 /* FUNCMAP DEFINITION */
 func (u User) ReturnRoleUser(theUser string) bool {
 	if strings.Compare(theUser, "user") == 0 {
+		fmt.Printf("DEBUG: WE ARE IN RETURN TRUE USER")
 		return true
 	} else {
 		return false
@@ -85,6 +87,7 @@ func (u User) ReturnRoleUser(theUser string) bool {
 
 func (u User) ReturnRoleAdmin(theAdmin string) bool {
 	if strings.Compare(theAdmin, "admin") == 0 {
+		fmt.Printf("DEBUG: WE ARE IN RETURN TRUE ADMIN")
 		return true
 	} else {
 		return false
@@ -123,7 +126,6 @@ func HandleError(w http.ResponseWriter, err error) {
 //Home page
 func homePage(w http.ResponseWriter, r *http.Request) {
 	aUser := getUser(w, r) //Get the User, if they exist
-	//if User is already logged in, bring them to the mainPage!
 
 	//If a User posts a form to log in!
 	//Search for Users in Database, send JSON version of User
@@ -132,7 +134,6 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 		//Query database for those username and password
-		fmt.Printf("DEBUG: Finding User in database with Username, %v\n", username)
 		rows, err := db.Query(`SELECT * FROM users WHERE USERNAME = ?;`, username)
 		check(err)
 		defer rows.Close()
@@ -309,8 +310,9 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 //mainPage
 func mainPage(w http.ResponseWriter, req *http.Request) {
 	//if User is already logged in, bring them to the mainPage!
-	aUser := getUser(w, req)              //Get the User, if they exist
-	vd := ViewData{aUser, aUser.UserName} //POSSIBLY DEBUG
+	aUser := getUser(w, req) //Get the User, if they exist
+	aUserRole := aUser.Role
+	vd := ViewData{aUser, aUser.UserName, aUserRole}
 	if !alreadyLoggedIn(w, req) {
 		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
@@ -367,28 +369,6 @@ func getHotDogSingular(w http.ResponseWriter, req *http.Request) {
 		id, theUser, dogType, condiment, calories, hotdogName, userID)
 }
 
-func getHotDogsAll(w http.ResponseWriter, req *http.Request) {
-	rows, err := db.Query(`SELECT TYPE FROM hot_dogs;`)
-	check(err)
-	defer rows.Close()
-	// data to be used in query
-	var s, name string
-	s = "RETRIEVED RECORDS:\n"
-
-	// query
-	/* From the documentation, Next returns the next row in the line of rows we asked for from the 'rows' variable above.
-	It returns false if there's no row up next, (so basically, it's really good for loops) */
-	for rows.Next() {
-		/* Scan copies the columns in the current row and copies them to a destination. So we set the destination,
-		(that 'name' string variable above), and point it to that */
-		err = rows.Scan(&name)
-		check(err)       //Check to make sure there was no error doing that above.
-		s += name + "\n" //We keep adding the name returned and a newline for printing later.
-	}
-
-	fmt.Printf("Here's the records, fucker: \n%v\n", s)
-}
-
 func handleRequests() {
 
 	myRouter := mux.NewRouter().StrictSlash(true)
@@ -402,7 +382,6 @@ func handleRequests() {
 	myRouter.HandleFunc("/updateFood", updateFood).Methods("POST")            //Update a certain food item
 	myRouter.HandleFunc("/insertHotDog", insertHotDog).Methods("POST")        //Post a hotdog!
 	myRouter.HandleFunc("/insertHamburger", insertHamburger).Methods("POST")  //Post a hamburger!
-	myRouter.HandleFunc("/scadoop", getHotDogsAll).Methods("GET")             //Get ALL Hotdogs!
 	myRouter.HandleFunc("/getAllFoodUser", getAllFoodUser).Methods("POST")    //Get all foods for a User ID
 	myRouter.HandleFunc("/getHDogSingular", getHotDogSingular).Methods("GET") //Get a SINGULAR hotdog
 	//Validation Stuff
@@ -423,44 +402,6 @@ func main() {
 
 	err = db.Ping()
 	check(err)
-	/* DEBUG
-	elHotDog := Hotdog{
-		"dogtype",
-		"condiment",
-		650,
-		"Name",
-		38298457,
-	}
-
-	q, err := json.Marshal(elHotDog)
-	if err != nil {
-		fmt.Println("There's an error marshalling.")
-	}
-	fmt.Printf("Here's our JSON: %v\n", string(q))
-	*/
-	/*
-		quotes := "quatation marks"
-		bigPeener := "Here's my\"" + quotes + "\""
-		fmt.Println(bigPeener)
-	*/
-	/* DEBUG
-	bs, err := bcrypt.GenerateFromPassword([]byte("pWord2"), bcrypt.MinCost)
-	if err != nil {
-		return
-	}
-	fmt.Printf("Our hashed password is: %v\n", bs)
-
-	err2 := bcrypt.CompareHashAndPassword(bs, []byte("pWord2"))
-	if err != nil {
-		return
-	}
-	fmt.Printf("Err2 is %v\n", err2)
-
-	theBSString := string(bs)
-	fmt.Printf("Here's our byte array as a string:\n%v\n", theBSString)
-	theStringBS := []byte(theBSString)
-	fmt.Printf("Here's our string BS back to a BS: \n%v\n", theStringBS)
-	*/
 
 	//Handle Requests
 	handleRequests()

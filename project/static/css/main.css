@@ -102,6 +102,12 @@
     height: 10vh;
 }
 
+#actionInstructionButton2 {
+    font-size: 1rem;
+    width: 10vw;
+    height: 10vh;
+}
+
 #actionChoice {
     width: 5vw;
     height: 5vh;
