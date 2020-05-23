@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
@@ -76,6 +77,7 @@ const sessionLength int = 180 //Length of sessions
 var template1 *template.Template
 
 /* FUNCMAP DEFINITION */
+/* DEBUG, I'M NOT SURE IF WE NEED THESE RETURN ROLE USERS */
 func (u User) ReturnRoleUser(theUser string) bool {
 	if strings.Compare(theUser, "user") == 0 {
 		fmt.Printf("DEBUG: WE ARE IN RETURN TRUE USER")
@@ -235,7 +237,6 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		dbSessions[newCookie.Value] = session{username, time.Now()}
 		// store user in dbUsers
 		//Make User and USERID
-		fmt.Println("DEBUG: Getting good, unique, UserID")
 		goodNum := false
 		theID := 0
 		row, err := db.Query(`SELECT user_id FROM users;`)
@@ -281,18 +282,30 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		}
 		fmt.Println("Adding User data to database")
 		//Add User to the SQL Database
-		stmt, err := db.Prepare("INSERT INTO users(USERNAME, PASSWORD, FIRSTNAME, LASTNAME, ROLE, USER_ID) VALUES(?,?,?,?,?,?)")
-		defer stmt.Close()
+		/*
+			stmt, err := db.Prepare("INSERT INTO users(USERNAME, PASSWORD, FIRSTNAME, LASTNAME, ROLE, USER_ID) VALUES(?,?,?,?,?,?)")
+			defer stmt.Close()
+		*/
 		bsString := []byte(password)                  //Encode Password
 		encodedString := hex.EncodeToString(bsString) //Encode Password Pt2
-		fmt.Printf("DEBUG: We are encoding our byte slice to a string: %v\n", encodedString)
-		r, err := stmt.Exec(username, encodedString, firstname, lastname, role, theID)
-		check(err)
+		var insertedUser User = User{
+			UserName: username,
+			Password: encodedString,
+			First:    firstname,
+			Last:     lastname,
+			Role:     role,
+			UserID:   theID,
+		}
+		jsonValue, _ := json.Marshal(insertedUser)
+		response, err := http.Post("http://localhost:8080/insertUser", "application/json", bytes.NewBuffer(jsonValue))
+		if err != nil {
+			fmt.Printf("The HTTP request failed with error %s\n", err)
+		} else {
+			data, _ := ioutil.ReadAll(response.Body)
+			fmt.Println(string(data))
 
-		n, err := r.RowsAffected()
-		check(err)
+		}
 
-		fmt.Printf("Inserted Record: %v\n", n)
 		//DEBUG, don't know if we need below
 		theUser = User{username, encodedString, firstname, lastname, role, theID}
 		dbUsers[username] = theUser
@@ -384,6 +397,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/insertHamburger", insertHamburger).Methods("POST")  //Post a hamburger!
 	myRouter.HandleFunc("/getAllFoodUser", getAllFoodUser).Methods("POST")    //Get all foods for a User ID
 	myRouter.HandleFunc("/getHDogSingular", getHotDogSingular).Methods("GET") //Get a SINGULAR hotdog
+	myRouter.HandleFunc("/insertUser", insertUser).Methods("POST")            //Post a User!
 	//Validation Stuff
 	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
 	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames

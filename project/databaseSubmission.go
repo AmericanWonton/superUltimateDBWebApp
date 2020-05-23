@@ -43,7 +43,12 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Fprint(w, failureMessage)
 	} else {
-		fmt.Fprint(w, successMessage)
+		hDogMarshaled, err := json.Marshal(postedHotDog)
+		if err != nil {
+			fmt.Printf("Error with %v\n", hDogMarshaled)
+		}
+		hDogSuccessMSG := successMessage + string(hDogMarshaled)
+		fmt.Fprint(w, hDogSuccessMSG)
 	}
 }
 
@@ -82,7 +87,12 @@ func insertHamburger(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Fprint(w, failureMessage)
 	} else {
-		fmt.Fprint(w, successMessage)
+		hamMarshaled, err := json.Marshal(postedHamburger)
+		if err != nil {
+			fmt.Printf("Error with %v\n", hamMarshaled)
+		}
+		hamSuccessMSG := successMessage + string(hamMarshaled)
+		fmt.Fprint(w, hamSuccessMSG)
 	}
 }
 
@@ -384,4 +394,32 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 	} else {
 		fmt.Fprintln(w, 3)
 	}
+}
+
+//Insert User
+func insertUser(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("Inserting User record.")
+	//Collect JSON from Postman or wherever
+	//Get the byte slice from the request body ajax
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//Marshal it into our type
+	var postedUser User
+	json.Unmarshal(bs, &postedUser)
+
+	//Add User to the SQL Database
+	stmt, err := db.Prepare("INSERT INTO users(USERNAME, PASSWORD, FIRSTNAME, LASTNAME, ROLE, USER_ID) VALUES(?,?,?,?,?,?)")
+	defer stmt.Close()
+
+	r, err := stmt.Exec(postedUser.UserName, postedUser.Password, postedUser.First,
+		postedUser.Last, postedUser.Role, postedUser.UserID)
+	check(err)
+
+	n, err := r.RowsAffected()
+	check(err)
+
+	fmt.Printf("Inserted Record: %v\n", n)
 }
