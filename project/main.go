@@ -24,12 +24,12 @@ import (
 
 //Here's our User struct
 type User struct {
-	UserName string
-	Password string //This was formally a []byte but we are changing our code to fit the database better
-	First    string
-	Last     string
-	Role     string
-	UserID   int
+	UserName string `json:"UserName"`
+	Password string `json:"Password"` //This was formally a []byte but we are changing our code to fit the database better
+	First    string `json:"First"`
+	Last     string `json:"Last"`
+	Role     string `json:"Role"`
+	UserID   int    `json:"UserID"`
 }
 
 //Below is our struct for Hotdogs/Hamburgers
@@ -51,9 +51,9 @@ type Hamburger struct {
 
 //Here is our ViewData struct
 type ViewData struct {
-	User     User
-	UserName string
-	Role     string
+	User     User   `json:"User"`
+	UserName string `json:"UserName"`
+	Role     string `json:"Role"`
 }
 
 //Here's our session struct
@@ -334,54 +334,6 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 	HandleError(w, err1)
 }
 
-//GET mainpage
-func getHotDogSingular(w http.ResponseWriter, req *http.Request) {
-	//Get the string map of our variables from the request
-	fmt.Println("Finding hotdog singular")
-	//Collect JSON from Postman or wherever
-	reqBody, _ := ioutil.ReadAll(req.Body)
-	fmt.Printf("Here's our body: \n%v\n", reqBody)
-	//Marshal it into our type
-	var postedHotDog Hotdog
-	json.Unmarshal(reqBody, &postedHotDog)
-	fmt.Printf("Here is our postedHotDog: %v\n", postedHotDog)
-
-	rows, err := db.Query(`SELECT * FROM hot_dogs WHERE NAME = 'HOT_AND_READY';`)
-	check(err)
-	defer rows.Close()
-	var id int64
-	var theUser string
-	var dogType string
-	var condiment string
-	var calories int
-	var hotdogName string
-	var userID string
-	count := 0
-	for rows.Next() {
-		err = rows.Scan(&id, &theUser, &dogType, &condiment, &calories, &hotdogName, &userID)
-		check(err)
-		fmt.Printf("Retrieved Record: %v\n", hotdogName)
-		count++
-	}
-	//If nothing returned from the rows
-	if count == 0 {
-		fmt.Printf("Nothing returned for this query.\n")
-		return
-	} else {
-		//Assign the returned name to our object
-		fmt.Printf("Hotdog name is: %v\n", hotdogName)
-		//Compare to see if the name matches the name we posted
-		if strings.Compare(postedHotDog.Name, hotdogName) == 0 {
-			fmt.Printf("Hey, our query %v matches our posted JSON, %v \n", hotdogName, postedHotDog.Name)
-		} else {
-			fmt.Printf("Whooops, our query, %v, does not match our JSON, %v\n", hotdogName, postedHotDog.Name)
-		}
-	}
-	//DEBUG, need to see how rows are returned.
-	fmt.Printf("Here is our rows returned:\nID:%v\nTheUser:%v\nDog Type:%v\nCondiment:%v\nCalories:%v\nHotdogname:%v\nuserID: %v\n",
-		id, theUser, dogType, condiment, calories, hotdogName, userID)
-}
-
 func handleRequests() {
 
 	myRouter := mux.NewRouter().StrictSlash(true)
@@ -392,12 +344,15 @@ func handleRequests() {
 	myRouter.HandleFunc("/mainPage", mainPage)
 	//Database Stuff
 	myRouter.HandleFunc("/deleteFood", deleteFood).Methods("POST")
-	myRouter.HandleFunc("/updateFood", updateFood).Methods("POST")            //Update a certain food item
-	myRouter.HandleFunc("/insertHotDog", insertHotDog).Methods("POST")        //Post a hotdog!
-	myRouter.HandleFunc("/insertHamburger", insertHamburger).Methods("POST")  //Post a hamburger!
-	myRouter.HandleFunc("/getAllFoodUser", getAllFoodUser).Methods("POST")    //Get all foods for a User ID
-	myRouter.HandleFunc("/getHDogSingular", getHotDogSingular).Methods("GET") //Get a SINGULAR hotdog
-	myRouter.HandleFunc("/insertUser", insertUser).Methods("POST")            //Post a User!
+	myRouter.HandleFunc("/updateFood", updateFood).Methods("POST")           //Update a certain food item
+	myRouter.HandleFunc("/insertHotDog", insertHotDog).Methods("POST")       //Post a hotdog!
+	myRouter.HandleFunc("/insertHamburger", insertHamburger).Methods("POST") //Post a hamburger!
+	myRouter.HandleFunc("/getAllFoodUser", getAllFoodUser).Methods("POST")   //Get all foods for a User ID
+	myRouter.HandleFunc("/getHotDog", getHotDog).Methods("GET")              //Get a SINGULAR hotdog
+	myRouter.HandleFunc("/insertUser", insertUser).Methods("POST")           //Post a User!
+	myRouter.HandleFunc("/getUsers", getUsers).Methods("GET")                //Get a Users!
+	myRouter.HandleFunc("/updateUsers", updateUsers).Methods("POST")         //Get a Users!
+	myRouter.HandleFunc("/deleteUsers", deleteUsers).Methods("POST")         //DELETE a Users!
 	//Validation Stuff
 	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
 	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames

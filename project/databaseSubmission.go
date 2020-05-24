@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -52,7 +53,108 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-//POST hotdog, Mainpage
+//GET HOTDOGS
+func getHotDog(w http.ResponseWriter, req *http.Request) {
+	//Get the string map of our variables from the request
+	fmt.Println("Finding hotdog singular")
+	//Collect JSON from Postman or wherever
+	reqBody, _ := ioutil.ReadAll(req.Body)
+	fmt.Printf("Here's our body: \n%v\n", reqBody)
+	//Marshal it into our type
+	var postedHotDog Hotdog
+	var hotDogSlice []Hotdog
+	json.Unmarshal(reqBody, &postedHotDog)
+	stmt := "SELECT * FROM hot_dogs WHERE NAME = ?"
+	rows, err := db.Query(stmt, postedHotDog.Name)
+	check(err)
+	defer rows.Close()
+	var id int64
+	var dogType string
+	var condiment string
+	var calories int
+	var hotdogName string
+	var userID int
+	count := 0
+	for rows.Next() {
+		err = rows.Scan(&id, &dogType, &condiment, &calories, &hotdogName, &userID)
+		check(err)
+		//Add the hotdog to the slice list
+		returnedHotDog := Hotdog{
+			HotDogType: dogType,
+			Condiment:  condiment,
+			Calories:   calories,
+			Name:       hotdogName,
+			UserID:     userID,
+		}
+		hotDogSlice = append(hotDogSlice, returnedHotDog)
+		count++
+	}
+	//If nothing returned from the rows
+	if count == 0 {
+		fmt.Fprint(w, "Nothing returned for this query.")
+		return
+	} else {
+		//Marshal our return message to JSON
+		hDogsMarshaled, err := json.Marshal(hotDogSlice)
+		if err != nil {
+			fmt.Printf("Error with %v\n", hDogsMarshaled)
+			fmt.Fprint(w, "Error returned for this marshalling.")
+		}
+		fmt.Fprint(w, hDogsMarshaled)
+	}
+}
+
+//DELETE hotdog
+func deleteFood(w http.ResponseWriter, req *http.Request) {
+	type foodDeletion struct {
+		FoodType string `json:"FoodType"`
+		FoodID   int    `json:"FoodID"`
+	}
+	//Unwrap from JSON
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//Marshal it into our type
+	var theFoodDeletion foodDeletion
+	json.Unmarshal(bs, &theFoodDeletion)
+
+	//Determine if this is a hotdog or hamburger deletion
+	sqlStatement := ""
+	if theFoodDeletion.FoodType == "hotdog" {
+		sqlStatement = "DELETE FROM hot_dogs WHERE ID=?"
+		delDog, err := db.Prepare(sqlStatement)
+		check(err)
+
+		r, err := delDog.Exec(theFoodDeletion.FoodID)
+		check(err)
+
+		n, err := r.RowsAffected()
+		check(err)
+
+		fmt.Printf("%v\n", n)
+
+		fmt.Fprintln(w, 1)
+	} else if theFoodDeletion.FoodType == "hamburger" {
+		sqlStatement = "DELETE FROM hamburgers WHERE ID=?"
+		delDog, err := db.Prepare(sqlStatement)
+		check(err)
+
+		r, err := delDog.Exec(theFoodDeletion.FoodID)
+		check(err)
+
+		n, err := r.RowsAffected()
+		check(err)
+
+		fmt.Printf("%v\n", n)
+
+		fmt.Fprintln(w, 2)
+	} else {
+		fmt.Fprintln(w, 3)
+	}
+}
+
+//INSERT HOTDOG
 func insertHamburger(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Inserting hamburger record.")
 	//Collect JSON from Postman or wherever
@@ -96,7 +198,7 @@ func insertHamburger(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-//GET all Food, Mainpage
+//GET all Food
 func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	//Get the byte slice from the request
 	bs, err := ioutil.ReadAll(req.Body)
@@ -277,56 +379,6 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, string(dataJSON))
 }
 
-//DELETE hotdog
-func deleteFood(w http.ResponseWriter, req *http.Request) {
-	type foodDeletion struct {
-		FoodType string `json:"FoodType"`
-		FoodID   int    `json:"FoodID"`
-	}
-	//Unwrap from JSON
-	bs, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		fmt.Println(err)
-	}
-	//Marshal it into our type
-	var theFoodDeletion foodDeletion
-	json.Unmarshal(bs, &theFoodDeletion)
-
-	//Determine if this is a hotdog or hamburger deletion
-	sqlStatement := ""
-	if theFoodDeletion.FoodType == "hotdog" {
-		sqlStatement = "DELETE FROM hot_dogs WHERE ID=?"
-		delDog, err := db.Prepare(sqlStatement)
-		check(err)
-
-		r, err := delDog.Exec(theFoodDeletion.FoodID)
-		check(err)
-
-		n, err := r.RowsAffected()
-		check(err)
-
-		fmt.Printf("%v\n", n)
-
-		fmt.Fprintln(w, 1)
-	} else if theFoodDeletion.FoodType == "hamburger" {
-		sqlStatement = "DELETE FROM hamburgers WHERE ID=?"
-		delDog, err := db.Prepare(sqlStatement)
-		check(err)
-
-		r, err := delDog.Exec(theFoodDeletion.FoodID)
-		check(err)
-
-		n, err := r.RowsAffected()
-		check(err)
-
-		fmt.Printf("%v\n", n)
-
-		fmt.Fprintln(w, 2)
-	} else {
-		fmt.Fprintln(w, 3)
-	}
-}
-
 //UPDATE FOOD
 func updateFood(w http.ResponseWriter, req *http.Request) {
 
@@ -345,7 +397,6 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 	//Marshal it into our type
 	var thefoodUpdate foodUpdate
 	json.Unmarshal(bs, &thefoodUpdate)
-	fmt.Printf("DEBUG:\n%v\n", thefoodUpdate)
 
 	sqlStatement := ""
 
@@ -372,7 +423,6 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintln(w, 1)
 
 	} else if thefoodUpdate.FoodType == "hamburger" {
-		fmt.Printf("DEBUG: Updating a hamburger at spot: %v\n", thefoodUpdate.FoodID)
 		var updatedHamburger Hamburger = thefoodUpdate.TheHamburger
 		sqlStatement = "UPDATE hamburgers SET TYPE=?, CONDIMENT=?, CALORIES=?," +
 			"NAME=?, USER_ID=? WHERE ID=?"
@@ -396,7 +446,7 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-//Insert User
+//INSERT USER(s)
 func insertUser(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Inserting User record.")
 	//Collect JSON from Postman or wherever
@@ -422,4 +472,161 @@ func insertUser(w http.ResponseWriter, req *http.Request) {
 	check(err)
 
 	fmt.Printf("Inserted Record: %v\n", n)
+}
+
+//GET USER(S)
+func getUsers(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("Getting User record(s).")
+	//Define the JSON submitted
+	type UserCollection struct {
+		UserIDs []int `json:"UserIDs"`
+	}
+	//Define data returned
+	type userReturned struct {
+		DBID     int    `json:"DBID"`
+		UserName string `json:"UserName"`
+		Password string `json:"Password"` //This was formally a []byte but we are changing our code to fit the database better
+		First    string `json:"First"`
+		Last     string `json:"Last"`
+		Role     string `json:"Role"`
+		UserID   int    `json:"UserID"`
+	}
+	//Collect JSON from Postman or wherever
+	//Get the byte slice from the request body ajax
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//Marshal it into our type
+	var postedUserIDs UserCollection
+	json.Unmarshal(bs, &postedUserIDs)
+	theIDS := postedUserIDs.UserIDs //Get all the IDS into an easier to read variable
+
+	//Assign variables to construct our Users into
+	var theReturnedUsers []userReturned
+	var aUser userReturned
+	//Query to get all the User IDs in database from slice of UserIDs
+	for x := 0; x < len(theIDS); x++ {
+		anID := theIDS[x] //Assign 1 ID to a variable
+		//Run Query on that ID
+		stmt := "SELECT * FROM users WHERE USER_ID = ?"
+		rows, err := db.Query(stmt, anID)
+		check(err)
+		defer rows.Close()
+
+		//Get User returned
+		for rows.Next() {
+			err = rows.Scan(&aUser.DBID, &aUser.UserName, &aUser.Password,
+				&aUser.First, &aUser.Last, &aUser.Role, &aUser.UserID)
+			check(err)
+			theReturnedUsers = append(theReturnedUsers, aUser)
+		}
+	}
+
+	//Check to see if theReturnedUsers got nothing; else, send the full JSON
+	if len(theReturnedUsers) <= 0 {
+		fmt.Printf("No Users returned\n")
+		theJSONMessage, err := json.Marshal(theReturnedUsers)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Fprint(w, string(theJSONMessage))
+	} else {
+		theJSONMessage, err := json.Marshal(theReturnedUsers)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Fprint(w, string(theJSONMessage))
+	}
+}
+
+//UPDATE USER(S)
+func updateUsers(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("Updating User record(s).")
+	//Define the JSON submitted
+	type UserCollection struct {
+		TheUsers []User `json:"UserIDs"`
+	}
+
+	//Collect JSON from Postman or wherever
+	//Get the byte slice from the request body ajax
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//Marshal it into our type
+	var submittedUsers UserCollection
+	json.Unmarshal(bs, &submittedUsers)
+
+	returnedString := "" //TheJSon string to return
+	//Update the Users from the gotten UserID
+	for x := 0; x < len(submittedUsers.TheUsers); x++ {
+		anID := submittedUsers.TheUsers[x].UserID //Assign 1 ID to a variable
+		//Run Query on that ID
+		stmt := "UPDATE users SET USERNAME=?, PASSWORD=?, FIRSTNAME=?, LASTNAME=?, ROLE=?" +
+			" WHERE USER_ID=?"
+		theStmt, err := db.Prepare(stmt)
+		check(err)
+		defer theStmt.Close()
+
+		r, err := theStmt.Exec(submittedUsers.TheUsers[x].UserName, submittedUsers.TheUsers[x].Password,
+			submittedUsers.TheUsers[x].First, submittedUsers.TheUsers[x].Last,
+			submittedUsers.TheUsers[x].Role, anID)
+		check(err)
+
+		n, err := r.RowsAffected()
+		check(err)
+
+		returnedString = returnedString + " " + "updated at ID " + string(anID) + " " + string(n)
+	}
+
+	//Return the JSON Message
+	theJSONMessage, err := json.Marshal(returnedString)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Fprint(w, string(theJSONMessage))
+}
+
+//DELETE USER(S)
+func deleteUsers(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("DELETING User record(s).")
+	//Define the JSON submitted
+	type UserCollection struct {
+		UserIDs []int `json:"UserIDs"`
+	}
+
+	//Collect JSON from Postman or wherever
+	//Get the byte slice from the request body ajax
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//Marshal it into our type
+	var postedUserIDs UserCollection
+	json.Unmarshal(bs, &postedUserIDs)
+	theIDS := postedUserIDs.UserIDs //Get all the IDS into an easier to read variable
+	//Query to get all the User IDs in database from slice of UserIDs to delete
+	for x := 0; x < len(theIDS); x++ {
+		anID := theIDS[x] //Assign 1 ID to a variable
+		//Run Query on that ID
+		stmt := "DELETE FROM users WHERE USER_ID = ?"
+		rows, err := db.Query(stmt, anID)
+		check(err)
+		defer rows.Close()
+	}
+	//Return the JSON response
+	returnString := "We deleted the following: "
+	for y := 0; y < len(theIDS); y++ {
+		theStringID := strconv.Itoa(theIDS[y])
+		returnString = returnString + " " + theStringID + " "
+	}
+	theJSONMessage, err := json.Marshal(returnString)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Fprint(w, string(theJSONMessage))
 }
