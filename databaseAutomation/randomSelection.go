@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/hex"
+	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -87,4 +89,43 @@ func randomUsername(fName string, lName string) string {
 	ourUsername := ""
 	ourUsername = ourUsername + string(fName[0:3]) + string(lName[0:3]) + "2020"
 	return ourUsername
+}
+
+func createUserID() int {
+	//Make User and USERID
+	goodNum := false
+	theID := 0
+
+	for goodNum == false {
+		//Build the random, unique integer to be assigned to this User
+		randInt := 0                 //The random integer added onto ID
+		randIntString := ""          //The integer built through a string...
+		useridmin, useridmax := 0, 9 //The min and Max value for our randInt
+		var idCount int              //A count of how many times our ID is in the database
+		for i := 0; i < 8; i++ {
+			randInt = rand.Intn(useridmax-useridmin) + useridmin
+			randIntString = randIntString + strconv.Itoa(randInt)
+		}
+		theID, err = strconv.Atoi(randIntString)
+		if err != nil {
+			fmt.Println(err)
+			idCount = 2
+		}
+		//Check to see if ID is in database
+		row, err := db.Query("SELECT user_id FROM users WHERE USER_ID=?;", theID)
+		check(err)
+		defer row.Close()
+
+		for row.Next() {
+			idCount = idCount + 1
+		}
+
+		if idCount >= 1 {
+			goodNum = false
+		} else {
+			goodNum = true
+		}
+	}
+
+	return theID
 }

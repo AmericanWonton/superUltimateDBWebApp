@@ -39,8 +39,6 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 	n, err := r.RowsAffected()
 	check(err)
 
-	fmt.Printf("DEBUG: %v rows effected.\n", n)
-
 	if err != nil {
 		fmt.Fprint(w, failureMessage)
 	} else {
@@ -48,7 +46,7 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			fmt.Printf("Error with %v\n", hDogMarshaled)
 		}
-		hDogSuccessMSG := successMessage + string(hDogMarshaled)
+		hDogSuccessMSG := successMessage + string(hDogMarshaled) + string(n)
 		fmt.Fprint(w, hDogSuccessMSG)
 	}
 }
@@ -184,8 +182,6 @@ func insertHamburger(w http.ResponseWriter, req *http.Request) {
 	n, err := r.RowsAffected()
 	check(err)
 
-	fmt.Printf("DEBUG: %v rows effected.\n", n)
-
 	if err != nil {
 		fmt.Fprint(w, failureMessage)
 	} else {
@@ -193,7 +189,7 @@ func insertHamburger(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			fmt.Printf("Error with %v\n", hamMarshaled)
 		}
-		hamSuccessMSG := successMessage + string(hamMarshaled)
+		hamSuccessMSG := successMessage + string(hamMarshaled) + string(n)
 		fmt.Fprint(w, hamSuccessMSG)
 	}
 }
@@ -471,7 +467,9 @@ func insertUser(w http.ResponseWriter, req *http.Request) {
 	n, err := r.RowsAffected()
 	check(err)
 
-	fmt.Printf("Inserted Record: %v\n", n)
+	theMessage := "Inserted User Record" + string(n)
+
+	fmt.Fprint(w, theMessage)
 }
 
 //GET USER(S)

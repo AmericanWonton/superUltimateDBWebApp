@@ -12,9 +12,12 @@
     {{/* Here are our Media Query and stylesheets */}}
     {{template "media-queries"}}
     {{/* Here is our Javascript or additional code needed */}}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
 </head>
 <body>
-
+    {{/* Greetings and Signup Instructions */}}
+    {{template "signup2"}}
     {{/* Here's the form to sign up */}}
     {{template "signup-form"}}
     {{/* Here's the AJAX to handle our form validation */}}

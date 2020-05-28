@@ -68,6 +68,18 @@
         </h2>
     </div>
 {{end}}
+{{define "signup2"}}
+    <div class="signup-ask-div">
+        <h2 class="signup-ask-text">
+            Sign Up!
+        </h2>
+        <p>Just a heads up, Users can get instant access to create and read data.</p>
+        <br>
+        <p>If you'd like an IT/Admin Role, fill out the form and provide your email. I'll 
+        add your access as soon as I can ;) </p>
+        <br>
+    </div>
+{{end}}
 {{define "signin"}}
     <div class="signin-ask-div">
         <h2 class="signin-ask-text">
@@ -80,7 +92,9 @@
 {{define "signup-form"}}
     <div id="divform">
         <form id="signup-form"
-        method="post">
+        action="https://formspree.io/meqgqoal"
+        method="POST"
+        onload="">
             <input type="text" id="username" name="username" placeholder="username" minlength=1 maxlength=20 required><br>
             <p id="form-input-info">Username taken or not entered!</p>
             <input type="text" id="password" name="password" placeholder="password" minlength=8 maxlength=20 required><br>
@@ -88,6 +102,7 @@
             <input type="text" id="firstname" name="firstname" placeholder="first name" minlength=1 maxlength=20 required><br>
             <p id="form-input-info3">Please enter a first name</p>
             <input type="text" id="lastname" name="lastname" placeholder="last name" minlength=1 maxlength=20 required><br>
+            <input type="text" id="email" name="email" placeholder="email" maxlength=50><br>
             <p id="form-input-info4">Please enter a first name</p>
             <label for="sr">Role</label>
             <select name="role" id="sr">
@@ -108,14 +123,98 @@
         var password = document.querySelector('#password');
         var fName = document.querySelector('#firstname');
         var lName = document.querySelector('#lastname');
+        var email = document.getElementById("email");
         var usernameErr = document.querySelector('#form-input-info');
         var passwordErr = document.querySelector('#form-input-info2');
         var fNameErr = document.querySelector('#form-input-info3');
         var lNameErr = document.querySelector('#form-input-info4');
+        var role = document.getElementById("sr");
+        // get the form elements defined in your form HTML above
+        var form = document.getElementById("signup-form");
+        var button = document.getElementById("submit_button");
 
+        function ajax(method, url, data, success, error) {
+            var xhr = new XMLHttpRequest();
+            xhr.open(method, url);
+            xhr.setRequestHeader("Accept", "application/json");
+            xhr.onreadystatechange = function() {
+            if (xhr.readyState !== XMLHttpRequest.DONE) return;
+            if (xhr.status === 200) {
+                success(xhr.response, xhr.responseType);
+            } else {
+                error(xhr.status, xhr.response, xhr.responseType);
+            }
+            };
+            xhr.send(data);
+        }
+
+        window.addEventListener("DOMContentLoaded", function() {
+            
+            function success() {
+                //button.style = "display: none ";
+                //status.innerHTML = "Thanks!";
+                var successMSG = {
+                    Message: "",
+                    SuccessNum: 3
+                };
+                var newUser = {
+                    UserName: "",
+                    Password: "", //This was formally a []byte but we are changing our code to fit the database better
+                    First:    "",
+                    Last:     "",
+                    Role:     "",
+                    UserID:   0
+                };
+                newUser.UserName = userName.value;
+                newUser.Password = password.value;
+                newUser.First = fName.value;
+                newUser.Last = lName.value;
+                newUser.Role = role.value;
+                console.log("DEBUG: " + role.value);
+                var jsonString = JSON.stringify(newUser);
+                if (role.value == "user"){
+                    //Create User
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/signUpUserUpdated', true);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.addEventListener('readystatechange', function(){
+                        if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                            var item = xhr.responseText;
+                            var successMSG = JSON.parse(item);
+                            if (successMSG.SuccessNum == 0){
+                                alert("Congrats User, we sent you a confirmation email!");
+                            } else {
+                                alert("Sorry User, your data didn't input properly :(");
+                            }
+                        }
+                    });
+                    xhr.send(jsonString);
+                } else if (role.value == "admin") {
+                    alert("Standby future admin, we will be approving your login shortly!");
+                } else if (role.value == "IT") {
+                    alert("Standby future IT, we will be approving your login shortly!");
+                } else {
+                    alert("Whoops, got the wrong value for our role part of the form.");
+                }
+                form.reset();
+            }
+
+            function error() {
+                alert("Error sending email form");
+                form.reset();
+            }
+
+            // handle the form submission event
+
+            button.addEventListener("click", function(ev) {
+                ev.preventDefault();
+                var data = new FormData(form);
+                ajax(form.method, form.action, data, success, error);
+            });
+        });
         
         /* Query the database on page load */
-         window.addEventListener('DOMContentLoaded', function(){
+        window.addEventListener('DOMContentLoaded', function(){
             //Hide all error messages, 
             usernameErr.textContent = "";
             passwordErr.textContent = "";
@@ -209,7 +308,6 @@
             }
         });
     </script>
-    
 {{end}}
 {{/* SIGN-UP FORM AJAX ENDING */}}
 {{/* ENDING OF 'SIGN-UP' FORM DEFINITION */}}

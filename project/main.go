@@ -209,23 +209,33 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
 	}
-	//If User is NOT already logged in, wait till they post a form!
-	var theUser User
-	// process form submission
+
+	err1 := template1.ExecuteTemplate(w, "signup.gohtml", nil)
+	HandleError(w, err1)
+
+	fmt.Printf("Signup Endpoint Hit\n")
+}
+
+func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
+	// process Ajax ping
 	if req.Method == http.MethodPost {
-		// get form values
-		username := req.FormValue("username")
-		password := req.FormValue("password")
-		firstname := req.FormValue("firstname")
-		lastname := req.FormValue("lastname")
-		role := req.FormValue("role")
-		// username taken?
-		/* We have field validation with Ajax...do we need this?
-		if _, ok := dbUsers[username]; ok {
-			http.Error(w, "Username already taken", http.StatusForbidden)
-			return
+		fmt.Println("DEBUG: We got the Ajax and are inserting the User.")
+		//Collect JSON from Postman or wherever
+		//Get the byte slice from the request body ajax
+		bs, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			fmt.Println(err)
 		}
-		*/
+
+		//Marshal it into our type
+		var postedUser User
+		json.Unmarshal(bs, &postedUser)
+		// get form values
+		username := postedUser.UserName
+		password := postedUser.Password
+		firstname := postedUser.First
+		lastname := postedUser.Last
+		role := postedUser.Role
 		// create session
 		sID, _ := uuid.NewV4()
 		newCookie := &http.Cookie{
@@ -239,11 +249,12 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		//Make User and USERID
 		goodNum := false
 		theID := 0
-		row, err := db.Query(`SELECT user_id FROM users;`)
-		check(err)
-		defer row.Close()
 
 		for goodNum == false {
+			//Query the database for all IDS
+			row, err := db.Query(`SELECT user_id FROM users;`)
+			check(err)
+			defer row.Close()
 			//Build the random, unique integer to be assigned to this User
 			goodNumFound := true //A second checker to break this loop
 			randInt := 0         //The random integer added onto ID
@@ -282,10 +293,6 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		}
 		fmt.Println("Adding User data to database")
 		//Add User to the SQL Database
-		/*
-			stmt, err := db.Prepare("INSERT INTO users(USERNAME, PASSWORD, FIRSTNAME, LASTNAME, ROLE, USER_ID) VALUES(?,?,?,?,?,?)")
-			defer stmt.Close()
-		*/
 		bsString := []byte(password)                  //Encode Password
 		encodedString := hex.EncodeToString(bsString) //Encode Password Pt2
 		var insertedUser User = User{
@@ -303,21 +310,28 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		} else {
 			data, _ := ioutil.ReadAll(response.Body)
 			fmt.Println(string(data))
-
 		}
 
 		//DEBUG, don't know if we need below
-		theUser = User{username, encodedString, firstname, lastname, role, theID}
+		var theUser = User{username, encodedString, firstname, lastname, role, theID}
 		dbUsers[username] = theUser
 		// redirect
-		http.Redirect(w, req, "/", http.StatusSeeOther)
-		return
-	} else {
-		err1 := template1.ExecuteTemplate(w, "signup.gohtml", nil)
-		HandleError(w, err1)
+		//http.Redirect(w, req, "/", http.StatusSeeOther)
+		//return
+		type successMSG struct {
+			Message    string `json:"Message"`
+			SuccessNum int    `json:"SuccessNum"`
+		}
+		msgSuccess := successMSG{
+			Message:    "Added the new account!",
+			SuccessNum: 0,
+		}
+		theJSONMessage, err := json.Marshal(msgSuccess)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Fprint(w, string(theJSONMessage))
 	}
-
-	fmt.Printf("Signup Endpoint Hit\n")
 }
 
 //mainPage
@@ -335,13 +349,13 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 }
 
 func handleRequests() {
-
 	myRouter := mux.NewRouter().StrictSlash(true)
 
 	http.Handle("/favicon.ico", http.NotFoundHandler()) //For missing FavIcon
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/signup", signUp)
 	myRouter.HandleFunc("/mainPage", mainPage)
+	myRouter.HandleFunc("/signUpUserUpdated", signUpUserUpdated)
 	//Database Stuff
 	myRouter.HandleFunc("/deleteFood", deleteFood).Methods("POST")
 	myRouter.HandleFunc("/updateFood", updateFood).Methods("POST")           //Update a certain food item
