@@ -60,10 +60,21 @@ A User can: 1. See ALL of the hotdogs/hamburgers they made, and can update THEIR
 
 5. Creating an Amazon Web Instance of this app: 
 1. Creating an Amazon Instance: https://www.udemy.com/course/go-programming-language/learn/lecture/6162772#overview
-KeyPair: D:\Go_Workspace\src\superUltimateDBWebApp\superUltimateDBWebApp\security\kp-superDB.pem
-KeyPair Login: ssh -i D:\Go_Workspace\src\superUltimateDBWebApp\superUltimateDBWebApp\security\kp-superDB.pem ubuntu@ec2-3-14-79-219.us-east-2.compute.amazonaws.com
-2. Uploading a docker image to Amazon: https://www.udemy.com/course/go-programming-language/learn/lecture/6404238#overview
+KeyPair(Make sure you chmod 400 this, first!):
+ D:\Go_Workspace\src\superUltimateDBWebApp\superUltimateDBWebApp\security\kp-superDB.pem
+KeyPair Login: ssh -i /d/Go_Workspace/src/superUltimateDBWebApp/superUltimateDBWebApp/security/kp-superDB.pem ubuntu@ec2-3-14-79-219.us-east-2.compute.amazonaws.com
 
+2. Creating a Docker GoLang Image: https://www.udemy.com/course/go-programming-language/learn/lecture/6404232#overview
+
+3. Uploading a docker image to Amazon: https://www.udemy.com/course/go-programming-language/learn/lecture/6404238#overview
+If you can log onto the ubuntu server, first update packages: sudo apt-get update -y && sudo apt-get upgrade -y 
+WARNING, ACCORDING TO THIS, UBUNTU MACHINES DON'T REALLY USE YUM:
+https://stackoverflow.com/questions/20120973/yum-fails-with-there-are-no-enabled-repos
+OR you can get yum. First: https://zoomadmin.com/HowToInstall/UbuntuPackage/yum
+Then: run sudo yum update -y 
+Install docker with Yum: sudo yum install -y docker
+HOW TO INSTALL DOCKER ON UBUNTU 18.4: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04
+For using using docker commands without Sudo on Ubuntu, you might have to subsitute user name with ubuntu
 
 New found factiods:
 1. Passing variables to Javascript: https://stackoverflow.com/questions/37426563/pass-golang-variables-into-javascript
