@@ -182,6 +182,9 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 						Name:  "session",
 						Value: sID.String(),
 					}
+					if err != nil {
+						fmt.Println(err)
+					}
 					cookie.MaxAge = sessionLength
 					http.SetCookie(w, cookie)
 					dbSessions[cookie.Value] = session{username, time.Now()}
@@ -396,5 +399,7 @@ func check(err error) {
 		fmt.Println(err)
 	}
 }
+
+//Some stuff for logging
 
 /* DEBUG ZONE */

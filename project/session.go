@@ -14,10 +14,13 @@ func getUser(w http.ResponseWriter, req *http.Request) User {
 	cookie, err := req.Cookie("session")
 	//If there is no session cookie, create a new session cookie
 	if err != nil {
-		sID, _ := uuid.NewV4() //Give sID a random number
+		sID, err := uuid.NewV4() //Give sID a random number
 		cookie = &http.Cookie{
 			Name:  "session",
 			Value: sID.String(),
+		}
+		if err != nil {
+			fmt.Println(err)
 		}
 
 	}
