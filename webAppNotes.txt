@@ -58,6 +58,12 @@ https://www.golangprograms.com/example-of-golang-crud-using-mysql-from-scratch.h
 A User can: 1. See ALL of the hotdogs/hamburgers they made, and can update THEIR hamburgers or hotdogs.
 2. Delete any Hotdogs/Hamburgers THEY made. 3. Add a hotdog or a Hamburger to THEIR list 
 
-New found factiods:
+5. Creating an Amazon Web Instance of this app: 
+1. Creating an Amazon Instance: https://www.udemy.com/course/go-programming-language/learn/lecture/6162772#overview
+KeyPair: D:\Go_Workspace\src\superUltimateDBWebApp\superUltimateDBWebApp\security\kp-superDB.pem
+KeyPair Login: ssh -i D:\Go_Workspace\src\superUltimateDBWebApp\superUltimateDBWebApp\security\kp-superDB.pem ubuntu@ec2-3-14-79-219.us-east-2.compute.amazonaws.com
+2. Uploading a docker image to Amazon: https://www.udemy.com/course/go-programming-language/learn/lecture/6404238#overview
 
+
+New found factiods:
 1. Passing variables to Javascript: https://stackoverflow.com/questions/37426563/pass-golang-variables-into-javascript
