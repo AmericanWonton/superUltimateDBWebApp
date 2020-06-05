@@ -15,11 +15,13 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/gobuffalo/packr/v2"
+	"github.com/google/uuid"
+
 	_ "github.com/go-mysql/errors"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/gorilla/mux"
-	uuid "github.com/satori/go.uuid"
 )
 
 //Here's our User struct
@@ -111,10 +113,21 @@ var funcMap = template.FuncMap{
 	"ReturnRoleIT":    User.ReturnRoleIT,
 }
 
+//Loading our templates in for ParseGlob: https://github.com/gobuffalo/packr/issues/16
+var templatesBox = packr.New("Templates", "./templates")
+
+func assembleTemplates() *template.Template {
+	//Define the template to return
+	ourTemplate := template.New("")
+
+	return ourTemplate
+}
+
 //Parse our templates
 func init() {
 	//template1 = template.Must(template.ParseGlob("templates/*"))
-	template1 = template.Must(template.New("").Funcs(funcMap).ParseGlob("templates/*gohtml"))
+	//template1 = template.Must(template.New("").Funcs(funcMap).ParseGlob("./templates/*"))
+	//template1 = assembleTemplates()
 }
 
 // Handle Errors
@@ -177,13 +190,11 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 					theUser := User{username, returnedPassword, returnedFName, returnedLName, returnedRole, returnedUserID}
 					dbUsers[username] = theUser
 					// create session
-					sID, _ := uuid.NewV4()
+					uuidWithHyphen := uuid.New().String()
+
 					cookie := &http.Cookie{
 						Name:  "session",
-						Value: sID.String(),
-					}
-					if err != nil {
-						fmt.Println(err)
+						Value: uuidWithHyphen,
 					}
 					cookie.MaxAge = sessionLength
 					http.SetCookie(w, cookie)
@@ -199,6 +210,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	/* Execute template, handle error */
+	fmt.Printf("DEBUG: Trying to execute index.gohtml...\n")
 	err1 := template1.ExecuteTemplate(w, "index.gohtml", aUser)
 	HandleError(w, err1)
 	fmt.Printf("Homepage Endpoint Hit\n")
@@ -240,10 +252,10 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 		lastname := postedUser.Last
 		role := postedUser.Role
 		// create session
-		sID, _ := uuid.NewV4()
+		uuidWithHyphen := uuid.New().String()
 		newCookie := &http.Cookie{
 			Name:  "session",
-			Value: sID.String(),
+			Value: uuidWithHyphen,
 		}
 		newCookie.MaxAge = sessionLength
 		http.SetCookie(w, newCookie)
@@ -375,7 +387,8 @@ func handleRequests() {
 	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames
 	//Serve our CSS files...
 	myRouter.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("."+"/static/"))))
-
+	//Serve our static files
+	http.Handle("/", http.FileServer(templatesBox))
 	log.Fatal(http.ListenAndServe(":8080", myRouter))
 }
 

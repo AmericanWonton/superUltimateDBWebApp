@@ -19,8 +19,9 @@ RUN go mod download
 COPY . .
 #Run the go directory
 # MIGHT NOT WORK: RUN go build -o main .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build *.go
+RUN CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build
 # Expose port 8080 to the outside world
 EXPOSE 8080
+ENTRYPOINT [ "/app/databaseapp" ]
 #Check off our binary executeable
 # MIGHT NOT WORK: CMD ["/app/main"]

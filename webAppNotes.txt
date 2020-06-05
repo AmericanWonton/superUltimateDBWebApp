@@ -63,6 +63,14 @@ A User can: 1. See ALL of the hotdogs/hamburgers they made, and can update THEIR
 KeyPair(Make sure you chmod 400 this, first!):
  D:\Go_Workspace\src\superUltimateDBWebApp\superUltimateDBWebApp\security\kp-superDB.pem
 KeyPair Login: ssh -i /d/Go_Workspace/src/superUltimateDBWebApp/superUltimateDBWebApp/security/kp-superDB.pem ubuntu@ec2-3-14-79-219.us-east-2.compute.amazonaws.com
+To 'Secure Copy' a file into our server:
+scp -i /d/Go_Workspace/src/superUltimateDBWebApp/superUltimateDBWebApp/security/kp-superDB.pem mydbbuild1 ubuntu@ec2-3-14-79-219.us-east-2.compute.amazonaws.com:
+//DON'T FORGET THAT COLON AT THE END, IT PUTS THE FILE IN THE ROOT DIRECTORY
+// You should be able to see it when logging in and typing ls
+//To build your binary for Ubuntu:
+GOOS=linux GOARCH=amd64 go build (maybe add this to change the name: -o mybinaryname)
+//Make sure to sudo chmod 777 your binary
+//To run, type sudo ./your binary
 
 2. Creating a Docker GoLang Image: https://www.udemy.com/course/go-programming-language/learn/lecture/6404232#overview
 
@@ -74,7 +82,18 @@ OR you can get yum. First: https://zoomadmin.com/HowToInstall/UbuntuPackage/yum
 Then: run sudo yum update -y 
 Install docker with Yum: sudo yum install -y docker
 HOW TO INSTALL DOCKER ON UBUNTU 18.4: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04
-For using using docker commands without Sudo on Ubuntu, you might have to subsitute user name with ubuntu
+For using using docker commands without Sudo on Ubuntu, you might have to substitute user name with ubuntu
+
+IMPORTANT DOCKER TEXT:
+FOR BUILDING A PROPER DOCKER FILE: https://www.youtube.com/watch?v=RSSwZt1c1Yo&feature=youtu.be
+BUILD AN EXECUTEABLE WITH A UNIQUE NAME: https://stackoverflow.com/questions/42706246/how-to-build-executable-with-name-other-than-golang-package
+DOCKER CONTAINTER COMMANDS: https://www.callicoder.com/docker-golang-image-container-example/
+NOTE: Make sure packages are up to date! Try doing this VS Code Trick first:
+https://stackoverflow.com/questions/58518588/vscode-could-not-import-golang-package
 
 New found factiods:
 1. Passing variables to Javascript: https://stackoverflow.com/questions/37426563/pass-golang-variables-into-javascript
+2. For building binaries with Go Web Dev, you should use the hell out of something called Packr! Otherwise, 
+your binary won't run correctly when you run it in different places because it can't find the files you want to parse!
+https://blog.gobuffalo.io/packr-v2-0-0-rc-3-introduction-7a5e06a688c5 //PackerV2
+https://github.com/gobuffalo/packr/issues/16
