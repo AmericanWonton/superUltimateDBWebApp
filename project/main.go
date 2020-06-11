@@ -125,8 +125,10 @@ func assembleTemplates() *template.Template {
 
 //Parse our templates
 func init() {
+	fmt.Println("DEBUG: Here is our template:")
 	//template1 = template.Must(template.ParseGlob("templates/*"))
-	//template1 = template.Must(template.New("").Funcs(funcMap).ParseGlob("./templates/*"))
+	template1 = template.Must(template.New("").Funcs(funcMap).ParseGlob("./templates/*"))
+	fmt.Printf("%v\n", template1)
 	//template1 = assembleTemplates()
 }
 

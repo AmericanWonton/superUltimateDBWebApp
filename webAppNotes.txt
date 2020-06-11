@@ -97,3 +97,4 @@ New found factiods:
 your binary won't run correctly when you run it in different places because it can't find the files you want to parse!
 https://blog.gobuffalo.io/packr-v2-0-0-rc-3-introduction-7a5e06a688c5 //PackerV2
 https://github.com/gobuffalo/packr/issues/16
+https://pkg.go.dev/github.com/gobuffalo/packr/v2/packr2?tab=overview
