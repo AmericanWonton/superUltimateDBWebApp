@@ -90,6 +90,7 @@ BUILD AN EXECUTEABLE WITH A UNIQUE NAME: https://stackoverflow.com/questions/427
 DOCKER CONTAINTER COMMANDS: https://www.callicoder.com/docker-golang-image-container-example/
 NOTE: Make sure packages are up to date! Try doing this VS Code Trick first:
 https://stackoverflow.com/questions/58518588/vscode-could-not-import-golang-package
+docker build -t testdbbinary .
 
 New found factiods:
 1. Passing variables to Javascript: https://stackoverflow.com/questions/37426563/pass-golang-variables-into-javascript
@@ -98,3 +99,8 @@ your binary won't run correctly when you run it in different places because it c
 https://blog.gobuffalo.io/packr-v2-0-0-rc-3-introduction-7a5e06a688c5 //PackerV2
 https://github.com/gobuffalo/packr/issues/16
 https://pkg.go.dev/github.com/gobuffalo/packr/v2/packr2?tab=overview
+after running packr2 -v and making a change to the project, you might need to run 
+packr2 clean and run packr2 -v again to update your changes.
+Running all Go files into a binary: https://stackoverflow.com/questions/10838469/how-to-compile-go-program-consisting-of-multiple-files/61793820#61793820
+To build ALL go files, try running  packr2 build -o spaghetti . //You get all files in a directory, PLUS the name flag
+

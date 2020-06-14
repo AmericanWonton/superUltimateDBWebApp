@@ -1,6 +1,6 @@
 # Start from a Debian image with the latest version of Go installed
 # and a workspace (GOPATH) configured at /go.
-FROM golang:1.14.1
+FROM golang:1.14.4
 #Maintainer info
 LABEL maintainer="jbkeller0303@gmail.com"
 LABEL build_date="2020-30-05"

@@ -114,22 +114,61 @@ var funcMap = template.FuncMap{
 }
 
 //Loading our templates in for ParseGlob: https://github.com/gobuffalo/packr/issues/16
-var templatesBox = packr.New("Templates", "./templates")
+var templatesBox = packr.New("templates", "./templates")
 
-func assembleTemplates() *template.Template {
-	//Define the template to return
-	ourTemplate := template.New("")
+func MustLoadBoxedTemplate(b *packr.Box) *template.Template {
+	t := template.Must(template.New("").Funcs(funcMap), err)
+	//t := template.New("")
+	err := b.Walk(func(p string, f packr.File) error {
+		if p == "" {
+			return nil
+		}
+		var err error
+		var csz int64
+		if finfo, err := f.FileInfo(); err != nil {
+			return err
+		} else {
+			// skip directory path
+			if finfo.IsDir() {
+				return nil
+			}
+			csz = finfo.Size()
+		}
 
-	return ourTemplate
+		// skip all files except .html
+		if !strings.Contains(p, ".html") && !strings.Contains(p, ".gohtml") {
+			fmt.Printf("We are skipping this filename: %v\n", p)
+			return nil
+		}
+
+		// Normalize template name
+		n := p
+		if strings.HasPrefix(p, "\\") || strings.HasPrefix(p, "/") {
+			n = n[1:] // don't want template name to start with / ie. /index.html
+		}
+		// replace windows path seperator \ to normalized /
+		n = strings.Replace(n, "\\", "/", -1)
+
+		var h = make([]byte, 0, csz)
+
+		if h, err = b.Find(p); err != nil {
+			return err
+		}
+
+		if _, err = t.New(n).Parse(string(h)); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		panic("error loading template")
+	}
+	return t
 }
 
 //Parse our templates
 func init() {
-	fmt.Println("DEBUG: Here is our template:")
-	//template1 = template.Must(template.ParseGlob("templates/*"))
-	template1 = template.Must(template.New("").Funcs(funcMap).ParseGlob("./templates/*"))
-	fmt.Printf("%v\n", template1)
-	//template1 = assembleTemplates()
+	template1 = MustLoadBoxedTemplate(templatesBox)
 }
 
 // Handle Errors
@@ -389,8 +428,9 @@ func handleRequests() {
 	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames
 	//Serve our CSS files...
 	myRouter.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("."+"/static/"))))
+	myRouter.PathPrefix("/templates/").Handler(http.StripPrefix("/templates/", http.FileServer(http.Dir("."+"/templates/"))))
 	//Serve our static files
-	http.Handle("/", http.FileServer(templatesBox))
+	myRouter.Handle("/", http.FileServer(templatesBox))
 	log.Fatal(http.ListenAndServe(":8080", myRouter))
 }
 
