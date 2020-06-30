@@ -17,6 +17,7 @@ import (
 
 	"github.com/gobuffalo/packr/v2"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 
 	_ "github.com/go-mysql/errors"
 	_ "github.com/go-sql-driver/mysql"
@@ -114,7 +115,7 @@ var funcMap = template.FuncMap{
 }
 
 //Loading our templates in for ParseGlob: https://github.com/gobuffalo/packr/issues/16
-var templatesBox = packr.New("templates", "./templates")
+var templatesBox = packr.New("templates", "./static")
 
 func MustLoadBoxedTemplate(b *packr.Box) *template.Template {
 	t := template.Must(template.New("").Funcs(funcMap), err)
@@ -137,7 +138,7 @@ func MustLoadBoxedTemplate(b *packr.Box) *template.Template {
 
 		// skip all files except .html
 		if !strings.Contains(p, ".html") && !strings.Contains(p, ".gohtml") {
-			fmt.Printf("We are skipping this filename: %v\n", p)
+			//fmt.Printf("We are skipping this filename: %v\n", p)
 			return nil
 		}
 
@@ -251,10 +252,8 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	/* Execute template, handle error */
-	fmt.Printf("DEBUG: Trying to execute index.gohtml...\n")
-	err1 := template1.ExecuteTemplate(w, "index.gohtml", aUser)
+	err1 := template1.ExecuteTemplate(w, "templates/index.gohtml", aUser)
 	HandleError(w, err1)
-	fmt.Printf("Homepage Endpoint Hit\n")
 }
 
 //signUp
@@ -266,7 +265,7 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err1 := template1.ExecuteTemplate(w, "signup.gohtml", nil)
+	err1 := template1.ExecuteTemplate(w, "templates/signup.gohtml", nil)
 	HandleError(w, err1)
 
 	fmt.Printf("Signup Endpoint Hit\n")
@@ -360,7 +359,7 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 			UserID:   theID,
 		}
 		jsonValue, _ := json.Marshal(insertedUser)
-		response, err := http.Post("http://localhost:8080/insertUser", "application/json", bytes.NewBuffer(jsonValue))
+		response, err := http.Post("http://localhost:80/insertUser", "application/json", bytes.NewBuffer(jsonValue))
 		if err != nil {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
 		} else {
@@ -400,10 +399,11 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
 	}
-	err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+	err1 := template1.ExecuteTemplate(w, "templates/mainpage.gohtml", vd)
 	HandleError(w, err1)
 }
 
+//Handles all requests coming in
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 
@@ -426,12 +426,12 @@ func handleRequests() {
 	//Validation Stuff
 	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
 	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames
-	//Serve our CSS files...
-	myRouter.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("."+"/static/"))))
-	myRouter.PathPrefix("/templates/").Handler(http.StripPrefix("/templates/", http.FileServer(http.Dir("."+"/templates/"))))
+	//Middleware logging
+	myRouter.Handle("/", loggingMiddleware(http.HandlerFunc(logHandler)))
 	//Serve our static files
 	myRouter.Handle("/", http.FileServer(templatesBox))
-	log.Fatal(http.ListenAndServe(":8080", myRouter))
+	myRouter.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(templatesBox)))
+	log.Fatal(http.ListenAndServe(":80", myRouter))
 }
 
 func main() {
@@ -456,5 +456,16 @@ func check(err error) {
 }
 
 //Some stuff for logging
+func logHandler(w http.ResponseWriter, req *http.Request) {
+	fmt.Printf("Package main, son")
+	fmt.Fprint(w, "package main, son.")
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		logrus.Infof("uri: %v\n", req.RequestURI)
+		next.ServeHTTP(w, req)
+	})
+}
 
 /* DEBUG ZONE */

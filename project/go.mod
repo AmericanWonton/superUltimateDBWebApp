@@ -13,7 +13,7 @@ require (
 	github.com/karrick/godirwalk v1.15.6 // indirect
 	github.com/rogpeppe/go-internal v1.6.0 // indirect
 	github.com/satori/go.uuid v1.2.0
-	github.com/sirupsen/logrus v1.6.0 // indirect
+	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/crypto v0.0.0-20200602180216-279210d13fed

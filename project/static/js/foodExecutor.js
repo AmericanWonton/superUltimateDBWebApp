@@ -59,7 +59,6 @@ function revealFoodForm(foodChoice) {
             }
             var condimentDEBUG = String(condimentType.value);
             var nameDEBUG = nameType.value;
-            console.log("CondimentDEBUG is: " + condimentDEBUG + " and nameDEBUG is: " + nameDEBUG);
             //JSON String creation
             var toSend = {
                 HotDogType: "",
@@ -83,7 +82,7 @@ function revealFoodForm(foodChoice) {
             xhr.addEventListener('readystatechange', function(){
                 if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
                     var item = xhr.responseText;
-                    if (item == 'Successful Insert') {
+                    if (item.includes('Successful Insert') == true) {
                         //Data inserted properly; clear the form fields
                         hDogType.value = "";
                         condimentType.value = "";
@@ -92,7 +91,7 @@ function revealFoodForm(foodChoice) {
                         alert("Hotdog submitted successfully!")
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
                         location.reload(true); //Reload Page
-                    } else if (item == 'Unsuccessful Insert'){
+                    } else if (item.includes('Unsuccessful Insert') == true){
                         //Data NOT inserted properly
                         hDogType.value = "";
                         condimentType.value = "";
@@ -112,6 +111,7 @@ function revealFoodForm(foodChoice) {
             xhr.send(jsonString);
             
         });
+
         //Append "Form Data"
         theDiv.appendChild(hDogType);
         theDiv.appendChild(condimentType);
@@ -155,7 +155,6 @@ function revealFoodForm(foodChoice) {
         submitButton.addEventListener("click", function(){
             console.log("Submit button clicked, submitting hamburger data.");
             //Ajax functionality for submitting forms
-            console.log("DEBUG: We're submitting the form.");
             //Field correction if fields aren't filled out
             if (hamburgType.value == ""){
                 hamburgType.value ="NONE";
@@ -178,7 +177,6 @@ function revealFoodForm(foodChoice) {
                 UserID: 0
             };
             
-            console.log("DEBUG: Here's the hamburgType.value: " + hamburgType.value);
             toSend.HamburgerType = hamburgType.value;
             toSend.Condiment = condimentType.value;
             toSend.Name = nameType.value;
@@ -193,7 +191,7 @@ function revealFoodForm(foodChoice) {
             xhr.addEventListener('readystatechange', function(){
                 if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
                     var item = xhr.responseText;
-                    if (item == 'Successful Insert') {
+                    if (item.includes('Successful Insert') == true) {
                         //Data inserted properly; clear the form fields
                         hamburgType.value = "";
                         condimentType.value = "";
@@ -202,7 +200,7 @@ function revealFoodForm(foodChoice) {
                         alert("Hamburger submitted successfully!")
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
                         location.reload(true); //Reload Page
-                    } else if (item == 'Unsuccessful Insert'){
+                    } else if (item.includes('Unsuccessful Insert') == true){
                         //Data NOT inserted properly
                         hamburgType.value = "";
                         condimentType.value = "";
@@ -310,7 +308,7 @@ function revealFoodForm(foodChoice) {
             xhr.addEventListener('readystatechange', function(){
                 if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
                     var item = xhr.responseText;
-                    if (item == 'Successful Insert') {
+                    if (item.includes('Successful Insert') == true) {
                         //Data inserted properly; clear the form fields
                         hDogType.value = "";
                         condimentType.value = "";
@@ -320,7 +318,7 @@ function revealFoodForm(foodChoice) {
                         alert("Hotdog submitted successfully!")
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
                         location.reload(true); //Reload Page
-                    } else if (item == 'Unsuccessful Insert'){
+                    } else if (item.includes('Unsuccessful Insert') == true){
                         //Data NOT inserted properly
                         hDogType.value = "";
                         condimentType.value = "";
@@ -431,7 +429,7 @@ function revealFoodForm(foodChoice) {
             xhr.addEventListener('readystatechange', function(){
                 if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
                     var item = xhr.responseText;
-                    if (item == 'Successful Insert') {
+                    if (item.includes('Successful Insert') == true) {
                         //Data inserted properly; clear the form fields
                         hamburgType.value = "";
                         condimentType.value = "";
@@ -441,7 +439,7 @@ function revealFoodForm(foodChoice) {
                         alert("Hamburger submitted successfully!")
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
                         location.reload(true); //Reload Page
-                    } else if (item == 'Unsuccessful Insert'){
+                    } else if (item.includes('Unsuccessful Insert') == true){
                         //Data NOT inserted properly
                         hamburgType.value = "";
                         condimentType.value = "";
