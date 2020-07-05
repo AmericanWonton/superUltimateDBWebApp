@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
@@ -10,14 +11,17 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"text/template"
 	"time"
 
 	"github.com/gobuffalo/packr/v2"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	_ "github.com/go-mysql/errors"
 	_ "github.com/go-sql-driver/mysql"
@@ -74,10 +78,32 @@ var dbSessionsCleaned time.Time
 var db *sql.DB
 var err error
 
+//Mongo database declarations
+var mongoClient *mongo.Client
+
+//Here is our waitgroup
+var wg sync.WaitGroup
+
 const sessionLength int = 180 //Length of sessions
 
 /* TEMPLATE DEFINITION BEGINNING */
 var template1 *template.Template
+
+func logWriter(logMessage string) {
+	//Logging info
+	fmt.Println("Writing log files.")
+	logFile, err := os.OpenFile("/tmp/superdblogs/superDBAppLog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+
+	defer logFile.Close()
+
+	if err != nil {
+		log.Fatalln("Failed opening file")
+	}
+
+	log.SetOutput(logFile)
+
+	log.Println(logMessage)
+}
 
 /* FUNCMAP DEFINITION */
 /* DEBUG, I'M NOT SURE IF WE NEED THESE RETURN ROLE USERS */
@@ -435,6 +461,8 @@ func handleRequests() {
 }
 
 func main() {
+	//Write initial entry to log
+	logWriter("Deployed superUltimateDBWebApp app.")
 	//open SQL connection
 	db, err = sql.Open("mysql",
 		"joek1:fartghookthestrong69@tcp(food-database.cd8ujtto1hfj.us-east-2.rds.amazonaws.com)/food-database-schema?charset=utf8")
@@ -443,6 +471,16 @@ func main() {
 
 	err = db.Ping()
 	check(err)
+
+	//Open Mongo connections
+	//Login to database
+	mongoClient = connectDB()
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err = mongoClient.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer mongoClient.Disconnect(ctx)
 
 	//Handle Requests
 	handleRequests()
