@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
@@ -39,7 +38,53 @@ type User struct {
 	UserID   int    `json:"UserID"`
 }
 
-//Below is our struct for Hotdogs/Hamburgers
+/* Mongo No-SQL Variable Declarations */
+type AUser struct { //Using this for Mongo
+	UserName    string         `json:"UserName"`
+	Password    string         `json:"Password"` //This was formally a []byte but we are changing our code to fit the database better
+	First       string         `json:"First"`
+	Last        string         `json:"Last"`
+	Role        string         `json:"Role"`
+	UserID      int            `json:"UserID"`
+	DateCreated string         `json:"DateCreated"`
+	DateUpdated string         `json:"DateUpdated"`
+	Hotdogs     MongoHotDogs   `json:"Hotdogs"`
+	Hamburgers  MongoHamburger `json:"Hamburgers"`
+}
+
+type TheUsers struct { //Using this for Mongo
+	Users []AUser `json:"Users"`
+}
+
+type MongoHotDog struct {
+	HotDogType  string   `json:"HotDogType"`
+	Condiments  []string `json:"Condiments"`
+	Calories    int      `json:"Calories"`
+	Name        string   `json:"Name"`
+	UserID      int      `json:"UserID"` //User WHOMST this hotDog belongs to
+	DateCreated string   `json:"DateCreated"`
+	DateUpdated string   `json:"DateUpdated"`
+}
+
+type MongoHotDogs struct {
+	Hotdogs []MongoHotDog `json:"Hotdogs"`
+}
+
+type MongoHamburger struct {
+	BurgerType  string   `json:"BurgerType"`
+	Condiments  []string `json:"Condiments"`
+	Calories    int      `json:"Calories"`
+	Name        string   `json:"Name"`
+	UserID      int      `json:"UserID"` //User WHOMST this hotDog belongs to
+	DateCreated string   `json:"DateCreated"`
+	DateUpdated string   `json:"DateUpdated"`
+}
+
+type MongoHamburgers struct {
+	Hamburgers []MongoHamburger `json:"Hamburgers"`
+}
+
+//Below is our struct for Hotdogs/Hamburgers(standard SQL)
 type Hotdog struct {
 	HotDogType string `json:"HotDogType"`
 	Condiment  string `json:"Condiment"`
@@ -78,7 +123,7 @@ var dbSessionsCleaned time.Time
 var db *sql.DB
 var err error
 
-//Mongo database declarations
+//Mongo DB Declarations
 var mongoClient *mongo.Client
 
 //Here is our waitgroup
@@ -97,7 +142,8 @@ func logWriter(logMessage string) {
 	defer logFile.Close()
 
 	if err != nil {
-		log.Fatalln("Failed opening file")
+		//log.Fatalln("Failed opening file")
+		fmt.Println("Failed opening file")
 	}
 
 	log.SetOutput(logFile)
@@ -372,7 +418,7 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 				goodNum = true
 			}
 		}
-		fmt.Println("Adding User data to database")
+		fmt.Println("Adding User data to SQL database")
 		//Add User to the SQL Database
 		bsString := []byte(password)                  //Encode Password
 		encodedString := hex.EncodeToString(bsString) //Encode Password Pt2
@@ -390,6 +436,32 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
 		} else {
 			data, _ := ioutil.ReadAll(response.Body)
+			fmt.Println(string(data))
+		}
+
+		//Add User to MongoDB
+		theTimeNow := time.Now()
+		var insertionUser AUser = AUser{
+			UserName:    username,
+			Password:    encodedString,
+			First:       firstname,
+			Last:        lastname,
+			Role:        role,
+			UserID:      theID,
+			DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
+			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+			Hotdogs:     MongoHotDogs{},
+			Hamburgers:  MongoHamburger{},
+		}
+		insertionUsers := TheUsers{
+			Users: []AUser{insertionUser},
+		}
+		jsonValue2, _ := json.Marshal(insertionUsers)
+		response2, err := http.Post("http://localhost:80/insertUsers", "application/json", bytes.NewBuffer(jsonValue2))
+		if err != nil {
+			fmt.Printf("The HTTP request failed with error %s\n", err)
+		} else {
+			data, _ := ioutil.ReadAll(response2.Body)
 			fmt.Println(string(data))
 		}
 
@@ -431,6 +503,7 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 
 //Handles all requests coming in
 func handleRequests() {
+	fmt.Printf("DEBUG: Handling Requests...\n")
 	myRouter := mux.NewRouter().StrictSlash(true)
 
 	http.Handle("/favicon.ico", http.NotFoundHandler()) //For missing FavIcon
@@ -438,7 +511,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/signup", signUp)
 	myRouter.HandleFunc("/mainPage", mainPage)
 	myRouter.HandleFunc("/signUpUserUpdated", signUpUserUpdated)
-	//Database Stuff
+	//SQL Database Stuff
 	myRouter.HandleFunc("/deleteFood", deleteFood).Methods("POST")
 	myRouter.HandleFunc("/updateFood", updateFood).Methods("POST")           //Update a certain food item
 	myRouter.HandleFunc("/insertHotDog", insertHotDog).Methods("POST")       //Post a hotdog!
@@ -449,6 +522,10 @@ func handleRequests() {
 	myRouter.HandleFunc("/getUsers", getUsers).Methods("GET")                //Get a Users!
 	myRouter.HandleFunc("/updateUsers", updateUsers).Methods("POST")         //Get a Users!
 	myRouter.HandleFunc("/deleteUsers", deleteUsers).Methods("POST")         //DELETE a Users!
+	//Mongo No-SQL Stuff
+	myRouter.HandleFunc("/insertUsers", insertUsers).Methods("POST")           //Post a User!
+	myRouter.HandleFunc("/insertHotDogs", insertHotDogs).Methods("POST")       //Post a Hotdog!
+	myRouter.HandleFunc("/insertHamburgers", insertHamburgers).Methods("POST") //Post a Hamburger!
 	//Validation Stuff
 	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
 	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames
@@ -462,7 +539,7 @@ func handleRequests() {
 
 func main() {
 	//Write initial entry to log
-	logWriter("Deployed superUltimateDBWebApp app.")
+	//logWriter("Deployed superUltimateDBWebApp app.")
 	//open SQL connection
 	db, err = sql.Open("mysql",
 		"joek1:fartghookthestrong69@tcp(food-database.cd8ujtto1hfj.us-east-2.rds.amazonaws.com)/food-database-schema?charset=utf8")
@@ -472,18 +549,11 @@ func main() {
 	err = db.Ping()
 	check(err)
 
-	//Open Mongo connections
-	//Login to database
+	//Mongo Connect
 	mongoClient = connectDB()
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = mongoClient.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer mongoClient.Disconnect(ctx)
-
 	//Handle Requests
 	handleRequests()
+	defer mongoClient.Disconnect(theContext) //Disconnect in 10 seconds if you can't connect
 }
 
 //Check errors in our mySQL errors
