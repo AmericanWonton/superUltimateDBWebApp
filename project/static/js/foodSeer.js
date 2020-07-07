@@ -61,9 +61,40 @@ function foodChanger(whichFood, whichChoice, hamburgObj, hotdogObj){
     };
 
     var jsonString = JSON.stringify(foodUpdate);
-    //Call Ajax to delete the foodRecord
+
+    //Call Ajax to update the foodRecord (SQL Database)
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/updateFood', true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.addEventListener('readystatechange', function(){
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+            var item = xhr.responseText;
+            console.log("DEBUG: " + item);
+            if (item == 1) {
+                //Hotdog Update
+                console.log(item);
+                alert("Hotdog updated");
+                location.reload(true);
+            } else if (item == 2) {
+                //Hamburger Update
+                console.log(item);
+                alert("Hamburger Updated");
+                location.reload(true);
+            } else if (item == 3) {
+                console.log(item);
+                alert("No food item updated; something went cooky :( ");
+                location.reload(true);
+            } else {
+                alert("No food item updated; something went cooky :( ");
+                console.log("Unexpected output at foodUpdater function.");
+                location.reload(true);
+            }
+        }
+    });
+    xhr.send(jsonString);
+    //Call Ajax to update the foodRecord (Mongo Database)
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/foodUpdateMongo', true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.addEventListener('readystatechange', function(){
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
@@ -104,9 +135,35 @@ function foodDeleter(whichFood, whichChoice){
 
     var jsonString = JSON.stringify(foodDeletion);
 
-    //Call Ajax to delete the foodRecord
+    //Call Ajax to delete the foodRecord(SQL Database)
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/deleteFood', true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.addEventListener('readystatechange', function(){
+        if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+            var item = xhr.responseText;
+            if (item == 1){
+                console.log(item);
+                alert("Hotdog successfully deleted");
+                location.reload(true);
+            }else if (item == 2){
+                console.log(item);
+                alert("Hamburger Deleted");
+                location.reload(true);
+            } else if (item == 3) {
+                console.log(item);
+                alert("Trouble deleting food item");
+                location.reload(true);
+            } else {
+                console.log("Unexpected output at foodDeletion function: " + item);
+                location.reload(true);
+            }
+        }
+    });
+    xhr.send(jsonString);
+    //Call Ajax to delete the foodRecord(Mongo Database)
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/foodDeleteMongo', true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.addEventListener('readystatechange', function(){
         if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){

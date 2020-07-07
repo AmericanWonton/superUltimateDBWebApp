@@ -381,7 +381,6 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 
 //UPDATE FOOD
 func updateFood(w http.ResponseWriter, req *http.Request) {
-
 	type foodUpdate struct {
 		FoodType     string    `json:"FoodType"`
 		FoodID       int       `json:"FoodID"`

@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -107,6 +110,51 @@ func insertHotDogs(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs) //Data insert results
 }
 
+func insertHotDogMongo(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("Inserting hotdog record in Mongo.")
+	//Collect JSON from Postman or wherever
+	//Get the byte slice from the request body ajax
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("Here is our byte slice as a string for JSON: \n\n%v\n", string(bs))
+	//Marshal it into our type
+	var postedHotDog Hotdog
+	json.Unmarshal(bs, &postedHotDog)
+
+	//Protections for the hotdog name
+	if strings.Compare(postedHotDog.HotDogType, "DEBUGTYPE") == 0 {
+		postedHotDog.HotDogType = "NONE"
+	}
+	//Change into Mongo Hotdog
+	theTimeNow := time.Now()
+	mongoHotDogInsert := MongoHotDog{
+		HotDogType:  postedHotDog.HotDogType,
+		Condiments:  []string{postedHotDog.Condiment},
+		Calories:    postedHotDog.Calories,
+		Name:        postedHotDog.Name,
+		FoodID:      randomIDCreation(),
+		UserID:      postedHotDog.UserID,
+		DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
+		DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+	}
+
+	//Collect Data for Mongo
+	user_collection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
+	collectedUsers := []interface{}{mongoHotDogInsert}
+	//Insert Our Data
+	insertManyResult, err := user_collection.InsertMany(context.TODO(), collectedUsers)
+	if err != nil {
+		fmt.Printf("Error inserting results: \n%v\n", err)
+		fmt.Fprint(w, failureMessage)
+		log.Fatal(err)
+	} else {
+		fmt.Fprint(w, successMessage)
+		fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs) //Data insert results
+	}
+}
+
 func insertHamburgers(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Inserting Hamburger records in Mongo.")
 	//Collect JSON from Postman or wherever
@@ -132,4 +180,281 @@ func insertHamburgers(w http.ResponseWriter, req *http.Request) {
 		log.Fatal(err)
 	}
 	fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs) //Data insert results
+}
+
+func insertHamburgerMongo(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("Inserting Hamburger record in Mongo.")
+	//Collect JSON from Postman or wherever
+	//Get the byte slice from the request body ajax
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("Here is our byte slice as a string for JSON: \n\n%v\n", string(bs))
+	//Marshal it into our type
+	var postedHamburger Hamburger
+	json.Unmarshal(bs, &postedHamburger)
+
+	//Protections for the hotdog name
+	if strings.Compare(postedHamburger.BurgerType, "DEBUGTYPE") == 0 {
+		postedHamburger.BurgerType = "NONE"
+	}
+	//Change into Mongo Hotdog
+	theTimeNow := time.Now()
+	mongoHamburgerInsert := MongoHamburger{
+		BurgerType:  postedHamburger.BurgerType,
+		Condiments:  []string{postedHamburger.Condiment},
+		Calories:    postedHamburger.Calories,
+		Name:        postedHamburger.Name,
+		FoodID:      randomIDCreation(),
+		UserID:      postedHamburger.UserID,
+		DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
+		DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+	}
+
+	//Collect Data for Mongo
+	user_collection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
+	collectedUsers := []interface{}{mongoHamburgerInsert}
+	//Insert Our Data
+	insertManyResult, err := user_collection.InsertMany(context.TODO(), collectedUsers)
+	if err != nil {
+		fmt.Printf("Error inserting results: \n%v\n", err)
+		fmt.Fprint(w, failureMessage)
+		log.Fatal(err)
+	} else {
+		fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs) //Data insert results
+		fmt.Fprint(w, successMessage)
+	}
+}
+
+func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
+	type foodUpdate struct {
+		FoodType     string    `json:"FoodType"`
+		FoodID       int       `json:"FoodID"`
+		TheHamburger Hamburger `json:"TheHamburger"`
+		TheHotDog    Hotdog    `json:"TheHotDog"`
+	}
+	//Unwrap from JSON
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//Marshal it into our type
+	var thefoodUpdate foodUpdate
+	json.Unmarshal(bs, &thefoodUpdate)
+
+	//Determine if this is a hotdog or hamburger update
+	if thefoodUpdate.FoodType == "hotdog" {
+		fmt.Printf("DEBUG: Updating hotdog at id: %v\n", thefoodUpdate.FoodID)
+		theTimeNow := time.Now()
+		var hotDogUpdate Hotdog = thefoodUpdate.TheHotDog
+		updatedHotDogMongo := MongoHotDog{
+			HotDogType:  hotDogUpdate.HotDogType,
+			Condiments:  []string{hotDogUpdate.Condiment},
+			Calories:    hotDogUpdate.Calories,
+			Name:        hotDogUpdate.Name,
+			UserID:      hotDogUpdate.UserID,
+			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+		}
+		//Add updatedHotDog to Document collection for Hotdogs
+		ic_collection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
+		filter := bson.D{{"UserID", updatedHotDogMongo.UserID}}                     //Here's our filter to look for
+		update := bson.D{                                                           //Here is our data to update
+			{"$set", bson.D{
+				{"HotDogType", updatedHotDogMongo.HotDogType},
+				{"Condiments", updatedHotDogMongo.Condiments},
+				{"Calories", updatedHotDogMongo.Calories},
+				{"Name", updatedHotDogMongo.Name},
+				{"DateUpdated", updatedHotDogMongo.DateUpdated},
+			}},
+		}
+
+		updateResult, err := ic_collection.UpdateMany(context.TODO(), filter, update)
+		if err != nil {
+			fmt.Fprintln(w, 3) //Failure Response Response
+			log.Fatal(err)
+		} else {
+			//Our new UpdateResult
+			fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
+			fmt.Fprintln(w, 1) //Success Response
+		}
+	} else if thefoodUpdate.FoodType == "hamburger" {
+		fmt.Printf("DEBUG: Updating Hamburger at id: %v\n", thefoodUpdate.FoodID)
+		theTimeNow := time.Now()
+		var hamburgerUpdate Hamburger = thefoodUpdate.TheHamburger
+		updatedHamburgerMongo := MongoHamburger{
+			BurgerType:  hamburgerUpdate.BurgerType,
+			Condiments:  []string{hamburgerUpdate.Condiment},
+			Calories:    hamburgerUpdate.Calories,
+			Name:        hamburgerUpdate.Name,
+			UserID:      hamburgerUpdate.UserID,
+			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+		}
+		//Add updatedHotDog to Document collection for Hotdogs
+		ic_collection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
+		filter := bson.D{{"UserID", updatedHamburgerMongo.UserID}}                     //Here's our filter to look for
+		update := bson.D{                                                              //Here is our data to update
+			{"$set", bson.D{
+				{"BurgerType", updatedHamburgerMongo.BurgerType},
+				{"Condiments", updatedHamburgerMongo.Condiments},
+				{"Calories", updatedHamburgerMongo.Calories},
+				{"Name", updatedHamburgerMongo.Name},
+				{"DateUpdated", updatedHamburgerMongo.DateUpdated},
+			}},
+		}
+
+		updateResult, err := ic_collection.UpdateMany(context.TODO(), filter, update)
+		if err != nil {
+			fmt.Fprintln(w, 3) //Failure Response Response
+			log.Fatal(err)
+		} else {
+			//Our new UpdateResult
+			fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
+			fmt.Fprintln(w, 1) //Success Response
+		}
+	} else {
+		fmt.Fprintln(w, 3)
+	}
+}
+
+//DEBUG: Work in Progress
+func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
+	type foodDeletion struct {
+		FoodType string `json:"FoodType"`
+		FoodID   int    `json:"FoodID"`
+	}
+	//Unwrap from JSON
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//Marshal it into our type
+	var theFoodDeletion foodDeletion
+	json.Unmarshal(bs, &theFoodDeletion)
+
+	//Determine if this is a hotdog or hamburger deletion
+	sqlStatement := ""
+	if theFoodDeletion.FoodType == "hotdog" {
+		sqlStatement = "DELETE FROM hot_dogs WHERE ID=?"
+		delDog, err := db.Prepare(sqlStatement)
+		check(err)
+
+		r, err := delDog.Exec(theFoodDeletion.FoodID)
+		check(err)
+
+		n, err := r.RowsAffected()
+		check(err)
+
+		fmt.Printf("%v\n", n)
+
+		fmt.Fprintln(w, 1)
+	} else if theFoodDeletion.FoodType == "hamburger" {
+		sqlStatement = "DELETE FROM hamburgers WHERE ID=?"
+		delDog, err := db.Prepare(sqlStatement)
+		check(err)
+
+		r, err := delDog.Exec(theFoodDeletion.FoodID)
+		check(err)
+
+		n, err := r.RowsAffected()
+		check(err)
+
+		fmt.Printf("%v\n", n)
+
+		fmt.Fprintln(w, 2)
+	} else {
+		fmt.Fprintln(w, 3)
+	}
+}
+
+//This should give a random id value to both food groups
+func randomIDCreation() int {
+	finalID := 0        //The final, unique ID to return to the food/user
+	randInt := 0        //The random integer added onto ID
+	randIntString := "" //The integer built through a string...
+	min, max := 0, 9    //The min and Max value for our randInt
+	foundID := false
+	for foundID == false {
+		for i := 0; i < 8; i++ {
+			randInt = rand.Intn(max-min) + min
+			randIntString = randIntString + strconv.Itoa(randInt)
+		}
+		//Once we have a string of numbers, we can convert it back to an integer
+		theID, err := strconv.Atoi(randIntString)
+		if err != nil {
+			fmt.Printf("We got an error converting a string back to a number, %v\n", err)
+			fmt.Println(err)
+		}
+		//Search all our collections to see if this UserID is unique
+		canExit := true                                                                       //If false, the User ID is found and we need to create a new one
+		user_collection := mongoClient.Database("superdbtest1").Collection("users")           //Here's our collection
+		hotdog_collection := mongoClient.Database("superdbtest1").Collection("hotdogs")       //Here's our collection
+		hamburger_collection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
+		filterUserID := bson.D{{"UserID", theID}}
+		filterFoodID := bson.D{{"FoodID", theID}}
+
+		findOptions := options.Find()
+		findOptions.SetLimit(1)
+
+		// Passing bson.D{{}} as the filter matches all documents in the collection
+		//For User
+		cur, err := user_collection.Find(context.TODO(), filterUserID, findOptions)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//For Hotdogs
+		cur2, err := hotdog_collection.Find(context.TODO(), filterFoodID, findOptions)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//For Hamburgers
+		cur3, err := hamburger_collection.Find(context.TODO(), filterFoodID, findOptions)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		//Run Cursors to see if this ID is found
+		//For Users
+		for cur.Next(context.TODO()) {
+			// create a value into which the single document can be decoded
+			canExit = false //Found value
+		}
+		if err := cur.Err(); err != nil {
+			fmt.Printf("Error using cur for User: \n%v\n", err)
+			log.Fatal(err)
+		}
+		//For HotDogs
+		for cur2.Next(context.TODO()) {
+			// create a value into which the single document can be decoded
+			canExit = false //Found value
+		}
+		if err := cur2.Err(); err != nil {
+			fmt.Printf("Error using cur2 for Hotdog: \n%v\n", err)
+			log.Fatal(err)
+		}
+		//For Hamburgers
+		for cur3.Next(context.TODO()) {
+			// create a value into which the single document can be decoded
+			canExit = false //Found value
+		}
+		if err := cur3.Err(); err != nil {
+			fmt.Printf("Error using cur3 for Hamburger: \n%v\n", err)
+			log.Fatal(err)
+		}
+
+		// Close the cursor once finished
+		cur.Close(context.TODO())
+		cur2.Close(context.TODO())
+		cur3.Close(context.TODO())
+
+		//Final check to see if we can exit this loop
+		if canExit == true {
+			foundID = true
+		} else {
+			foundID = false
+		}
+	}
+
+	return finalID
 }

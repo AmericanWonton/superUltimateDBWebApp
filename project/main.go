@@ -61,6 +61,7 @@ type MongoHotDog struct {
 	Condiments  []string `json:"Condiments"`
 	Calories    int      `json:"Calories"`
 	Name        string   `json:"Name"`
+	FoodID      int      `json:"FoodID"`
 	UserID      int      `json:"UserID"` //User WHOMST this hotDog belongs to
 	DateCreated string   `json:"DateCreated"`
 	DateUpdated string   `json:"DateUpdated"`
@@ -75,6 +76,7 @@ type MongoHamburger struct {
 	Condiments  []string `json:"Condiments"`
 	Calories    int      `json:"Calories"`
 	Name        string   `json:"Name"`
+	FoodID      int      `json:"FoodID"`
 	UserID      int      `json:"UserID"` //User WHOMST this hotDog belongs to
 	DateCreated string   `json:"DateCreated"`
 	DateUpdated string   `json:"DateUpdated"`
@@ -447,7 +449,7 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 			First:       firstname,
 			Last:        lastname,
 			Role:        role,
-			UserID:      theID,
+			UserID:      randomIDCreation(),
 			DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
 			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 			Hotdogs:     MongoHotDogs{},
@@ -523,9 +525,12 @@ func handleRequests() {
 	myRouter.HandleFunc("/updateUsers", updateUsers).Methods("POST")         //Get a Users!
 	myRouter.HandleFunc("/deleteUsers", deleteUsers).Methods("POST")         //DELETE a Users!
 	//Mongo No-SQL Stuff
-	myRouter.HandleFunc("/insertUsers", insertUsers).Methods("POST")           //Post a User!
-	myRouter.HandleFunc("/insertHotDogs", insertHotDogs).Methods("POST")       //Post a Hotdog!
-	myRouter.HandleFunc("/insertHamburgers", insertHamburgers).Methods("POST") //Post a Hamburger!
+	myRouter.HandleFunc("/insertUsers", insertUsers).Methods("POST")                   //Post a User!
+	myRouter.HandleFunc("/insertHotDogs", insertHotDogs).Methods("POST")               //Post Hotdogs!
+	myRouter.HandleFunc("/insertHamburgers", insertHamburgers).Methods("POST")         //Post Hamburgers!
+	myRouter.HandleFunc("/insertHotDogMongo", insertHotDogMongo).Methods("POST")       //Post Hamburgers!
+	myRouter.HandleFunc("/insertHamburgerMongo", insertHamburgerMongo).Methods("POST") //Post Hamburgers!
+	myRouter.HandleFunc("/foodUpdateMongo", foodUpdateMongo).Methods("POST")           //Post Food Update!
 	//Validation Stuff
 	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
 	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames
