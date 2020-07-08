@@ -370,6 +370,7 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 
 //This should give a random id value to both food groups
 func randomIDCreation() int {
+	fmt.Printf("DEBUG: Creating Random ID for User/Food\n")
 	finalID := 0        //The final, unique ID to return to the food/user
 	randInt := 0        //The random integer added onto ID
 	randIntString := "" //The integer built through a string...
@@ -387,67 +388,24 @@ func randomIDCreation() int {
 			fmt.Println(err)
 		}
 		//Search all our collections to see if this UserID is unique
-		canExit := true                                                                       //If false, the User ID is found and we need to create a new one
-		user_collection := mongoClient.Database("superdbtest1").Collection("users")           //Here's our collection
-		hotdog_collection := mongoClient.Database("superdbtest1").Collection("hotdogs")       //Here's our collection
-		hamburger_collection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
-		filterUserID := bson.D{{"UserID", theID}}
-		filterFoodID := bson.D{{"FoodID", theID}}
-
-		findOptions := options.Find()
-		findOptions.SetLimit(1)
-
-		// Passing bson.D{{}} as the filter matches all documents in the collection
-		//For User
-		cur, err := user_collection.Find(context.TODO(), filterUserID, findOptions)
-		if err != nil {
-			log.Fatal(err)
+		canExit := true
+		user_collection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
+		var testAUser AUser
+		theErr := user_collection.FindOne(context.TODO(), bson.M{"userid": theID}).Decode(&testAUser)
+		if theErr != nil {
+			if strings.Contains(theErr.Error(), "no documents in result") {
+				fmt.Printf("It's all good, this document wasn't found for User and our ID is clean.\n")
+			} else {
+				fmt.Printf("DEBUG: We have another error for finding a unique UserID: \n%v\n", theErr)
+				canExit = false
+				log.Fatal(theErr)
+			}
 		}
-		//For Hotdogs
-		cur2, err := hotdog_collection.Find(context.TODO(), filterFoodID, findOptions)
-		if err != nil {
-			log.Fatal(err)
+		if testAUser.UserID == theID {
+			goodToGo = false
+		} else {
+			goodToGo = true
 		}
-		//For Hamburgers
-		cur3, err := hamburger_collection.Find(context.TODO(), filterFoodID, findOptions)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		//Run Cursors to see if this ID is found
-		//For Users
-		for cur.Next(context.TODO()) {
-			// create a value into which the single document can be decoded
-			canExit = false //Found value
-		}
-		if err := cur.Err(); err != nil {
-			fmt.Printf("Error using cur for User: \n%v\n", err)
-			log.Fatal(err)
-		}
-		//For HotDogs
-		for cur2.Next(context.TODO()) {
-			// create a value into which the single document can be decoded
-			canExit = false //Found value
-		}
-		if err := cur2.Err(); err != nil {
-			fmt.Printf("Error using cur2 for Hotdog: \n%v\n", err)
-			log.Fatal(err)
-		}
-		//For Hamburgers
-		for cur3.Next(context.TODO()) {
-			// create a value into which the single document can be decoded
-			canExit = false //Found value
-		}
-		if err := cur3.Err(); err != nil {
-			fmt.Printf("Error using cur3 for Hamburger: \n%v\n", err)
-			log.Fatal(err)
-		}
-
-		// Close the cursor once finished
-		cur.Close(context.TODO())
-		cur2.Close(context.TODO())
-		cur3.Close(context.TODO())
-
 		//Final check to see if we can exit this loop
 		if canExit == true {
 			foundID = true
@@ -457,4 +415,10 @@ func randomIDCreation() int {
 	}
 
 	return finalID
+}
+
+func findUserID(theID int) bool {
+	goodToGo := true
+
+	return goodToGo
 }

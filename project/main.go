@@ -40,16 +40,16 @@ type User struct {
 
 /* Mongo No-SQL Variable Declarations */
 type AUser struct { //Using this for Mongo
-	UserName    string         `json:"UserName"`
-	Password    string         `json:"Password"` //This was formally a []byte but we are changing our code to fit the database better
-	First       string         `json:"First"`
-	Last        string         `json:"Last"`
-	Role        string         `json:"Role"`
-	UserID      int            `json:"UserID"`
-	DateCreated string         `json:"DateCreated"`
-	DateUpdated string         `json:"DateUpdated"`
-	Hotdogs     MongoHotDogs   `json:"Hotdogs"`
-	Hamburgers  MongoHamburger `json:"Hamburgers"`
+	UserName    string          `json:"UserName"`
+	Password    string          `json:"Password"` //This was formally a []byte but we are changing our code to fit the database better
+	First       string          `json:"First"`
+	Last        string          `json:"Last"`
+	Role        string          `json:"Role"`
+	UserID      int             `json:"UserID"`
+	DateCreated string          `json:"DateCreated"`
+	DateUpdated string          `json:"DateUpdated"`
+	Hotdogs     MongoHotDogs    `json:"Hotdogs"`
+	Hamburgers  MongoHamburgers `json:"Hamburgers"`
 }
 
 type TheUsers struct { //Using this for Mongo
@@ -420,7 +420,7 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 				goodNum = true
 			}
 		}
-		fmt.Println("Adding User data to SQL database")
+		fmt.Println("DEBUG: Adding User data to SQL database")
 		//Add User to the SQL Database
 		bsString := []byte(password)                  //Encode Password
 		encodedString := hex.EncodeToString(bsString) //Encode Password Pt2
@@ -442,6 +442,7 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 		}
 
 		//Add User to MongoDB
+		fmt.Printf("DEBUG: Adding User to MongoDB\n")
 		theTimeNow := time.Now()
 		var insertionUser AUser = AUser{
 			UserName:    username,
@@ -453,7 +454,7 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 			DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
 			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 			Hotdogs:     MongoHotDogs{},
-			Hamburgers:  MongoHamburger{},
+			Hamburgers:  MongoHamburgers{},
 		}
 		insertionUsers := TheUsers{
 			Users: []AUser{insertionUser},
