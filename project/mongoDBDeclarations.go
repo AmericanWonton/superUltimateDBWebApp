@@ -402,12 +402,13 @@ func randomIDCreation() int {
 			}
 		}
 		if testAUser.UserID == theID {
-			goodToGo = false
+			canExit = false
 		} else {
-			goodToGo = true
+			canExit = true
 		}
 		//Final check to see if we can exit this loop
 		if canExit == true {
+			finalID = theID
 			foundID = true
 		} else {
 			foundID = false
@@ -415,10 +416,4 @@ func randomIDCreation() int {
 	}
 
 	return finalID
-}
-
-func findUserID(theID int) bool {
-	goodToGo := true
-
-	return goodToGo
 }
