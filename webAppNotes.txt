@@ -115,3 +115,5 @@ MongoDB Notes:
 Warning! You need to be careful when using a VPN. MongoDB only allows connections from certain IPS for the
 cloud, unless you have some stuff set up with Amazon...
 Good examples: https://blog.ruanbekker.com/blog/2019/04/17/mongodb-examples-with-golang/#:~:text=Connecting%20to%20MongoDB%20in%20Golang&text=package%20main%20import%20(%20%22context%22,main()%20%7B%20clientOptions%20%3A%3D%20options.
+Important workaround for driver connections! You need to use Java string!
+https://stackoverflow.com/questions/55660134/cant-connect-to-mongo-cloud-mongodb-database-in-golang-on-ubuntu
