@@ -410,6 +410,9 @@
         var hamSeerDiv = document.getElementById("hamSeer");
         var foodUpdateBtn = document.getElementById("food_UpdateBtn");
         var foodDeleteBtn = document.getElementById("food_deleteBtn");
+        var hotdogsArray = []; //All the hot dog object arrays
+        var hamburgArray = []; //All the hamburger object arrays
+
 
         //When clicked, see all food options
         seeFoodButton.addEventListener("click", function(){
@@ -690,7 +693,12 @@
                 } else {    
                     //Good Selection
                     console.log("DEBUG: Deleting a hotdog");
-                    foodDeleter(foodChoice.value, hotdogIDArray[foodID.value]);
+                    var foodDeletionMongo = {
+                        FoodType: "hotdog", //For hotdog
+                        TheHamburger: hamburgArray[foodChoice.value],
+                        TheHotDog: hotdogsArray[foodChoice.value]
+                    }; //Make JSON to send to food API for Mongo
+                    foodDeleter(foodChoice.value, hotdogIDArray[foodID.value], foodDeletionMongo);
                 }
             } else if (foodChoice.value == "hamburger"){
                 //See if the foodID field was assigned correctly
@@ -700,8 +708,13 @@
                     alert("Please choose an ID for hotdog listed below.");
                 } else {    
                     //Good Selection
+                    var foodDeletionMongo = {
+                        FoodType: "hamburger", //For hotdog
+                        TheHamburger: hamburgArray[foodChoice.value],
+                        TheHotDog: hotdogsArray[foodChoice.value]
+                    }; //Make JSON to send to food API for Mongo
                     console.log("DEBUG: deleting a hamburger");
-                    foodDeleter(foodChoice.value, hamburgerIDArray[foodID.value]);
+                    foodDeleter(foodChoice.value, hamburgerIDArray[foodID.value], foodDeletionMongo);
                 }
             } else {
                 console.log("Error, User selected nothing in the foodchoice" +
@@ -1157,8 +1170,13 @@
                     //location.reload(true);
                 } else {    
                     //Good Selection
+                    var foodDeletionMongo = {
+                        FoodType: "hotdog", //For hotdog
+                        TheHamburger: hamburgArray[foodChoice.value],
+                        TheHotDog: hotdogsArray[foodChoice.value]
+                    }; //Make JSON to send to food API for Mongo
                     console.log("DEBUG: Deleting a hotdog");
-                    foodDeleter(foodChoice.value, hotdogIDArray[foodID.value]);
+                    foodDeleter(foodChoice.value, hotdogIDArray[foodID.value], foodDeletionMongo);
                 }
             } else if (foodChoice.value == "hamburger"){
                 //See if the foodID field was assigned correctly
@@ -1168,8 +1186,13 @@
                     alert("Please choose an ID for hotdog listed below.");
                 } else {    
                     //Good Selection
+                    var foodDeletionMongo = {
+                        FoodType: "hamburger", //For hotdog
+                        TheHamburger: hamburgArray[foodChoice.value],
+                        TheHotDog: hotdogsArray[foodChoice.value]
+                    }; //Make JSON to send to food API for Mongo
                     console.log("DEBUG: deleting a hamburger");
-                    foodDeleter(foodChoice.value, hamburgerIDArray[foodID.value]);
+                    foodDeleter(foodChoice.value, hotdogIDArray[foodID.value], foodDeletionMongo);
                 }
             } else {
                 console.log("Error, User selected nothing in the foodchoice" +

@@ -22,7 +22,7 @@ var theContext context.Context
 
 func connectDB() *mongo.Client {
 	//Setup Mongo connection to Atlas Cluster
-	theClient, err := mongo.NewClient(options.Client().ApplyURI("mongodb+srv://joek:superduperPWord@superdbcluster.kswud.mongodb.net/superdbtest1?retryWrites=true&w=majority"))
+	theClient, err := mongo.NewClient(options.Client().ApplyURI("mongodb://bigjohnny:figleafs@superdbcluster-shard-00-00.kswud.mongodb.net:27017,superdbcluster-shard-00-01.kswud.mongodb.net:27017,superdbcluster-shard-00-02.kswud.mongodb.net:27017/superdbtest1?ssl=true&replicaSet=atlas-pvjlol-shard-0&authSource=admin&retryWrites=true&w=majority"))
 	if err != nil {
 		fmt.Printf("Errored getting mongo client: %v\n", err)
 		log.Fatal(err)
@@ -320,9 +320,11 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 
 //DEBUG: Work in Progress
 func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
+	//Our Food deletion struct
 	type foodDeletion struct {
-		FoodType string `json:"FoodType"`
-		FoodID   int    `json:"FoodID"`
+		FoodType     string    `json:"FoodType"`
+		TheHamburger Hamburger `json:"TheHamburger"`
+		TheHotDog    Hotdog    `json:"TheHotDog"`
 	}
 	//Unwrap from JSON
 	bs, err := ioutil.ReadAll(req.Body)
@@ -334,33 +336,68 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 	json.Unmarshal(bs, &theFoodDeletion)
 
 	//Determine if this is a hotdog or hamburger deletion
-	sqlStatement := ""
 	if theFoodDeletion.FoodType == "hotdog" {
-		sqlStatement = "DELETE FROM hot_dogs WHERE ID=?"
-		delDog, err := db.Prepare(sqlStatement)
-		check(err)
+		/* FIRST DELETE FROM HOTDOG COLLECTION*/
+		hotdogCollection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
+		deletes := []bson.M{
+			{"UserID": theFoodDeletion.TheHotDog.UserID},
+		} //Here's our filter to look for
+		deletes = append(deletes, bson.M{"HotDogType": bson.M{
+			"$eq": foodSlurs[j],
+		}}, bson.M{"Condiments": bson.M{
+			"$eq": foodSlurs[j],
+		}}, bson.M{"Name": bson.M{
+			"$eq": foodSlurs[j],
+		}})
 
-		r, err := delDog.Exec(theFoodDeletion.FoodID)
-		check(err)
+		// create the slice of write models
+		var writes []mongo.WriteModel
 
-		n, err := r.RowsAffected()
-		check(err)
+		for _, del := range deletes {
+			model := mongo.NewDeleteManyModel().SetFilter(del)
+			writes = append(writes, model)
+		}
 
-		fmt.Printf("%v\n", n)
+		// run bulk write
+		res, err := hotdogCollection.BulkWrite(context.TODO(), writes)
+		if err != nil {
+			logWriter("Error writing Mongo Delete Statement")
+			logWriter("\n")
+			logWriter(err.Error())
+			log.Fatal(err)
+		}
+		//Print Results
+		fmt.Printf("Deleted the following documents: %v\n", res.DeletedCount)
+		logWriter("Deleted the following documents: " + string(res.DeletedCount) + "\n")
+
+		/* NOW DELETE FROM USER COLLECITON */
 
 		fmt.Fprintln(w, 1)
 	} else if theFoodDeletion.FoodType == "hamburger" {
-		sqlStatement = "DELETE FROM hamburgers WHERE ID=?"
-		delDog, err := db.Prepare(sqlStatement)
-		check(err)
+		hamburgerCollection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
+		deletes := []bson.M{
+			{"UserID": theFoodDeletion.TheHotDog.UserID},
+		} //Here's our filter to look for
 
-		r, err := delDog.Exec(theFoodDeletion.FoodID)
-		check(err)
+		// create the slice of write models
+		var writes []mongo.WriteModel
 
-		n, err := r.RowsAffected()
-		check(err)
+		for _, del := range deletes {
+			model := mongo.NewDeleteManyModel().SetFilter(del)
+			writes = append(writes, model)
+		}
 
-		fmt.Printf("%v\n", n)
+		// run bulk write
+		res, err := hamburgerCollection.BulkWrite(context.TODO(), writes)
+		if err != nil {
+			logWriter("Error writing Mongo Delete Statement")
+			logWriter("\n")
+			logWriter(err.Error())
+			log.Fatal(err)
+		}
+		//Print Results
+		fmt.Printf("Deleted the following documents: %v\n", res.DeletedCount)
+		logWriter("Deleted the following documents: " + string(res.DeletedCount) + "\n")
 
 		fmt.Fprintln(w, 2)
 	} else {
@@ -389,9 +426,10 @@ func randomIDCreation() int {
 		}
 		//Search all our collections to see if this UserID is unique
 		canExit := true
-		user_collection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
+		//User collection
+		userCollection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
 		var testAUser AUser
-		theErr := user_collection.FindOne(context.TODO(), bson.M{"userid": theID}).Decode(&testAUser)
+		theErr := userCollection.FindOne(context.TODO(), bson.M{"userid": theID}).Decode(&testAUser)
 		if theErr != nil {
 			if strings.Contains(theErr.Error(), "no documents in result") {
 				fmt.Printf("It's all good, this document wasn't found for User and our ID is clean.\n")
@@ -401,6 +439,58 @@ func randomIDCreation() int {
 				log.Fatal(theErr)
 			}
 		}
+		if testAUser.UserID == theID {
+			canExit = false
+		} else {
+			canExit = true
+		}
+		//Check hotdog collection
+		hotdogCollection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
+		var testHotdog MongoHotDog
+		//Give 0 values to determine if these IDs are found
+		theFilter := bson.M{
+			"$or": []interface{}{
+				bson.M{"userid": theID},
+				bson.M{"foodid": theID},
+			},
+		}
+		theErr = hotdogCollection.FindOne(context.TODO(), theFilter).Decode(&testHotdog)
+		if theErr != nil {
+			if strings.Contains(theErr.Error(), "no documents in result") {
+				fmt.Printf("It's all good, this document wasn't found for User and our ID is clean.\n")
+			} else {
+				fmt.Printf("DEBUG: We have another error for finding a unique UserID: \n%v\n", theErr)
+				canExit = false
+				log.Fatal(theErr)
+			}
+		}
+		//Check to see if the ID was found for a hotdog database
+		if testAUser.UserID == theID {
+			canExit = false
+		} else {
+			canExit = true
+		}
+		//Check hamburger collection
+		hamburgerCollection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
+		var testBurger MongoHamburger
+		//Give 0 values to determine if these IDs are found
+		theFilter2 := bson.M{
+			"$or": []interface{}{
+				bson.M{"userid": theID},
+				bson.M{"foodid": theID},
+			},
+		}
+		theErr = hamburgerCollection.FindOne(context.TODO(), theFilter2).Decode(&testBurger)
+		if theErr != nil {
+			if strings.Contains(theErr.Error(), "no documents in result") {
+				fmt.Printf("It's all good, this document wasn't found for User and our ID is clean.\n")
+			} else {
+				fmt.Printf("DEBUG: We have another error for finding a unique UserID: \n%v\n", theErr)
+				canExit = false
+				log.Fatal(theErr)
+			}
+		}
+		//Check to see if the ID was found for a hotdog database
 		if testAUser.UserID == theID {
 			canExit = false
 		} else {
@@ -416,4 +506,71 @@ func randomIDCreation() int {
 	}
 
 	return finalID
+}
+
+//This should return foodIDS for a User or ALL Users for hotdogs
+func getFoodIDSHDog(userID int) []int {
+	var foodIDS []int
+
+	hotdogCollection := mongoClient.Database("superdbtest1").Collection("hotdogs") //here's our collection
+	filter := bson.D{{"foodid", userID}}                                           //Here's our filter to look for
+	//Here's how to find and assign multiple Documents using a cursor
+	// Pass these options to the Find method
+	findOptions := options.Find()
+	//Not needed, mostly for debugging: findOptions.SetLimit(2)
+	cur, err := hotdogCollection.Find(context.TODO(), filter, findOptions)
+	if err != nil {
+		logWriter("Issue finding food for this ID: " + string(userID) + " " + err.Error())
+		log.Fatal(err)
+	}
+	//Loop through results
+	for cur.Next(theContext) {
+		// create a value into which the single document can be decoded
+		var elem MongoHotDog
+		err := cur.Decode(&elem)
+		if err != nil {
+			logWriter("Issue writing the current element for hotdogs: " + err.Error())
+			log.Fatal(err)
+		}
+		foodIDS = append(foodIDS, elem.FoodID)
+	}
+	if err := cur.Err(); err != nil {
+		logWriter("Issue looping through hotdogs: " + err.Error())
+		log.Fatal(err)
+	}
+
+	return foodIDS
+}
+
+func getFoodIDSHam(userID int) []int {
+	var foodIDS []int
+
+	hamburgerCollection := mongoClient.Database("superdbtest1").Collection("hamburgers") //here's our collection
+	filter := bson.D{{"foodid", userID}}                                                 //Here's our filter to look for
+	//Here's how to find and assign multiple Documents using a cursor
+	// Pass these options to the Find method
+	findOptions := options.Find()
+	//Not needed, mostly for debugging: findOptions.SetLimit(2)
+	cur, err := hamburgerCollection.Find(context.TODO(), filter, findOptions)
+	if err != nil {
+		logWriter("Issue finding hamburger food for this ID: " + string(userID) + " " + err.Error())
+		log.Fatal(err)
+	}
+	//Loop through results
+	for cur.Next(theContext) {
+		// create a value into which the single document can be decoded
+		var elem MongoHamburger
+		err := cur.Decode(&elem)
+		if err != nil {
+			logWriter("Issue writing the current element for hamburgers: " + err.Error())
+			log.Fatal(err)
+		}
+		foodIDS = append(foodIDS, elem.FoodID)
+	}
+	if err := cur.Err(); err != nil {
+		logWriter("Issue looping through hamburgers: " + err.Error())
+		log.Fatal(err)
+	}
+
+	return foodIDS
 }

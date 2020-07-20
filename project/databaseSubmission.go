@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const successMessage string = "Successful Insert"
@@ -29,15 +30,28 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 	if strings.Compare(postedHotDog.HotDogType, "DEBUGTYPE") == 0 {
 		postedHotDog.HotDogType = "NONE"
 	}
+	//Fill empty values
+	if postedHotDog.FoodID == 0 || postedHotDog.FoodID < 8 {
+		postedHotDog.FoodID = randomIDCreation()
+	}
+	if len(postedHotDog.DateCreated) < 1 {
+		theTimeNow := time.Now()
+		postedHotDog.DateCreated = theTimeNow.Format("2006-01-02 15:04:05")
+	}
+	if len(postedHotDog.DateUpdated) < 1 {
+		theTimeNow := time.Now()
+		postedHotDog.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
+	}
 
-	stmt, err := db.Prepare("INSERT INTO hot_dogs(TYPE, CONDIMENT, CALORIES, NAME, USER_ID) VALUES(?,?,?,?,?)")
-	defer stmt.Close()
+	stmt, err := db.Prepare("INSERT INTO hot_dogs(TYPE, CONDIMENT, CALORIES, NAME, USER_ID, FOOD_ID, DATE_CREATED, DATE_UPDATED) VALUES(?,?,?,?,?)")
 
-	r, err := stmt.Exec(postedHotDog.HotDogType, postedHotDog.Condiment, postedHotDog.Calories, postedHotDog.Name, postedHotDog.UserID)
+	r, err := stmt.Exec(postedHotDog.HotDogType, postedHotDog.Condiment, postedHotDog.Calories, postedHotDog.Name, postedHotDog.UserID,
+		postedHotDog.FoodID, postedHotDog.DateCreated, postedHotDog.DateUpdated)
 	check(err)
 
 	n, err := r.RowsAffected()
 	check(err)
+	stmt.Close() //Close the SQL
 
 	fmt.Printf("DEBUG: %v rows effected.\n", n)
 
@@ -67,7 +81,6 @@ func getHotDog(w http.ResponseWriter, req *http.Request) {
 	stmt := "SELECT * FROM hot_dogs WHERE NAME = ?"
 	rows, err := db.Query(stmt, postedHotDog.Name)
 	check(err)
-	defer rows.Close()
 	var id int64
 	var dogType string
 	var condiment string
@@ -89,6 +102,7 @@ func getHotDog(w http.ResponseWriter, req *http.Request) {
 		hotDogSlice = append(hotDogSlice, returnedHotDog)
 		count++
 	}
+	rows.Close()
 	//If nothing returned from the rows
 	if count == 0 {
 		fmt.Fprint(w, "Nothing returned for this query.")
@@ -171,20 +185,31 @@ func insertHamburger(w http.ResponseWriter, req *http.Request) {
 	if strings.Compare(postedHamburger.BurgerType, "DEBUGTYPE") == 0 {
 		postedHamburger.BurgerType = "NONE"
 	}
+	//Fill empty values
+	if postedHamburger.FoodID == 0 || postedHamburger.FoodID < 8 {
+		postedHamburger.FoodID = randomIDCreation()
+	}
+	if len(postedHamburger.DateCreated) < 1 {
+		theTimeNow := time.Now()
+		postedHamburger.DateCreated = theTimeNow.Format("2006-01-02 15:04:05")
+	}
+	if len(postedHamburger.DateUpdated) < 1 {
+		theTimeNow := time.Now()
+		postedHamburger.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
+	}
 
-	fmt.Printf("DEBUG: HERE IS OUR postedHamburger: \n%v\n", postedHamburger)
-
-	stmt, err := db.Prepare("INSERT INTO hamburgers(TYPE, CONDIMENT, CALORIES, NAME, USER_ID) VALUES(?,?,?,?,?)")
-	defer stmt.Close()
+	stmt, err := db.Prepare("INSERT INTO hamburgers(TYPE, CONDIMENT, CALORIES, NAME, USER_ID, FOOD_ID, DATE_CREATED, DATE_UPDATED) VALUES(?,?,?,?,?,?,?,?)")
 
 	r, err := stmt.Exec(postedHamburger.BurgerType, postedHamburger.Condiment,
-		postedHamburger.Calories, postedHamburger.Name, postedHamburger.UserID)
+		postedHamburger.Calories, postedHamburger.Name, postedHamburger.UserID, postedHamburger.FoodID, postedHamburger.DateCreated, postedHamburger.DateUpdated)
 	check(err)
 
 	n, err := r.RowsAffected()
 	check(err)
 
 	fmt.Printf("DEBUG: %v rows effected.\n", n)
+
+	stmt.Close() //Close the SQL
 
 	if err != nil {
 		fmt.Fprint(w, failureMessage)
@@ -231,6 +256,8 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	var hamburgerSlice []Hamburger
 	var hotDogIDSlice []int
 	var hamburgIDSlice []int
+	var hDogMongoIDS []int
+	var hamMonogIDS []int
 
 	//Assemble data to send back
 	type data struct {
@@ -239,6 +266,8 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 		TheHamburgers  []Hamburger `json:"TheHamburgers:`
 		ID_HotDogs     []int       `json:"ID_HotDogs"`
 		ID_Hamburgers  []int       `json:"ID_Hamburgers"`
+		HDogFoodIDS    []int       `json:"HDogFoodIDS"`
+		HamFoodIDS     []int       `json:"HamFoodIDS"`
 	}
 
 	//Counter for food returned
@@ -250,7 +279,6 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 		//Get HotDogs
 		hrows, err1 := db.Query(`SELECT * FROM hot_dogs ORDER BY ID;`)
 		check(err1)
-		defer hrows.Close()
 
 		for hrows.Next() {
 			err = hrows.Scan(&h_id, &h_dogType, &h_condiment, &h_calories, &h_hotdogName, &h_userID)
@@ -269,10 +297,12 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 			dogCounter = dogCounter + 1
 		}
 
+		//Get Mongo Food IDS for Hot Dogs
+		hDogMongoIDS = getFoodIDSHDog(theUser.UserID)
+
 		//Get Hamburgers
 		hamrows, err2 := db.Query(`SELECT * FROM hamburgers ORDER BY ID`)
 		check(err2)
-		defer hamrows.Close()
 
 		for hamrows.Next() {
 			err = hamrows.Scan(&ham_id, &ham_type, &ham_condiment, &ham_calories, &ham_name, &ham_userID)
@@ -289,11 +319,16 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 			hamburgIDSlice = append(hamburgIDSlice, ham_id)
 			hamCounter = hamCounter + 1
 		}
+
+		//Get Mongo Food IDS for Hamburgers
+		hamMonogIDS = getFoodIDSHam(theUser.UserID)
+		//Close Connections
+		hrows.Close()
+		hamrows.Close()
 	} else {
 		//Get HotDogs
 		hrows, err1 := db.Query(`SELECT * FROM hot_dogs WHERE USER_ID=? ORDER BY ID;`, theUser.UserID)
 		check(err1)
-		defer hrows.Close()
 
 		for hrows.Next() {
 			err = hrows.Scan(&h_id, &h_dogType, &h_condiment, &h_calories, &h_hotdogName, &h_userID)
@@ -315,7 +350,6 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 		//Get Hamburgers
 		hamrows, err2 := db.Query(`SELECT * FROM hamburgers WHERE USER_ID=? ORDER BY ID`, theUser.UserID)
 		check(err2)
-		defer hamrows.Close()
 
 		for hamrows.Next() {
 			err = hamrows.Scan(&ham_id, &ham_type, &ham_condiment, &ham_calories, &ham_name, &ham_userID)
@@ -332,6 +366,9 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 			hamburgIDSlice = append(hamburgIDSlice, ham_id)
 			hamCounter = hamCounter + 1
 		}
+		//Close Connections
+		hrows.Close()
+		hamrows.Close()
 	}
 
 	//Check to see if we have any data to submit
@@ -341,6 +378,8 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 		TheHamburgers:  hamburgerSlice,
 		ID_HotDogs:     hotDogIDSlice,
 		ID_Hamburgers:  hamburgIDSlice,
+		HDogFoodIDS:    hDogMongoIDS,
+		HamFoodIDS:     hamMonogIDS,
 	}
 
 	if len(sendData.TheHotDogs) <= 0 && len(sendData.TheHamburgers) <= 0 {
@@ -404,14 +443,14 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 		fmt.Printf("DEBUG: Updating hotdog at id: %v\n", thefoodUpdate.FoodID)
 		var updatedHotdog Hotdog = thefoodUpdate.TheHotDog
 		sqlStatement = "UPDATE hot_dogs SET TYPE=?, CONDIMENT=?, CALORIES=?," +
-			"NAME=?, USER_ID=? WHERE ID=?"
+			"NAME=?, USER_ID=?, DATE_UPDATED=? WHERE ID=?"
 
 		stmt, err := db.Prepare(sqlStatement)
 		check(err)
-
+		theTimeNow := time.Now()
 		r, err := stmt.Exec(updatedHotdog.HotDogType, updatedHotdog.Condiment,
 			updatedHotdog.Calories, updatedHotdog.Name, updatedHotdog.UserID,
-			thefoodUpdate.FoodID)
+			theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID)
 		check(err)
 
 		n, err := r.RowsAffected()
@@ -424,14 +463,14 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 	} else if thefoodUpdate.FoodType == "hamburger" {
 		var updatedHamburger Hamburger = thefoodUpdate.TheHamburger
 		sqlStatement = "UPDATE hamburgers SET TYPE=?, CONDIMENT=?, CALORIES=?," +
-			"NAME=?, USER_ID=? WHERE ID=?"
+			"NAME=?, USER_ID=?, DATE_UPDATED=? WHERE ID=?"
 
 		stmt, err := db.Prepare(sqlStatement)
 		check(err)
-
+		theTimeNow := time.Now()
 		r, err := stmt.Exec(updatedHamburger.BurgerType, updatedHamburger.Condiment,
 			updatedHamburger.Calories, updatedHamburger.Name, updatedHamburger.UserID,
-			thefoodUpdate.FoodID)
+			theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID)
 		check(err)
 
 		n, err := r.RowsAffected()
@@ -460,15 +499,15 @@ func insertUser(w http.ResponseWriter, req *http.Request) {
 	json.Unmarshal(bs, &postedUser)
 
 	//Add User to the SQL Database
-	stmt, err := db.Prepare("INSERT INTO users(USERNAME, PASSWORD, FIRSTNAME, LASTNAME, ROLE, USER_ID) VALUES(?,?,?,?,?,?)")
-	defer stmt.Close()
+	stmt, err := db.Prepare("INSERT INTO users(USERNAME, PASSWORD, FIRSTNAME, LASTNAME, ROLE, USER_ID, DATE_CREATED, DATE_UPDATED) VALUES(?,?,?,?,?,?)")
 
 	r, err := stmt.Exec(postedUser.UserName, postedUser.Password, postedUser.First,
-		postedUser.Last, postedUser.Role, postedUser.UserID)
+		postedUser.Last, postedUser.Role, postedUser.UserID, postedUser.DateCreated, postedUser.DateUpdated)
 	check(err)
 
 	n, err := r.RowsAffected()
 	check(err)
+	stmt.Close()
 
 	fmt.Printf("Inserted Record: %v\n", n)
 }
@@ -512,7 +551,6 @@ func getUsers(w http.ResponseWriter, req *http.Request) {
 		stmt := "SELECT * FROM users WHERE USER_ID = ?"
 		rows, err := db.Query(stmt, anID)
 		check(err)
-		defer rows.Close()
 
 		//Get User returned
 		for rows.Next() {
@@ -521,6 +559,7 @@ func getUsers(w http.ResponseWriter, req *http.Request) {
 			check(err)
 			theReturnedUsers = append(theReturnedUsers, aUser)
 		}
+		rows.Close()
 	}
 
 	//Check to see if theReturnedUsers got nothing; else, send the full JSON
@@ -564,20 +603,20 @@ func updateUsers(w http.ResponseWriter, req *http.Request) {
 	for x := 0; x < len(submittedUsers.TheUsers); x++ {
 		anID := submittedUsers.TheUsers[x].UserID //Assign 1 ID to a variable
 		//Run Query on that ID
-		stmt := "UPDATE users SET USERNAME=?, PASSWORD=?, FIRSTNAME=?, LASTNAME=?, ROLE=?" +
+		stmt := "UPDATE users SET USERNAME=?, PASSWORD=?, FIRSTNAME=?, LASTNAME=?, ROLE=?, DATE_UPDATED=?" +
 			" WHERE USER_ID=?"
 		theStmt, err := db.Prepare(stmt)
 		check(err)
-		defer theStmt.Close()
-
+		theTimeNow := time.Now()
 		r, err := theStmt.Exec(submittedUsers.TheUsers[x].UserName, submittedUsers.TheUsers[x].Password,
 			submittedUsers.TheUsers[x].First, submittedUsers.TheUsers[x].Last,
-			submittedUsers.TheUsers[x].Role, anID)
+			submittedUsers.TheUsers[x].Role, theTimeNow.Format("2006-01-02 15:04:05"), anID)
 		check(err)
 
 		n, err := r.RowsAffected()
 		check(err)
 
+		theStmt.Close()
 		returnedString = returnedString + " " + "updated at ID " + string(anID) + " " + string(n)
 	}
 

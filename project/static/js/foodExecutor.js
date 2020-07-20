@@ -65,7 +65,10 @@ function revealFoodForm(foodChoice) {
                 Condiment: "",
                 Calories: Number(caloriesType.value),
                 Name: "",
-                UserID: 0
+                UserID: userID,
+                FoodID: 0,
+                DateCreated: "",
+                DateUpdated: ""
             };
             
             toSend.HotDogType = hDogType.value;
@@ -208,7 +211,10 @@ function revealFoodForm(foodChoice) {
                 Condiment: "",
                 Calories: Number(caloriesType.value),
                 Name: "",
-                UserID: 0
+                UserID: 0,
+                FoodID: 0,
+                DateCreated: "",
+                DateUpdated: ""
             };
             
             toSend.HamburgerType = hamburgType.value;
@@ -359,7 +365,10 @@ function revealFoodForm(foodChoice) {
                 Condiment: "",
                 Calories: Number(caloriesType.value),
                 Name: "",
-                UserID: 0
+                UserID: 0,
+                FoodID: 0,
+                DateCreated: "",
+                DateUpdated: ""
             };
             var theIDNumber = Number(userIDInput.value);
             toSend.HotDogType = hDogType.value;
@@ -516,7 +525,10 @@ function revealFoodForm(foodChoice) {
                 Condiment: "",
                 Calories: Number(caloriesType.value),
                 Name: "",
-                UserID: 0
+                UserID: 0,
+                FoodID: 0,
+                DateCreated: "",
+                DateUpdated: ""
             };
             var theIDNumber = Number(userIDInput.value);
             toSend.HamburgerType = hamburgType.value;

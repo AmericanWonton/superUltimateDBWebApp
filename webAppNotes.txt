@@ -64,7 +64,7 @@ KeyPair(Make sure you chmod 400 this, first!):
  D:\Go_Workspace\src\superUltimateDBWebApp\superUltimateDBWebApp\security\kp-superDB.pem
 KeyPair Login: ssh -i /d/goworkspace/src/superUltimateDBWebApp/superUltimateDBWebApp/security/kp-superDB.pem ubuntu@ec2-3-135-9-238.us-east-2.compute.amazonaws.com
 To 'Secure Copy' a file into our server:
-scp -i /d/goworkspace/src/superUltimateDBWebApp/superUltimateDBWebApp/security/kp-superDB.pem superdbautogentest3 ubuntu@ec2-3-135-9-238.us-east-2.compute.amazonaws.com:
+scp -i /d/goworkspace/src/superUltimateDBWebApp/superUltimateDBWebApp/security/kp-superDB.pem superdbautogentest ubuntu@ec2-3-135-9-238.us-east-2.compute.amazonaws.com:
 //DON'T FORGET THAT COLON AT THE END, IT PUTS THE FILE IN THE ROOT DIRECTORY
 // You should be able to see it when logging in and typing ls
 //To build your binary for Ubuntu:
@@ -103,7 +103,7 @@ https://pkg.go.dev/github.com/gobuffalo/packr/v2/packr2?tab=overview
 after running packr2 -v and making a change to the project, you might need to run 
 packr2 clean and run packr2 -v again to update your changes
 Running all Go files into a binary: https://stackoverflow.com/questions/10838469/how-to-compile-go-program-consisting-of-multiple-files/61793820#61793820
-To build ALL go files, try running  GOOS=linux GOARCH=amd64 packr2 build -o superdbautogentest3 . //You get all files in a directory, PLUS the name flag
+To build ALL go files, try running  GOOS=linux GOARCH=amd64 packr2 build -o superdbautogentest . //You get all files in a directory, PLUS the name flag
 
 Enabling Cronjobs on Linux Systems: 
 https://www.digitalocean.com/community/tutorials/how-to-use-cron-to-automate-tasks-ubuntu-1804

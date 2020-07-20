@@ -124,16 +124,18 @@ function foodChanger(whichFood, whichChoice, hamburgObj, hotdogObj){
     xhr.send(jsonString);
 }
 
-function foodDeleter(whichFood, whichChoice){
+function foodDeleter(whichFood, whichChoice, mongoFoodDeletion){
     console.log("DEBUG: Reached the foodDeleter.");
     var foodDeletion = {
         FoodType: whichFood,
         FoodID: whichChoice
-    }; //Make JSON to send to food API
+    }; //Make JSON to send to food API for SQL
 
     console.log(foodDeletion);
 
     var jsonString = JSON.stringify(foodDeletion);
+
+    var jsonMongoString = JSON.stringify(mongoFoodDeletion)
 
     //Call Ajax to delete the foodRecord(SQL Database)
     var xhr = new XMLHttpRequest();
@@ -170,21 +172,21 @@ function foodDeleter(whichFood, whichChoice){
             var item = xhr.responseText;
             if (item == 1){
                 console.log(item);
-                alert("Hotdog successfully deleted");
+                alert("Hotdog successfully deleted in Mongo");
                 location.reload(true);
             }else if (item == 2){
                 console.log(item);
-                alert("Hamburger Deleted");
+                alert("Hamburger Deleted in Mongo");
                 location.reload(true);
             } else if (item == 3) {
                 console.log(item);
-                alert("Trouble deleting food item");
+                alert("Trouble deleting food item in Mongo");
                 location.reload(true);
             } else {
-                console.log("Unexpected output at foodDeletion function: " + item);
+                console.log("Unexpected output at foodDeletion function for Mongo: " + item);
                 location.reload(true);
             }
         }
     });
-    xhr.send(jsonString);
+    xhr.send(jsonMongoString);
 }

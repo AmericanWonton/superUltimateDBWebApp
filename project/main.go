@@ -30,12 +30,14 @@ import (
 
 //Here's our User struct
 type User struct {
-	UserName string `json:"UserName"`
-	Password string `json:"Password"` //This was formally a []byte but we are changing our code to fit the database better
-	First    string `json:"First"`
-	Last     string `json:"Last"`
-	Role     string `json:"Role"`
-	UserID   int    `json:"UserID"`
+	UserName    string `json:"UserName"`
+	Password    string `json:"Password"` //This was formally a []byte but we are changing our code to fit the database better
+	First       string `json:"First"`
+	Last        string `json:"Last"`
+	Role        string `json:"Role"`
+	UserID      int    `json:"UserID"`
+	DateCreated string `json:"DateCreated"`
+	DateUpdated string `json:"DateUpdated"`
 }
 
 /* Mongo No-SQL Variable Declarations */
@@ -88,19 +90,25 @@ type MongoHamburgers struct {
 
 //Below is our struct for Hotdogs/Hamburgers(standard SQL)
 type Hotdog struct {
-	HotDogType string `json:"HotDogType"`
-	Condiment  string `json:"Condiment"`
-	Calories   int    `json:"Calories"`
-	Name       string `json:"Name"`
-	UserID     int    `json:"UserID"` //User WHOMST this hotDog belongs to
+	HotDogType  string `json:"HotDogType"`
+	Condiment   string `json:"Condiment"`
+	Calories    int    `json:"Calories"`
+	Name        string `json:"Name"`
+	UserID      int    `json:"UserID"` //User WHOMST this hotDog belongs to
+	FoodID      int    `json:"FoodID"`
+	DateCreated string `json:"DateCreated"`
+	DateUpdated string `json:"DateUpdated"`
 }
 
 type Hamburger struct {
-	BurgerType string `json:"BurgerType"`
-	Condiment  string `json:"Condiment"`
-	Calories   int    `json:"Calories"`
-	Name       string `json:"Name"`
-	UserID     int    `json:"UserID"` //User WHOMST this hotDog belongs to
+	BurgerType  string `json:"BurgerType"`
+	Condiment   string `json:"Condiment"`
+	Calories    int    `json:"Calories"`
+	Name        string `json:"Name"`
+	UserID      int    `json:"UserID"` //User WHOMST this hotDog belongs to
+	FoodID      int    `json:"FoodID"`
+	DateCreated string `json:"DateCreated"`
+	DateUpdated string `json:"DateUpdated"`
 }
 
 //Here is our ViewData struct
@@ -276,9 +284,13 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		var returnedLName string = ""
 		var returnedRole string = ""
 		var returnedUserID int = 0
+		var returnedDateCreated string = ""
+		var returnedDateUpdated string = ""
+
 		for rows.Next() {
 			//assign variable
-			err = rows.Scan(&returnedTableID, &returnedUsername, &returnedPassword, &returnedFName, &returnedLName, &returnedRole, &returnedUserID)
+			err = rows.Scan(&returnedTableID, &returnedUsername, &returnedPassword, &returnedFName, &returnedLName, &returnedRole, &returnedUserID,
+				&returnedDateCreated, &returnedDateUpdated)
 			check(err)
 		}
 		//Count to see if password/Username returned at all
@@ -303,7 +315,8 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 					//Username matched, password matched good stuff
 					//User logged in, directing them to the mainpage
 					//Going to main page, passing values
-					theUser := User{username, returnedPassword, returnedFName, returnedLName, returnedRole, returnedUserID}
+					theUser := User{username, returnedPassword, returnedFName, returnedLName, returnedRole, returnedUserID,
+						returnedDateCreated, returnedDateUpdated}
 					dbUsers[username] = theUser
 					// create session
 					uuidWithHyphen := uuid.New().String()
@@ -424,13 +437,16 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 		//Add User to the SQL Database
 		bsString := []byte(password)                  //Encode Password
 		encodedString := hex.EncodeToString(bsString) //Encode Password Pt2
+		theTimeNow := time.Now()
 		var insertedUser User = User{
-			UserName: username,
-			Password: encodedString,
-			First:    firstname,
-			Last:     lastname,
-			Role:     role,
-			UserID:   theID,
+			UserName:    username,
+			Password:    encodedString,
+			First:       firstname,
+			Last:        lastname,
+			Role:        role,
+			UserID:      theID,
+			DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
+			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 		}
 		jsonValue, _ := json.Marshal(insertedUser)
 		response, err := http.Post("http://localhost:80/insertUser", "application/json", bytes.NewBuffer(jsonValue))
@@ -443,7 +459,6 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 
 		//Add User to MongoDB
 		fmt.Printf("DEBUG: Adding User to MongoDB\n")
-		theTimeNow := time.Now()
 		var insertionUser AUser = AUser{
 			UserName:    username,
 			Password:    encodedString,
