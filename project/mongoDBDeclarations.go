@@ -574,3 +574,166 @@ func getFoodIDSHam(userID int) []int {
 
 	return foodIDS
 }
+
+func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
+	//Get the byte slice from the request
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//Marshal it into our type
+	var theUser User
+	json.Unmarshal(bs, &theUser)
+
+	//Delcare our array of food returned
+	var returnedHotDogs []MongoHotDog
+	var returnedHamburgers []MongoHamburger
+	//Declare data struct to send back
+	type data struct {
+		SuccessMessage string           `json:"SuccessMessage"`
+		TheHotDogs     []MongoHotDog    `json:"TheHotDogs"`
+		TheHamburgers  []MongoHamburger `json:"TheHamburgers:`
+	}
+
+	//Search for UserID or for all
+	hotdogCollection := mongoClient.Database("superdbtest1").Collection("hotdogs")       //Here's our collection
+	hamburgerCollection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
+	if theUser.UserID == 0 {
+		//Query Mongo for all hotdogs
+		theFilter := bson.D{{}}
+		findOptions := options.Find()
+		curHDog, err := hotdogCollection.Find(theContext, theFilter, findOptions)
+		if err != nil {
+			if strings.Contains(err.Error(), "no documents in result") {
+				fmt.Printf("No documents were returned for hotdogs in MongoDB: %v\n", err.Error())
+				logWriter("No documents were returned in MongoDB for Hotdogs: " + err.Error())
+			} else {
+				fmt.Printf("There was an error returning hotdogs: %v\n", err.Error())
+				logWriter("There was an error returning hotdogs in Mongo: " + err.Error())
+				log.Fatal(err)
+			}
+		}
+		//Loop over query results and fill hotdogs array
+		for curHDog.Next(theContext) {
+			// create a value into which the single document can be decoded
+			var aHotDog MongoHotDog
+			err := curHDog.Decode(&aHotDog)
+			if err != nil {
+				fmt.Printf("Error decoding hotdogs in MongoDB: %v\n", err.Error())
+				logWriter("Error decoding hotdogs in MongoDB: " + err.Error())
+				log.Fatal(err)
+			}
+			returnedHotDogs = append(returnedHotDogs, aHotDog)
+		}
+		// Close the cursor once finished
+		curHDog.Close(theContext)
+
+		//Query Mongo for all Hamburgers
+		curHam, err := hamburgerCollection.Find(theContext, theFilter, findOptions)
+		if err != nil {
+			if strings.Contains(err.Error(), "no documents in result") {
+				fmt.Printf("No documents were returned for hamburgeres in MongoDB: %v\n", err.Error())
+				logWriter("No documents were returned in MongoDB for hamburgers: " + err.Error())
+			} else {
+				fmt.Printf("There was an error returning hamburgers: %v\n", err.Error())
+				logWriter("There was an error returning hamburgers in Mongo: " + err.Error())
+				log.Fatal(err)
+			}
+		}
+
+		//Loop over query results and fill hotdogs array
+		for curHam.Next(theContext) {
+			// create a value into which the single document can be decoded
+			var aHamburger MongoHamburger
+			err := curHDog.Decode(&aHamburger)
+			if err != nil {
+				fmt.Printf("Error decoding hamburgers in MongoDB: %v\n", err.Error())
+				logWriter("Error decoding hamburgers in MongoDB: " + err.Error())
+				log.Fatal(err)
+			}
+			returnedHamburgers = append(returnedHamburgers, aHamburger)
+		}
+
+		// Close the cursor once finished
+		curHam.Close(theContext)
+	} else {
+		//Query Mongo for all hotdogs
+		theFilter := bson.D{{"userid", theUser.UserID}}
+		findOptions := options.Find()
+		curHDog, err := hotdogCollection.Find(theContext, theFilter, findOptions)
+		if err != nil {
+			if strings.Contains(err.Error(), "no documents in result") {
+				fmt.Printf("No documents were returned for hotdogs in MongoDB: %v\n", err.Error())
+				logWriter("No documents were returned in MongoDB for Hotdogs: " + err.Error())
+			} else {
+				fmt.Printf("There was an error returning hotdogs: %v\n", err.Error())
+				logWriter("There was an error returning hotdogs in Mongo: " + err.Error())
+				log.Fatal(err)
+			}
+		}
+		//Loop over query results and fill hotdogs array
+		for curHDog.Next(theContext) {
+			// create a value into which the single document can be decoded
+			var aHotDog MongoHotDog
+			err := curHDog.Decode(&aHotDog)
+			if err != nil {
+				fmt.Printf("Error decoding hotdogs in MongoDB: %v\n", err.Error())
+				logWriter("Error decoding hotdogs in MongoDB: " + err.Error())
+				log.Fatal(err)
+			}
+			returnedHotDogs = append(returnedHotDogs, aHotDog)
+		}
+		// Close the cursor once finished
+		curHDog.Close(theContext)
+
+		//Query Mongo for all Hamburgers
+		curHam, err := hamburgerCollection.Find(theContext, theFilter, findOptions)
+		if err != nil {
+			if strings.Contains(err.Error(), "no documents in result") {
+				fmt.Printf("No documents were returned for hamburgers in MongoDB: %v\n", err.Error())
+				logWriter("No documents were returned in MongoDB for hamburgers: " + err.Error())
+			} else {
+				fmt.Printf("There was an error returning hamburgers: %v\n", err.Error())
+				logWriter("There was an error returning hamburgers in Mongo: " + err.Error())
+				log.Fatal(err)
+			}
+		}
+
+		//Loop over query results and fill hotdogs array
+		for curHam.Next(theContext) {
+			// create a value into which the single document can be decoded
+			var aHamburger MongoHamburger
+			err := curHDog.Decode(&aHamburger)
+			if err != nil {
+				fmt.Printf("Error decoding hamburgers in MongoDB: %v\n", err.Error())
+				logWriter("Error decoding hamburgers in MongoDB: " + err.Error())
+				log.Fatal(err)
+			}
+			returnedHamburgers = append(returnedHamburgers, aHamburger)
+		}
+
+		// Close the cursor once finished
+		curHam.Close(theContext)
+	}
+	//Assemble data to return
+	sendData := data{
+		SuccessMessage: "Success",
+		TheHotDogs:     returnedHotDogs,
+		TheHamburgers:  returnedHamburgers,
+	}
+
+	//Do a wellness check for the data
+	if len(sendData.TheHotDogs) <= 0 && len(sendData.TheHamburgers) <= 0 {
+		sendData.SuccessMessage = "Failure"
+	}
+	//Marshal data to JSON
+	dataJSON, err := json.Marshal(sendData)
+	if err != nil {
+		fmt.Println("There's an error marshalling.")
+		logWriter("There's an error marshalling.")
+	}
+
+	fmt.Fprintf(w, string(dataJSON))
+
+}

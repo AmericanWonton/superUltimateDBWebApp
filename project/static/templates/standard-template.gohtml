@@ -410,8 +410,6 @@
         var hamSeerDiv = document.getElementById("hamSeer");
         var foodUpdateBtn = document.getElementById("food_UpdateBtn");
         var foodDeleteBtn = document.getElementById("food_deleteBtn");
-        var hotdogsArray = []; //All the hot dog object arrays
-        var hamburgArray = []; //All the hamburger object arrays
 
 
         //When clicked, see all food options
@@ -437,35 +435,40 @@
                         var hotdogsGoodCount = true; //Used for not displaying hotdogs
                         var hamburgerGoodCount = true; //Used for displaying hotdogs
                         //Update Hotdog and Hamburger Arrays
-                        if (dataOBJ.TheHamburgers[0].BurgerType == "DEBUGTYPE"){
+                        //Update Hamburger Arrays
+                        if (dataOBJ.TheHamburgers.length == 0){
                             console.log("DEBUG: We have no burgers to deliver");
                             hamburgerGoodCount = false;
                         } else {
-                            for (var x = 0; x < dataOBJ.ID_Hamburgers.length; x++) {
-                                hamburgerIDArray.push(dataOBJ.ID_Hamburgers[x]);
+                            for (var x = 0; x < dataOBJ.TheHamburgers.length; x++) {
                                 hamburgerChoice = hamburgerChoice + 1;
                                 aHamburger.BurgerType = dataOBJ.TheHamburgers[x].BurgerType;
-                                aHamburger.Condiment = dataOBJ.TheHamburgers[x].Condiment;
+                                aHamburger.Condiments = dataOBJ.TheHamburgers[x].Condiments;
                                 aHamburger.Calories = dataOBJ.TheHamburgers[x].Calories;
                                 aHamburger.Name = dataOBJ.TheHamburgers[x].Name;
+                                aHamburger.FoodID = dataOBJ.TheHamburgers[x].FoodID;
                                 aHamburger.UserID = dataOBJ.TheHamburgers[x].UserID;
+                                aHamburger.DateCreated = dataOBJ.TheHamburgers[x].DateCreated;
+                                aHamburger.DateUpdated = dataOBJ.TheHamburgers[x].DateUpdated;
                                 hamburgArray.push(aHamburger); //Add the Hamburger to the Hamburger array
                             }
                         }
-                        
-                        if (dataOBJ.TheHotDogs[0].HotDogType == "DEBUGTYPE"){
-                            console.log("DEBUG: WE AIN'T FOUND SHIT FOR HOTDOGS");
+                        //Update Hotdog arrays
+                        if (dataOBJ.TheHotDogs.length == 0){
+                            console.log("DEBUG: NO HOT DOGS TO UPDATE");
                             hotdogsGoodCount = false;
                         } else {
-                            for (var y = 0; y < dataOBJ.ID_HotDogs.length; y++) {
+                            for (var y = 0; y < dataOBJ.TheHotDogs.length; y++) {
                                 console.log("DEBUG: We're adding hotdogs ids");
-                                hotdogIDArray.push(dataOBJ.ID_HotDogs[y]);
                                 hotDogChoice = hotDogChoice + 1;
                                 aHotDog.HotDogType = dataOBJ.TheHotDogs[y].HotDogType;
-                                aHotDog.Condiment = dataOBJ.TheHotDogs[y].Condiment;
+                                aHotDog.Condiments = dataOBJ.TheHotDogs[y].Condiments;
                                 aHotDog.Calories = dataOBJ.TheHotDogs[y].Calories;
                                 aHotDog.Name = dataOBJ.TheHotDogs[y].Name;
+                                aHotDog.FoodID = dataOBJ.TheHotDogs[y].FoodID;
                                 aHotDog.UserID = dataOBJ.TheHotDogs[y].UserID;
+                                aHotDog.DateCreated = dataOBJ.TheHotDogs[y].DateCreated;
+                                aHotDog.DateUpdated = dataOBJ.TheHotDogs[y].DateUpdated;
                                 hotdogsArray.push(aHotDog); //Add the hotdog to the hotdog array
                             }
                         }
@@ -474,7 +477,7 @@
                         if (hamburgerGoodCount == false){
                             console.log("We won't be displaying hamburgers.");
                         } else {
-                            for (var y = 0; y < dataOBJ.ID_Hamburgers.length; y++) {
+                            for (var y = 0; y < dataOBJ.TheHamburgers.length; y++) {
                                 //Create container for Hamburger info
                                 var udContainerDiv = document.createElement("div");
                                 udContainerDiv.setAttribute("id", "udContainerDiv");
@@ -559,6 +562,54 @@
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
+                                //Create FoodID Info Section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "FoodID";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHamburgers[y].FoodID;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create DateCreated Info Section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "DateCreated";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHamburgers[y].DateCreated;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create DateUpdated Info Section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "DateCreated";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHamburgers[y].DateCreated;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                 
                                 //All the divs fields for the container are added. Add this to the hamseer!
                                 hamSeerDiv.appendChild(udContainerDiv);
                             }

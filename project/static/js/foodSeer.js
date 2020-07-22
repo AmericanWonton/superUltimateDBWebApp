@@ -15,6 +15,8 @@ var hotdogIDArray = new Array(); //Declare Array for id reference use
 var hamburgerIDArray = new Array(); //Declare Array for id reference use
 var hotdogsArray = new Array(); //All the hot dog object arrays
 var hamburgArray = new Array(); //All the hamburger object arrays
+var mongoHotDogFoodID = new Array(); //All of the Mongo food IDS for Hotdogs
+var mongoHamburgerFoodID = new Array(); //All of the Mongo Food IDS for Hamburgers
 var hamburgerChoice = 1; //When the User updates data, this displays the seletced Burger Choices
 var hotDogChoice = 1; //When the User updates data, this displays the seletced Hotdog Choices
 var toSend = {
@@ -25,19 +27,26 @@ var toSend = {
     Role:     "",
     UserID:   0
 };
+var emptyArray = new Array(); //only used to put this value in aHotdog and aHamburger
 var aHotDog = {
     HotDogType: "",
-    Condiment: "",
+    Condiments: emptyArray,
     Calories: 0,
     Name: "",
-    UserID: 0
+    FoodID: 0,
+    UserID: 0,
+    DateCreated: "",
+    DateUpdated: ""
 }
 var aHamburger = {
     BurgerType: "",
-    Condiment: "",
+    Condiments: emptyArray,
     Calories: 0,
     Name: "",
-    UserID: 0
+    FoodID: 0,
+    UserID: 0,
+    DateCreated: "",
+    DateUpdated: ""
 }
 
 function elementPasser(seeFood, foodSeer, foodUpDate, hdogSeer, hamSeer, foodUpdateButton, foodDeleteButton){
