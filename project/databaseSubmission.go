@@ -491,25 +491,49 @@ func insertUser(w http.ResponseWriter, req *http.Request) {
 	//Get the byte slice from the request body ajax
 	bs, err := ioutil.ReadAll(req.Body)
 	if err != nil {
+		fmt.Printf("We go an error reading the JSON: %v\n", err.Error())
 		fmt.Println(err)
 	}
+
+	fmt.Printf("DEBUG: HERE IS OUR BS: %v\n", bs)
 
 	//Marshal it into our type
 	var postedUser User
 	json.Unmarshal(bs, &postedUser)
 
 	//Add User to the SQL Database
-	stmt, err := db.Prepare("INSERT INTO users(USERNAME, PASSWORD, FIRSTNAME, LASTNAME, ROLE, USER_ID, DATE_CREATED, DATE_UPDATED) VALUES(?,?,?,?,?,?)")
+	stmt, err := db.Prepare("INSERT INTO users(USERNAME, PASSWORD, FIRSTNAME, LASTNAME, ROLE, USER_ID, DATE_CREATED, DATE_UPDATED) VALUES(?,?,?,?,?,?,?,?)")
 
 	r, err := stmt.Exec(postedUser.UserName, postedUser.Password, postedUser.First,
 		postedUser.Last, postedUser.Role, postedUser.UserID, postedUser.DateCreated, postedUser.DateUpdated)
 	check(err)
 
-	n, err := r.RowsAffected()
-	check(err)
+	n, err2 := r.RowsAffected()
+	check(err2)
 	stmt.Close()
 
 	fmt.Printf("Inserted Record: %v\n", n)
+
+	/*
+
+		//Marshal it into our type
+		var postedUser User
+		json.Unmarshal(bs, &postedUser)
+
+		//Add User to the SQL Database
+		stmt, err := db.Prepare("INSERT INTO users(USERNAME, PASSWORD, FIRSTNAME, LASTNAME, ROLE, USER_ID, DATE_CREATED, DATE_UPDATED) VALUES(?,?,?,?,?,?)")
+
+		r, err := stmt.Exec(postedUser.UserName, postedUser.Password, postedUser.First,
+			postedUser.Last, postedUser.Role, postedUser.UserID, postedUser.DateCreated, postedUser.DateUpdated)
+		check(err)
+
+		n, err := r.RowsAffected()
+		check(err)
+		stmt.Close()
+
+		fmt.Printf("Inserted Record: %v\n", n)
+
+	*/
 }
 
 //GET USER(S)

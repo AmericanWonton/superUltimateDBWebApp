@@ -343,11 +343,11 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 			{"UserID": theFoodDeletion.TheHotDog.UserID},
 		} //Here's our filter to look for
 		deletes = append(deletes, bson.M{"HotDogType": bson.M{
-			"$eq": foodSlurs[j],
+			"$eq": "",
 		}}, bson.M{"Condiments": bson.M{
-			"$eq": foodSlurs[j],
+			"$eq": "foodSlurs[j]",
 		}}, bson.M{"Name": bson.M{
-			"$eq": foodSlurs[j],
+			"$eq": "",
 		}})
 
 		// create the slice of write models
@@ -414,6 +414,8 @@ func randomIDCreation() int {
 	min, max := 0, 9    //The min and Max value for our randInt
 	foundID := false
 	for foundID == false {
+		randInt = 0
+		randIntString = ""
 		for i := 0; i < 8; i++ {
 			randInt = rand.Intn(max-min) + min
 			randIntString = randIntString + strconv.Itoa(randInt)
@@ -422,7 +424,9 @@ func randomIDCreation() int {
 		theID, err := strconv.Atoi(randIntString)
 		if err != nil {
 			fmt.Printf("We got an error converting a string back to a number, %v\n", err)
+			fmt.Printf("Here is randInt: %v\n and randIntString: %v\n", randInt, randIntString)
 			fmt.Println(err)
+			log.Fatal(err)
 		}
 		//Search all our collections to see if this UserID is unique
 		canExit := true

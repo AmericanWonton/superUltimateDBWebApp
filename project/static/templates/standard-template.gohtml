@@ -182,13 +182,15 @@
                             var item = xhr.responseText;
                             var successMSG = JSON.parse(item);
                             if (successMSG.SuccessNum == 0){
-                                alert("Congrats User, we sent you a confirmation email!");
+                                console.log("DEBUG: Successful User submission, going to main page.")
                             } else {
-                                alert("Sorry User, your data didn't input properly :(");
+                                console.log("DEBUG: Unsuccessful User submission, going to main page.")
                             }
                         }
                     });
                     xhr.send(jsonString);
+                    console.log("Redirecting to a window")
+                    window.location.replace("http://localhost:80");
                 } else if (role.value == "admin") {
                     alert("Standby future admin, we will be approving your login shortly!");
                 } else if (role.value == "IT") {
@@ -196,7 +198,6 @@
                 } else {
                     alert("Whoops, got the wrong value for our role part of the form.");
                 }
-                form.reset();
             }
 
             function error() {
@@ -205,7 +206,6 @@
             }
 
             // handle the form submission event
-
             button.addEventListener("click", function(ev) {
                 ev.preventDefault();
                 var data = new FormData(form);
@@ -599,14 +599,14 @@
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
                                 udcfText.setAttribute("id", "udcfText");
-                                udcfText.innerHTML = "DateCreated";
+                                udcfText.innerHTML = "DateUpdated";
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
                                 var udcFieldInfoTxtDiv = document.createElement("div");
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
                                 udcfText.setAttribute("id", "udcfText");
-                                udcfText.innerHTML = dataOBJ.TheHamburgers[y].DateCreated;
+                                udcfText.innerHTML = dataOBJ.TheHamburgers[y].DateUpdated;
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
                                  
@@ -621,7 +621,7 @@
                             console.log("We won't be displaying hot dogs.");
                         } else {
                             for (var i = 0; i < dataOBJ.TheHotDogs.length; i++) {
-                                console.log("We're displaying hotodogs");
+                                console.log("We're displaying hotdogs");
                                 //Create container for hotdog info
                                 var udContainerDiv = document.createElement("div");
                                 udContainerDiv.setAttribute("id", "udContainerDiv");
@@ -703,6 +703,54 @@
                                 var udcfText = document.createElement("p");
                                 udcfText.setAttribute("id", "udcfText");
                                 udcfText.innerHTML = dataOBJ.TheHotDogs[i].Name;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create FoodID section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "FoodID";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHotDogs[i].FoodID;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create DateCreated info section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "DateCreated";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHotDogs[i].DateCreated;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create DateUpdated info section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "DateUpdated";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHotDogs[i].DateUpdated;
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 

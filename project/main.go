@@ -484,11 +484,9 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 		}
 
 		//DEBUG, don't know if we need below
-		var theUser = User{username, encodedString, firstname, lastname, role, theID}
+		var theUser = User{username, encodedString, firstname, lastname, role, theID, insertionUser.DateCreated,
+			insertionUser.DateUpdated}
 		dbUsers[username] = theUser
-		// redirect
-		//http.Redirect(w, req, "/", http.StatusSeeOther)
-		//return
 		type successMSG struct {
 			Message    string `json:"Message"`
 			SuccessNum int    `json:"SuccessNum"`
@@ -580,7 +578,7 @@ func main() {
 //Check errors in our mySQL errors
 func check(err error) {
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("We got an error somewhere, printing it out: %v\n", err.Error())
 	}
 }
 
