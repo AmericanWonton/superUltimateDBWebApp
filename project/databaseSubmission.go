@@ -43,7 +43,7 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 		postedHotDog.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
 	}
 
-	stmt, err := db.Prepare("INSERT INTO hot_dogs(TYPE, CONDIMENT, CALORIES, NAME, USER_ID, FOOD_ID, DATE_CREATED, DATE_UPDATED) VALUES(?,?,?,?,?)")
+	stmt, err := db.Prepare("INSERT INTO hot_dogs(TYPE, CONDIMENT, CALORIES, NAME, USER_ID, FOOD_ID, DATE_CREATED, DATE_UPDATED) VALUES(?,?,?,?,?,?,?,?)")
 
 	r, err := stmt.Exec(postedHotDog.HotDogType, postedHotDog.Condiment, postedHotDog.Calories, postedHotDog.Name, postedHotDog.UserID,
 		postedHotDog.FoodID, postedHotDog.DateCreated, postedHotDog.DateUpdated)
@@ -55,15 +55,31 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 
 	fmt.Printf("DEBUG: %v rows effected.\n", n)
 
+	//Define the data to return
+	type returnData struct {
+		SuccessMsg     string `json:"SuccessMsg"`
+		ReturnedHotDog Hotdog `json:"ReturnedHotDog"`
+	}
+
 	if err != nil {
-		fmt.Fprint(w, failureMessage)
+		theReturnData := returnData{
+			SuccessMsg:     failureMessage,
+			ReturnedHotDog: postedHotDog,
+		}
+		fmt.Fprint(w, theReturnData)
 	} else {
 		hDogMarshaled, err := json.Marshal(postedHotDog)
 		if err != nil {
 			fmt.Printf("Error with %v\n", hDogMarshaled)
 		}
 		hDogSuccessMSG := successMessage + string(hDogMarshaled)
-		fmt.Fprint(w, hDogSuccessMSG)
+
+		theReturnData := returnData{
+			SuccessMsg:     hDogSuccessMSG,
+			ReturnedHotDog: postedHotDog,
+		}
+
+		fmt.Fprint(w, theReturnData)
 	}
 }
 
@@ -136,7 +152,7 @@ func deleteFood(w http.ResponseWriter, req *http.Request) {
 	//Determine if this is a hotdog or hamburger deletion
 	sqlStatement := ""
 	if theFoodDeletion.FoodType == "hotdog" {
-		sqlStatement = "DELETE FROM hot_dogs WHERE ID=?"
+		sqlStatement = "DELETE FROM hot_dogs WHERE FOOD_ID=?"
 		delDog, err := db.Prepare(sqlStatement)
 		check(err)
 
@@ -150,7 +166,7 @@ func deleteFood(w http.ResponseWriter, req *http.Request) {
 
 		fmt.Fprintln(w, 1)
 	} else if theFoodDeletion.FoodType == "hamburger" {
-		sqlStatement = "DELETE FROM hamburgers WHERE ID=?"
+		sqlStatement = "DELETE FROM hamburgers WHERE FOOD_ID=?"
 		delDog, err := db.Prepare(sqlStatement)
 		check(err)
 
@@ -242,14 +258,20 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	var h_calories int
 	var h_hotdogName string
 	var h_userID int
+	var h_foodID int
+	var h_dateCreated int
+	var h_dateUpdated int
 
-	//Declare variables for hotdog
+	//Declare variables for hamburger
 	var ham_id int
 	var ham_type string
 	var ham_condiment string
 	var ham_calories int
 	var ham_name string
 	var ham_userID int
+	var ham_foodID int
+	var ham_dateCreated int
+	var ham_dateUpdated int
 
 	//Declare all our our hotdog/hamburger collections returned
 	var hotDogSlice []Hotdog
@@ -281,7 +303,8 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 		check(err1)
 
 		for hrows.Next() {
-			err = hrows.Scan(&h_id, &h_dogType, &h_condiment, &h_calories, &h_hotdogName, &h_userID)
+			err = hrows.Scan(&h_id, &h_dogType, &h_condiment, &h_calories, &h_hotdogName, &h_userID,
+				&h_foodID, &h_dateCreated, &h_dateUpdated)
 			check(err) //Check to make sure there was no error doing that above.
 			//Add Hotdog to a new Hotdog and add to slice
 			var newHotDog Hotdog = Hotdog{
@@ -305,7 +328,8 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 		check(err2)
 
 		for hamrows.Next() {
-			err = hamrows.Scan(&ham_id, &ham_type, &ham_condiment, &ham_calories, &ham_name, &ham_userID)
+			err = hamrows.Scan(&ham_id, &ham_type, &ham_condiment, &ham_calories, &ham_name, &ham_userID,
+				&ham_foodID, &ham_dateCreated, &ham_dateUpdated)
 			check(err) //Check to make sure there was no error doing that above.
 			//Add Hamburger to a new Hamburger and add to slice
 			var newHamburger Hamburger = Hamburger{
@@ -331,7 +355,8 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 		check(err1)
 
 		for hrows.Next() {
-			err = hrows.Scan(&h_id, &h_dogType, &h_condiment, &h_calories, &h_hotdogName, &h_userID)
+			err = hrows.Scan(&h_id, &h_dogType, &h_condiment, &h_calories, &h_hotdogName, &h_userID,
+				&h_foodID, &h_dateCreated, &h_dateUpdated)
 			check(err) //Check to make sure there was no error doing that above.
 			//Add Hotdog to a new Hotdog and add to slice
 			var newHotDog Hotdog = Hotdog{
@@ -352,7 +377,8 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 		check(err2)
 
 		for hamrows.Next() {
-			err = hamrows.Scan(&ham_id, &ham_type, &ham_condiment, &ham_calories, &ham_name, &ham_userID)
+			err = hamrows.Scan(&ham_id, &ham_type, &ham_condiment, &ham_calories, &ham_name, &ham_userID,
+				&ham_foodID, &ham_dateCreated, &ham_dateUpdated)
 			check(err) //Check to make sure there was no error doing that above.
 			//Add Hamburger to a new Hamburger and add to slice
 			var newHamburger Hamburger = Hamburger{
@@ -495,8 +521,6 @@ func insertUser(w http.ResponseWriter, req *http.Request) {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("DEBUG: HERE IS OUR BS: %v\n", bs)
-
 	//Marshal it into our type
 	var postedUser User
 	json.Unmarshal(bs, &postedUser)
@@ -513,27 +537,6 @@ func insertUser(w http.ResponseWriter, req *http.Request) {
 	stmt.Close()
 
 	fmt.Printf("Inserted Record: %v\n", n)
-
-	/*
-
-		//Marshal it into our type
-		var postedUser User
-		json.Unmarshal(bs, &postedUser)
-
-		//Add User to the SQL Database
-		stmt, err := db.Prepare("INSERT INTO users(USERNAME, PASSWORD, FIRSTNAME, LASTNAME, ROLE, USER_ID, DATE_CREATED, DATE_UPDATED) VALUES(?,?,?,?,?,?)")
-
-		r, err := stmt.Exec(postedUser.UserName, postedUser.Password, postedUser.First,
-			postedUser.Last, postedUser.Role, postedUser.UserID, postedUser.DateCreated, postedUser.DateUpdated)
-		check(err)
-
-		n, err := r.RowsAffected()
-		check(err)
-		stmt.Close()
-
-		fmt.Printf("Inserted Record: %v\n", n)
-
-	*/
 }
 
 //GET USER(S)

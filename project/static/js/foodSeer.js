@@ -133,18 +133,14 @@ function foodChanger(whichFood, whichChoice, hamburgObj, hotdogObj){
     xhr.send(jsonString);
 }
 
-function foodDeleter(whichFood, whichChoice, mongoFoodDeletion){
+function foodDeleter(whichFood, whichChoice){
     console.log("DEBUG: Reached the foodDeleter.");
     var foodDeletion = {
         FoodType: whichFood,
         FoodID: whichChoice
     }; //Make JSON to send to food API for SQL
 
-    console.log(foodDeletion);
-
     var jsonString = JSON.stringify(foodDeletion);
-
-    var jsonMongoString = JSON.stringify(mongoFoodDeletion)
 
     //Call Ajax to delete the foodRecord(SQL Database)
     var xhr = new XMLHttpRequest();
@@ -197,5 +193,5 @@ function foodDeleter(whichFood, whichChoice, mongoFoodDeletion){
             }
         }
     });
-    xhr.send(jsonMongoString);
+    xhr.send(jsonString);
 }

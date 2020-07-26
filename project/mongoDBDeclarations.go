@@ -131,10 +131,10 @@ func insertHotDogMongo(w http.ResponseWriter, req *http.Request) {
 	theTimeNow := time.Now()
 	mongoHotDogInsert := MongoHotDog{
 		HotDogType:  postedHotDog.HotDogType,
-		Condiments:  []string{postedHotDog.Condiment},
+		Condiments:  turnFoodArray(postedHotDog.Condiment),
 		Calories:    postedHotDog.Calories,
 		Name:        postedHotDog.Name,
-		FoodID:      randomIDCreation(),
+		FoodID:      postedHotDog.FoodID,
 		UserID:      postedHotDog.UserID,
 		DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
 		DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
@@ -203,10 +203,10 @@ func insertHamburgerMongo(w http.ResponseWriter, req *http.Request) {
 	theTimeNow := time.Now()
 	mongoHamburgerInsert := MongoHamburger{
 		BurgerType:  postedHamburger.BurgerType,
-		Condiments:  []string{postedHamburger.Condiment},
+		Condiments:  turnFoodArray(postedHamburger.Condiment),
 		Calories:    postedHamburger.Calories,
 		Name:        postedHamburger.Name,
-		FoodID:      randomIDCreation(),
+		FoodID:      postedHamburger.FoodID,
 		UserID:      postedHamburger.UserID,
 		DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
 		DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
@@ -512,6 +512,40 @@ func randomIDCreation() int {
 	return finalID
 }
 
+//Should give a random id value to use for both food groups...good for Mongo AND SQL insertion.
+func randomIDCreationAPI(w http.ResponseWriter, req *http.Request) {
+	//Our Food deletion struct
+	type jsonRecieved struct {
+		stringReceived string `json:"stringReceived"`
+	}
+	fmt.Println("DEBUG: We're creating a randomID thru this API...")
+	//Unwrap from JSON
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//Marshal it into our type
+	var ourJSONInfo jsonRecieved
+	json.Unmarshal(bs, &ourJSONInfo)
+
+	type returnJSON struct {
+		SuccessMsg     string `json:"SuccessMsg"`
+		FoodIDReturned int    `json:"FoodIDReturned"`
+	}
+
+	giveJSON := returnJSON{
+		SuccessMsg:     "Successful ID Given",
+		FoodIDReturned: randomIDCreation(), //Go get unique IDS for 2 DBS
+	}
+
+	theJSONMessage, err := json.Marshal(giveJSON)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Fprint(w, string(theJSONMessage))
+}
+
 //This should return foodIDS for a User or ALL Users for hotdogs
 func getFoodIDSHDog(userID int) []int {
 	var foodIDS []int
@@ -598,6 +632,8 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 		SuccessMessage string           `json:"SuccessMessage"`
 		TheHotDogs     []MongoHotDog    `json:"TheHotDogs"`
 		TheHamburgers  []MongoHamburger `json:"TheHamburgers:`
+		HaveHotDogs    bool             `json:"HaveHotDogs"`
+		HaveHamburgers bool             `json:"HaveHamburgers"`
 	}
 
 	//Search for UserID or for all
@@ -605,7 +641,7 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 	hamburgerCollection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
 	if theUser.UserID == 0 {
 		//Query Mongo for all hotdogs
-		theFilter := bson.D{{}}
+		theFilter := bson.M{}
 		findOptions := options.Find()
 		curHDog, err := hotdogCollection.Find(theContext, theFilter, findOptions)
 		if err != nil {
@@ -613,9 +649,8 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 				fmt.Printf("No documents were returned for hotdogs in MongoDB: %v\n", err.Error())
 				logWriter("No documents were returned in MongoDB for Hotdogs: " + err.Error())
 			} else {
-				fmt.Printf("There was an error returning hotdogs: %v\n", err.Error())
-				logWriter("There was an error returning hotdogs in Mongo: " + err.Error())
-				log.Fatal(err)
+				fmt.Printf("There was an error returning hotdogs for all Users, spot1: %v\n", err.Error())
+				logWriter("There was an error returning hotdogs in Mongo for all Users, spot1: " + err.Error())
 			}
 		}
 		//Loop over query results and fill hotdogs array
@@ -624,9 +659,8 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 			var aHotDog MongoHotDog
 			err := curHDog.Decode(&aHotDog)
 			if err != nil {
-				fmt.Printf("Error decoding hotdogs in MongoDB: %v\n", err.Error())
-				logWriter("Error decoding hotdogs in MongoDB: " + err.Error())
-				log.Fatal(err)
+				fmt.Printf("Error decoding hotdogs in MongoDB for all Users spot2: %v\n", err.Error())
+				logWriter("Error decoding hotdogs in MongoDB for all Users spot2: " + err.Error())
 			}
 			returnedHotDogs = append(returnedHotDogs, aHotDog)
 		}
@@ -640,9 +674,8 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 				fmt.Printf("No documents were returned for hamburgeres in MongoDB: %v\n", err.Error())
 				logWriter("No documents were returned in MongoDB for hamburgers: " + err.Error())
 			} else {
-				fmt.Printf("There was an error returning hamburgers: %v\n", err.Error())
-				logWriter("There was an error returning hamburgers in Mongo: " + err.Error())
-				log.Fatal(err)
+				fmt.Printf("There was an error returning hamburgers for all Users: %v\n", err.Error())
+				logWriter("There was an error returning hamburgers in Mongo for all Users: " + err.Error())
 			}
 		}
 
@@ -650,11 +683,10 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 		for curHam.Next(theContext) {
 			// create a value into which the single document can be decoded
 			var aHamburger MongoHamburger
-			err := curHDog.Decode(&aHamburger)
+			err := curHam.Decode(&aHamburger)
 			if err != nil {
-				fmt.Printf("Error decoding hamburgers in MongoDB: %v\n", err.Error())
-				logWriter("Error decoding hamburgers in MongoDB: " + err.Error())
-				log.Fatal(err)
+				fmt.Printf("Error decoding hamburgers in MongoDB for all Users: %v\n", err.Error())
+				logWriter("Error decoding hamburgers in MongoDB for all Users: " + err.Error())
 			}
 			returnedHamburgers = append(returnedHamburgers, aHamburger)
 		}
@@ -662,8 +694,8 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 		// Close the cursor once finished
 		curHam.Close(theContext)
 	} else {
-		//Query Mongo for all hotdogs
-		theFilter := bson.D{{"userid", theUser.UserID}}
+		//Query Mongo for all hotdogs for a User
+		theFilter := bson.M{"userid": theUser.UserID}
 		findOptions := options.Find()
 		curHDog, err := hotdogCollection.Find(theContext, theFilter, findOptions)
 		if err != nil {
@@ -671,9 +703,8 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 				fmt.Printf("No documents were returned for hotdogs in MongoDB: %v\n", err.Error())
 				logWriter("No documents were returned in MongoDB for Hotdogs: " + err.Error())
 			} else {
-				fmt.Printf("There was an error returning hotdogs: %v\n", err.Error())
-				logWriter("There was an error returning hotdogs in Mongo: " + err.Error())
-				log.Fatal(err)
+				fmt.Printf("There was an error returning hotdogs for this User, %v: %v\n", theUser.UserID, err.Error())
+				logWriter("There was an error returning hotdogs in Mongo for this User " + err.Error())
 			}
 		}
 		//Loop over query results and fill hotdogs array
@@ -682,9 +713,8 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 			var aHotDog MongoHotDog
 			err := curHDog.Decode(&aHotDog)
 			if err != nil {
-				fmt.Printf("Error decoding hotdogs in MongoDB: %v\n", err.Error())
+				fmt.Printf("Error decoding hotdogs in MongoDB for this User, %v: %v\n", theUser.UserID, err.Error())
 				logWriter("Error decoding hotdogs in MongoDB: " + err.Error())
-				log.Fatal(err)
 			}
 			returnedHotDogs = append(returnedHotDogs, aHotDog)
 		}
@@ -695,10 +725,10 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 		curHam, err := hamburgerCollection.Find(theContext, theFilter, findOptions)
 		if err != nil {
 			if strings.Contains(err.Error(), "no documents in result") {
-				fmt.Printf("No documents were returned for hamburgers in MongoDB: %v\n", err.Error())
+				fmt.Printf("No documents were returned for hamburgers in MongoDB for this User, %v: %v\n", theUser.UserID, err.Error())
 				logWriter("No documents were returned in MongoDB for hamburgers: " + err.Error())
 			} else {
-				fmt.Printf("There was an error returning hamburgers: %v\n", err.Error())
+				fmt.Printf("There was an error returning hamburgers for this User, %v: %v\n", theUser.UserID, err.Error())
 				logWriter("There was an error returning hamburgers in Mongo: " + err.Error())
 				log.Fatal(err)
 			}
@@ -708,11 +738,10 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 		for curHam.Next(theContext) {
 			// create a value into which the single document can be decoded
 			var aHamburger MongoHamburger
-			err := curHDog.Decode(&aHamburger)
+			err := curHam.Decode(&aHamburger)
 			if err != nil {
-				fmt.Printf("Error decoding hamburgers in MongoDB: %v\n", err.Error())
+				fmt.Printf("Error decoding hamburgers in MongoDB for this User, %v: %v\n", theUser.UserID, err.Error())
 				logWriter("Error decoding hamburgers in MongoDB: " + err.Error())
-				log.Fatal(err)
 			}
 			returnedHamburgers = append(returnedHamburgers, aHamburger)
 		}
@@ -725,11 +754,19 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 		SuccessMessage: "Success",
 		TheHotDogs:     returnedHotDogs,
 		TheHamburgers:  returnedHamburgers,
+		HaveHotDogs:    true,
+		HaveHamburgers: true,
 	}
 
 	//Do a wellness check for the data
 	if len(sendData.TheHotDogs) <= 0 && len(sendData.TheHamburgers) <= 0 {
 		sendData.SuccessMessage = "Failure"
+	}
+	if len(sendData.TheHotDogs) <= 0 {
+		sendData.HaveHotDogs = false //Allow our loops to function properly in JS
+	}
+	if len(sendData.TheHamburgers) <= 0 {
+		sendData.HaveHamburgers = false //Allow our loops to funciton properly in JS
 	}
 	//Marshal data to JSON
 	dataJSON, err := json.Marshal(sendData)
@@ -739,5 +776,15 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 	}
 
 	fmt.Fprintf(w, string(dataJSON))
+}
 
+//This is for sorting the food into one string array for Mongo
+func turnFoodArray(foodString string) []string {
+	var returnedFood []string
+
+	testArray := strings.Fields(foodString)
+
+	returnedFood = testArray
+
+	return returnedFood
 }

@@ -12,6 +12,10 @@ function revealFoodForm(foodChoice) {
     if (foodChoice == 0) {
         console.log("Mkay, you clicked hotdog.")
         //Create the form elements and append them to the form
+        /* Let's start with form instruction first */
+        var condimentInstruction = document.createElement("p");
+        condimentInstruction.setAttribute("id", "condimentInstruction");
+        condimentInstruction.innerHTML = "To give this hotdog multiple condiments, give a space between each condiment.";
         var hDogType = document.createElement("input");
         hDogType.setAttribute("type", "text");
         hDogType.setAttribute("id", "hotDogType");
@@ -57,8 +61,34 @@ function revealFoodForm(foodChoice) {
             if (nameType.value == ""){
                 nameType.value = "NONE";
             }
-            var condimentDEBUG = String(condimentType.value);
-            var nameDEBUG = nameType.value;
+            //Need to create randomFoodID for BOTH DBs...
+            var randomFoodID = 0;
+            var dataSending = {
+                dataString: "stringdata"
+            }
+            var jsonString = JSON.stringify(dataSending);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/randomIDCreationAPI', true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.addEventListener('readystatechange', function(){
+                if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                    var item = xhr.responseText;
+                    if (item.SuccessMsg.includes('Successful ID Given') == true) {
+                        //Data inserted properly; fill form fields for Mongo!
+                        randomFoodID = item.FoodIDReturned;
+                        console.log("DEBUG: We've returned the randomFoodID successfully: " + randomFoodID)
+                    } else if (item.SuccessMsg.includes('Unsuccessful ID Given') == true){
+                        //Data NOT inserted properly
+                        console.log("Could not get ID for this food.");
+                        randomFoodID = 0;
+                    } else {
+                        //No appropriate Response recieved
+                        alert("Error getting random ID for this food for SQL and Mongo")
+                        location.reload(true); //Reload Page
+                    }
+                }
+            });
+            xhr.send(jsonString);
             //JSON String creation
             var toSend = {
                 HotDogType: "",
@@ -66,7 +96,7 @@ function revealFoodForm(foodChoice) {
                 Calories: Number(caloriesType.value),
                 Name: "",
                 UserID: userID,
-                FoodID: 0,
+                FoodID: randomFoodID,
                 DateCreated: "",
                 DateUpdated: ""
             };
@@ -75,6 +105,7 @@ function revealFoodForm(foodChoice) {
             toSend.Condiment = condimentType.value;
             toSend.Name = nameType.value;
             toSend.UserID = userID;
+            toSend.FoodID = randomFoodID;
 
             var jsonString = JSON.stringify(toSend);
             console.log(jsonString);
@@ -85,16 +116,10 @@ function revealFoodForm(foodChoice) {
             xhr.addEventListener('readystatechange', function(){
                 if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
                     var item = xhr.responseText;
-                    if (item.includes('Successful Insert') == true) {
-                        //Data inserted properly; clear the form fields
-                        hDogType.value = "";
-                        condimentType.value = "";
-                        caloriesType.value = "";
-                        nameType.value = "";
-                        alert("Hotdog submitted successfully!")
+                    if (item.SuccessMsg.includes('Successful Insert') == true) {
+                        //Data inserted properly; fill form fields for Mongo!
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
-                    } else if (item.includes('Unsuccessful Insert') == true){
+                    } else if (item.SuccessMsg.includes('Unsuccessful Insert') == true){
                         //Data NOT inserted properly
                         hDogType.value = "";
                         condimentType.value = "";
@@ -113,6 +138,7 @@ function revealFoodForm(foodChoice) {
             });
             xhr.send(jsonString);
 
+            toSend.FoodID = randomFoodID; //Here for DEBUG purposes...
             //Mongo Entry
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/insertHotDogMongo', true);
@@ -150,6 +176,7 @@ function revealFoodForm(foodChoice) {
         });
 
         //Append "Form Data"
+        theDiv.appendChild(condimentInstruction);
         theDiv.appendChild(hDogType);
         theDiv.appendChild(condimentType);
         theDiv.appendChild(caloriesType);
@@ -161,6 +188,10 @@ function revealFoodForm(foodChoice) {
     } else if (foodChoice == 1) { //For Hamburger Selection
         console.log("Mkay, you clicked hamburger.")
         //Create the form elements and append them to the form
+        /* Let's start with form instruction first */
+        var condimentInstruction = document.createElement("p");
+        condimentInstruction.setAttribute("id", "condimentInstruction");
+        condimentInstruction.innerHTML = "To give this hotdog multiple condiments, give a space between each condiment.";
         var hamburgType = document.createElement("input");
         hamburgType.setAttribute("type", "text");
         hamburgType.setAttribute("id", "hamburgType");
@@ -205,6 +236,34 @@ function revealFoodForm(foodChoice) {
             if (nameType.value == ""){
                 nameType.value = "NONE";
             }
+            //Need to create randomFoodID for BOTH DBs...
+            var randomFoodID = 0;
+            var dataSending = {
+                dataString: "stringdata"
+            }
+            var jsonString = JSON.stringify(dataSending);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/randomIDCreationAPI', true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.addEventListener('readystatechange', function(){
+                if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                    var item = xhr.responseText;
+                    if (item.SuccessMsg.includes('Successful ID Given') == true) {
+                        //Data inserted properly; fill form fields for Mongo!
+                        randomFoodID = item.FoodIDReturned;
+                    } else if (item.SuccessMsg.includes('Unsuccessful ID Given') == true){
+                        //Data NOT inserted properly
+                        console.log("Could not get ID for this food.");
+                        randomFoodID = 0;
+                    } else {
+                        //No appropriate Response recieved
+                        alert("Error getting random ID for this food for SQL and Mongo")
+                        location.reload(true); //Reload Page
+                    }
+                }
+            });
+            xhr.send(jsonString);
+
             //JSON String creation
             var toSend = {
                 HamburgerType: "",
@@ -212,7 +271,7 @@ function revealFoodForm(foodChoice) {
                 Calories: Number(caloriesType.value),
                 Name: "",
                 UserID: 0,
-                FoodID: 0,
+                FoodID: randomFoodID,
                 DateCreated: "",
                 DateUpdated: ""
             };
@@ -294,6 +353,7 @@ function revealFoodForm(foodChoice) {
             xhr.send(jsonString);
         });
         //Append "Form Data"
+        theDiv.appendChild(condimentInstruction);
         theDiv.appendChild(hamburgType);
         theDiv.appendChild(condimentType);
         theDiv.appendChild(caloriesType);
@@ -304,6 +364,10 @@ function revealFoodForm(foodChoice) {
     } else if (foodChoice == 2){//For IT/Admin Hotdog Selection
         console.log("Mkay, you clicked hotdog as an Admin or IT.")
         //Create the form elements and append them to the form
+        /* Let's start with form instruction first */
+        var condimentInstruction = document.createElement("p");
+        condimentInstruction.setAttribute("id", "condimentInstruction");
+        condimentInstruction.innerHTML = "To give this hotdog multiple condiments, give a space between each condiment.";
         var hDogType = document.createElement("input");
         hDogType.setAttribute("type", "text");
         hDogType.setAttribute("id", "hotDogType");
@@ -359,6 +423,34 @@ function revealFoodForm(foodChoice) {
                 userIDInput.innerHTML = userID;
                 userIDInput.value = userID;
             }
+            //Need to create randomFoodID for BOTH DBs...
+            var randomFoodID = 0;
+            var dataSending = {
+                dataString: "stringdata"
+            }
+            var jsonString = JSON.stringify(dataSending);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/randomIDCreationAPI', true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.addEventListener('readystatechange', function(){
+                if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                    var item = xhr.responseText;
+                    if (item.SuccessMsg.includes('Successful ID Given') == true) {
+                        //Data inserted properly; fill form fields for Mongo!
+                        randomFoodID = item.FoodIDReturned;
+                    } else if (item.SuccessMsg.includes('Unsuccessful ID Given') == true){
+                        //Data NOT inserted properly
+                        console.log("Could not get ID for this food.");
+                        randomFoodID = 0;
+                    } else {
+                        //No appropriate Response recieved
+                        alert("Error getting random ID for this food for SQL and Mongo")
+                        location.reload(true); //Reload Page
+                    }
+                }
+            });
+            xhr.send(jsonString);
+
             //JSON String creation
             var toSend = {
                 HotDogType: "",
@@ -366,7 +458,7 @@ function revealFoodForm(foodChoice) {
                 Calories: Number(caloriesType.value),
                 Name: "",
                 UserID: 0,
-                FoodID: 0,
+                FoodID: randomFoodID,
                 DateCreated: "",
                 DateUpdated: ""
             };
@@ -450,9 +542,9 @@ function revealFoodForm(foodChoice) {
                 }
             });
             xhr.send(jsonString);
-            
         });
         //Append "Form Data"
+        theDiv.appendChild(condimentInstruction);
         theDiv.appendChild(hDogType);
         theDiv.appendChild(condimentType);
         theDiv.appendChild(caloriesType);
@@ -464,6 +556,10 @@ function revealFoodForm(foodChoice) {
     } else if (foodChoice == 3){//For IT/Admin Hamburger Selection
         console.log("Mkay, you clicked hamburger.")
         //Create the form elements and append them to the form
+        /* Let's start with form instruction first */
+        var condimentInstruction = document.createElement("p");
+        condimentInstruction.setAttribute("id", "condimentInstruction");
+        condimentInstruction.innerHTML = "To give this hotdog multiple condiments, give a space between each condiment.";
         var hamburgType = document.createElement("input");
         hamburgType.setAttribute("type", "text");
         hamburgType.setAttribute("id", "hamburgType");
@@ -519,6 +615,34 @@ function revealFoodForm(foodChoice) {
                 userIDInput.innerHTML = userID;
                 userIDInput.value = userID;
             }
+            //Need to create randomFoodID for BOTH DBs...
+            var randomFoodID = 0;
+            var dataSending = {
+                dataString: "stringdata"
+            }
+            var jsonString = JSON.stringify(dataSending);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/randomIDCreationAPI', true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.addEventListener('readystatechange', function(){
+                if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                    var item = xhr.responseText;
+                    if (item.SuccessMsg.includes('Successful ID Given') == true) {
+                        //Data inserted properly; fill form fields for Mongo!
+                        randomFoodID = item.FoodIDReturned;
+                    } else if (item.SuccessMsg.includes('Unsuccessful ID Given') == true){
+                        //Data NOT inserted properly
+                        console.log("Could not get ID for this food.");
+                        randomFoodID = 0;
+                    } else {
+                        //No appropriate Response recieved
+                        alert("Error getting random ID for this food for SQL and Mongo")
+                        location.reload(true); //Reload Page
+                    }
+                }
+            });
+            xhr.send(jsonString);
+
             //JSON String creation
             var toSend = {
                 HamburgerType: "",
@@ -526,7 +650,7 @@ function revealFoodForm(foodChoice) {
                 Calories: Number(caloriesType.value),
                 Name: "",
                 UserID: 0,
-                FoodID: 0,
+                FoodID: randomFoodID,
                 DateCreated: "",
                 DateUpdated: ""
             };
@@ -612,6 +736,7 @@ function revealFoodForm(foodChoice) {
             xhr.send(jsonString);
         });
         //Append "Form Data"
+        theDiv.appendChild(condimentInstruction);
         theDiv.appendChild(hamburgType);
         theDiv.appendChild(condimentType);
         theDiv.appendChild(caloriesType);

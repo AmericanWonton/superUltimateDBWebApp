@@ -365,7 +365,7 @@
                     <option value="hotdog">hotdog</option>
                     <option value="hamburger">hamburger</option>
                 </select>
-                <input type="number" id="foodID" name="foodID" placeholder="foodNumber" minlength=1 maxlength=20>
+                <input type="number" id="foodID" name="foodID" placeholder="foodID Number" minlength=1 maxlength=20>
                 <input type="text" id="foodType" name="foodType" placeholder="foodType" minlength=1 maxlength=48>
                 <input type="text" id="condimentType" name="condimentType" placeholder="condimentType" minlength=1 maxlength=48>
                 <input type="number" id="calories" name="calories" placeholder="calories" minlength=1 maxlength=8>
@@ -418,7 +418,7 @@
             var jsonString = JSON.stringify(toSend);
 
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/getAllFoodUser', true);
+            xhr.open('POST', '/getAllFoodMongo', true);
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.addEventListener('readystatechange', function(){
                 if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
@@ -436,14 +436,23 @@
                         var hamburgerGoodCount = true; //Used for displaying hotdogs
                         //Update Hotdog and Hamburger Arrays
                         //Update Hamburger Arrays
-                        if (dataOBJ.TheHamburgers.length == 0){
+                        if (dataOBJ.HaveHamburgers == false){
                             console.log("DEBUG: We have no burgers to deliver");
                             hamburgerGoodCount = false;
                         } else {
                             for (var x = 0; x < dataOBJ.TheHamburgers.length; x++) {
+                                var condimentsString = ""; //Declare string to display Condiments
                                 hamburgerChoice = hamburgerChoice + 1;
                                 aHamburger.BurgerType = dataOBJ.TheHamburgers[x].BurgerType;
-                                aHamburger.Condiments = dataOBJ.TheHamburgers[x].Condiments;
+                                if (dataOBJ.TheHamburgers[x].Condiments.length == 0){
+                                    console.log("DEBUG: This Hamburger has no condiments.");
+                                    condimentsString = "No condiments";
+                                } else {
+                                    for (var i = 0; i < dataOBJ.TheHamburgers[x].Condiments.length; i++){
+                                        condimentsString = condimentsString + dataOBJ.TheHamburgers[x].Condiments[i] + " ";
+                                    }
+                                    aHamburger.Condiments = condimentsString;
+                                }
                                 aHamburger.Calories = dataOBJ.TheHamburgers[x].Calories;
                                 aHamburger.Name = dataOBJ.TheHamburgers[x].Name;
                                 aHamburger.FoodID = dataOBJ.TheHamburgers[x].FoodID;
@@ -454,15 +463,23 @@
                             }
                         }
                         //Update Hotdog arrays
-                        if (dataOBJ.TheHotDogs.length == 0){
+                        if (dataOBJ.HaveHotDogs == false){
                             console.log("DEBUG: NO HOT DOGS TO UPDATE");
                             hotdogsGoodCount = false;
                         } else {
                             for (var y = 0; y < dataOBJ.TheHotDogs.length; y++) {
-                                console.log("DEBUG: We're adding hotdogs ids");
+                                var condimentsString = ""; //Declare string to display Condiments
                                 hotDogChoice = hotDogChoice + 1;
                                 aHotDog.HotDogType = dataOBJ.TheHotDogs[y].HotDogType;
-                                aHotDog.Condiments = dataOBJ.TheHotDogs[y].Condiments;
+                                if (dataOBJ.TheHotDogs[y].Condiments.length == 0){
+                                    console.log("DEBUG: This hotdog has no condiments.");
+                                    condimentsString = "No Condiments";
+                                } else{
+                                    for (var i = 0; i < dataOBJ.TheHotDogs[y].Condiments.length; i++){
+                                        condimentsString = condimentsString + dataOBJ.TheHotDogs[y].Condiments[i] + " ";
+                                    }
+                                    aHotDog.Condiments = condimentsString;
+                                }
                                 aHotDog.Calories = dataOBJ.TheHotDogs[y].Calories;
                                 aHotDog.Name = dataOBJ.TheHotDogs[y].Name;
                                 aHotDog.FoodID = dataOBJ.TheHotDogs[y].FoodID;
@@ -487,7 +504,7 @@
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
                                 udcfText.setAttribute("id", "udcfText");
-                                udcfText.innerHTML = "HamburgerID";
+                                udcfText.innerHTML = "Food Order Hamburger";
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
                                 var udcFieldInfoTxtDiv = document.createElement("div");
@@ -515,6 +532,7 @@
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
                                 //Create Condiment info section
+                                var condimentsString = ""; //Declare string to display Condiments
                                 var udcFieldInfoTxtDiv = document.createElement("div");
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
@@ -526,7 +544,16 @@
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
                                 udcfText.setAttribute("id", "udcfText");
-                                udcfText.innerHTML = dataOBJ.TheHamburgers[y].Condiment;
+                                if (dataOBJ.TheHamburgers[y].Condiments.length == 0){
+                                    console.log("DEBUG: This Hamburger has no condiments.");
+                                    condimentsString = "No condiments";
+                                    udcfText.innerHTML = condimentsString
+                                } else {
+                                    for (var i = 0; i < dataOBJ.TheHamburgers[y].Condiments.length; i++){
+                                        condimentsString = condimentsString + dataOBJ.TheHamburgers[y].Condiments[i] + " ";
+                                    }
+                                    udcfText.innerHTML = condimentsString
+                                }
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
@@ -621,7 +648,6 @@
                             console.log("We won't be displaying hot dogs.");
                         } else {
                             for (var i = 0; i < dataOBJ.TheHotDogs.length; i++) {
-                                console.log("We're displaying hotdogs");
                                 //Create container for hotdog info
                                 var udContainerDiv = document.createElement("div");
                                 udContainerDiv.setAttribute("id", "udContainerDiv");
@@ -631,7 +657,7 @@
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
                                 udcfText.setAttribute("id", "udcfText");
-                                udcfText.innerHTML = "HotdogID";
+                                udcfText.innerHTML = "Food Order Hotdog";
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
                                 var udcFieldInfoTxtDiv = document.createElement("div");
@@ -659,6 +685,7 @@
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
                                 //Create Condiment info section
+                                var condimentsString = ""; //Declare string to display Condiments
                                 var udcFieldInfoTxtDiv = document.createElement("div");
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
@@ -670,7 +697,16 @@
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
                                 udcfText.setAttribute("id", "udcfText");
-                                udcfText.innerHTML = dataOBJ.TheHotDogs[i].Condiment;
+                                if (dataOBJ.TheHotDogs[i].Condiments.length == 0){
+                                    console.log("DEBUG: This Hamburger has no condiments.");
+                                    condimentsString = "No condiments";
+                                    udcfText.innerHTML = condimentsString
+                                } else {
+                                    for (var n = 0; n < dataOBJ.TheHotDogs[i].Condiments.length; n++){
+                                        condimentsString = condimentsString + dataOBJ.TheHotDogs[i].Condiments[n] + " ";
+                                    }
+                                    udcfText.innerHTML = condimentsString
+                                }
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
@@ -791,13 +827,12 @@
                     //location.reload(true);
                 } else {    
                     //Good Selection
-                    console.log("DEBUG: Deleting a hotdog");
                     var foodDeletionMongo = {
                         FoodType: "hotdog", //For hotdog
                         TheHamburger: hamburgArray[foodChoice.value],
                         TheHotDog: hotdogsArray[foodChoice.value]
                     }; //Make JSON to send to food API for Mongo
-                    foodDeleter(foodChoice.value, hotdogIDArray[foodID.value], foodDeletionMongo);
+                    foodDeleter(foodChoice.value, hotdogIDArray[foodID.value]);
                 }
             } else if (foodChoice.value == "hamburger"){
                 //See if the foodID field was assigned correctly
