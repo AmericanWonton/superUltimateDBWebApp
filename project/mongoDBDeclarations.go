@@ -145,12 +145,37 @@ func insertHotDogMongo(w http.ResponseWriter, req *http.Request) {
 	collectedUsers := []interface{}{mongoHotDogInsert}
 	//Insert Our Data
 	insertManyResult, err := user_collection.InsertMany(context.TODO(), collectedUsers)
+	//Define the data to return
+	type returnData struct {
+		SuccessMsg     string      `json:"SuccessMsg"`
+		ReturnedHotDog MongoHotDog `json:"ReturnedHotDog"`
+		SuccessBool    bool        `json:"SuccessBool"`
+	}
 	if err != nil {
+		theReturnData := returnData{
+			SuccessMsg:     failureMessage,
+			ReturnedHotDog: mongoHotDogInsert,
+			SuccessBool:    false,
+		}
+		dataJSON, err := json.Marshal(theReturnData)
+		if err != nil {
+			fmt.Println("There's an error marshalling.")
+			logWriter("There's an error marshalling.")
+		}
 		fmt.Printf("Error inserting results: \n%v\n", err)
-		fmt.Fprint(w, failureMessage)
-		log.Fatal(err)
+		fmt.Fprint(w, dataJSON)
 	} else {
-		fmt.Fprint(w, successMessage)
+		theReturnData := returnData{
+			SuccessMsg:     successMessage,
+			ReturnedHotDog: mongoHotDogInsert,
+			SuccessBool:    true,
+		}
+		dataJSON, err := json.Marshal(theReturnData)
+		if err != nil {
+			fmt.Println("There's an error marshalling.")
+			logWriter("There's an error marshalling.")
+		}
+		fmt.Fprint(w, dataJSON)
 		fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs) //Data insert results
 	}
 }
@@ -531,19 +556,23 @@ func randomIDCreationAPI(w http.ResponseWriter, req *http.Request) {
 	type returnJSON struct {
 		SuccessMsg     string `json:"SuccessMsg"`
 		FoodIDReturned int    `json:"FoodIDReturned"`
+		SuccessBool    bool   `json:"SuccessBool"`
 	}
 
+	theID := randomIDCreation()
+	fmt.Printf("DEBUG: Here is our randomID: %v\n", theID)
 	giveJSON := returnJSON{
 		SuccessMsg:     "Successful ID Given",
-		FoodIDReturned: randomIDCreation(), //Go get unique IDS for 2 DBS
+		FoodIDReturned: theID, //Go get unique IDS for 2 DBS
+		SuccessBool:    true,
 	}
-
-	theJSONMessage, err := json.Marshal(giveJSON)
+	dataJSON, err := json.Marshal(giveJSON)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("There's an error marshalling.")
+		logWriter("There's an error marshalling.")
 	}
 
-	fmt.Fprint(w, string(theJSONMessage))
+	fmt.Fprint(w, dataJSON)
 }
 
 //This should return foodIDS for a User or ALL Users for hotdogs

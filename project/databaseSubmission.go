@@ -31,9 +31,6 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 		postedHotDog.HotDogType = "NONE"
 	}
 	//Fill empty values
-	if postedHotDog.FoodID == 0 || postedHotDog.FoodID < 8 {
-		postedHotDog.FoodID = randomIDCreation()
-	}
 	if len(postedHotDog.DateCreated) < 1 {
 		theTimeNow := time.Now()
 		postedHotDog.DateCreated = theTimeNow.Format("2006-01-02 15:04:05")
@@ -59,14 +56,21 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 	type returnData struct {
 		SuccessMsg     string `json:"SuccessMsg"`
 		ReturnedHotDog Hotdog `json:"ReturnedHotDog"`
+		SuccessBool    bool   `json:"SuccessBool"`
 	}
 
 	if err != nil {
 		theReturnData := returnData{
 			SuccessMsg:     failureMessage,
 			ReturnedHotDog: postedHotDog,
+			SuccessBool:    false,
 		}
-		fmt.Fprint(w, theReturnData)
+		dataJSON, err := json.Marshal(theReturnData)
+		if err != nil {
+			fmt.Println("There's an error marshalling.")
+			logWriter("There's an error marshalling.")
+		}
+		fmt.Fprint(w, dataJSON)
 	} else {
 		hDogMarshaled, err := json.Marshal(postedHotDog)
 		if err != nil {
@@ -77,9 +81,16 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 		theReturnData := returnData{
 			SuccessMsg:     hDogSuccessMSG,
 			ReturnedHotDog: postedHotDog,
+			SuccessBool:    true,
 		}
 
-		fmt.Fprint(w, theReturnData)
+		dataJSON, err := json.Marshal(theReturnData)
+		if err != nil {
+			fmt.Println("There's an error marshalling.")
+			logWriter("There's an error marshalling.")
+		}
+
+		fmt.Fprint(w, dataJSON)
 	}
 }
 

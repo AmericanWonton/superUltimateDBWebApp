@@ -73,18 +73,20 @@ function revealFoodForm(foodChoice) {
             xhr.addEventListener('readystatechange', function(){
                 if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
                     var item = xhr.responseText;
-                    if (item.SuccessMsg.includes('Successful ID Given') == true) {
+                    var dataReturned = JSON.parse(item);
+                    if (dataReturned.SuccessBool === true) {
                         //Data inserted properly; fill form fields for Mongo!
-                        randomFoodID = item.FoodIDReturned;
-                        console.log("DEBUG: We've returned the randomFoodID successfully: " + randomFoodID)
-                    } else if (item.SuccessMsg.includes('Unsuccessful ID Given') == true){
+                        randomFoodID = dataReturned.FoodIDReturned;
+                        console.log("DEBUG: We've returned the randomFoodID successfully: " + randomFoodID);
+                    } else if (dataReturned.SuccessBool === false){
                         //Data NOT inserted properly
                         console.log("Could not get ID for this food.");
                         randomFoodID = 0;
                     } else {
                         //No appropriate Response recieved
-                        alert("Error getting random ID for this food for SQL and Mongo")
-                        location.reload(true); //Reload Page
+                        console.log("Error getting random ID for this food for SQL and Mongo in randomIDCreation");
+                        //alert("Error getting random ID for this food for SQL and Mongo in randomIDCreation");
+                        //location.reload(true); //Reload Page
                     }
                 }
             });
@@ -108,7 +110,7 @@ function revealFoodForm(foodChoice) {
             toSend.FoodID = randomFoodID;
 
             var jsonString = JSON.stringify(toSend);
-            console.log(jsonString);
+            console.log("DEBUG: Here's our JSON: " + jsonString);
             //SQL Entry
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/insertHotDog', true);
@@ -116,29 +118,34 @@ function revealFoodForm(foodChoice) {
             xhr.addEventListener('readystatechange', function(){
                 if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
                     var item = xhr.responseText;
-                    if (item.SuccessMsg.includes('Successful Insert') == true) {
+                    var dataReturned = JSON.parse(item);
+                    if (dataReturned.SuccessBool === true) {
                         //Data inserted properly; fill form fields for Mongo!
+                        console.log("Inserted hotdog successful for insertHotDog.");
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
-                    } else if (item.SuccessMsg.includes('Unsuccessful Insert') == true){
+                    } else if (dataReturned.SuccessBool === false){
                         //Data NOT inserted properly
                         hDogType.value = "";
                         condimentType.value = "";
                         caloriesType.value = "";
                         nameType.value = "";
-                        alert("There was an issue submitting your hotdog :(")
+                        console.log("There was an issue submitting your hotdog :(");
+                        //alert("There was an issue submitting your hotdog :(");
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
+                        //location.reload(true); //Reload Page
                     } else {
                         //No appropriate Response recieved
-                        alert("Error submitting data, please send again.")
+                        console.log("Error submitting data for insertHotDog, please send again.");
+                        //alert("Error submitting data for insertHotDog, please send again.");
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
+                        //location.reload(true); //Reload Page
                     }
                 }
             });
             xhr.send(jsonString);
 
             toSend.FoodID = randomFoodID; //Here for DEBUG purposes...
+            console.log("Here is our food ID: " + toSend.FoodID);
             //Mongo Entry
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/insertHotDogMongo', true);
@@ -146,29 +153,33 @@ function revealFoodForm(foodChoice) {
             xhr.addEventListener('readystatechange', function(){
                 if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
                     var item = xhr.responseText;
-                    if (item.includes('Successful Insert') == true) {
+                    var dataReturned = JSON.parse(item);
+                    if (dataReturned.SuccessBool === true) {
                         //Data inserted properly; clear the form fields
                         hDogType.value = "";
                         condimentType.value = "";
                         caloriesType.value = "";
                         nameType.value = "";
-                        alert("Hotdog submitted successfully!")
+                        console.log("Hotdog submitted successfully!");
+                        //alert("Hotdog submitted successfully!");
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
-                    } else if (item.includes('Unsuccessful Insert') == true){
+                        //location.reload(true); //Reload Page
+                    } else if (dataReturned.SuccessBool === false){
                         //Data NOT inserted properly
                         hDogType.value = "";
                         condimentType.value = "";
                         caloriesType.value = "";
                         nameType.value = "";
-                        alert("There was an issue submitting your hotdog :(")
+                        console.log("There was an issue submitting your hotdog :(");
+                        //alert("There was an issue submitting your hotdog :(");
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
+                        //location.reload(true); //Reload Page
                     } else {
                         //No appropriate Response recieved
-                        alert("Error submitting data, please send again.")
+                        console.log("Error submitting data for insertHotDogMongo, please send again.");
+                        //alert("Error submitting data for insertHotDogMongo, please send again.");
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
+                        //location.reload(true); //Reload Page
                     }
                 }
             });
@@ -184,7 +195,6 @@ function revealFoodForm(foodChoice) {
         theDiv.appendChild(submitButton);
         //Dispaly the form to click on
         theDiv.style.display = "block";
-
     } else if (foodChoice == 1) { //For Hamburger Selection
         console.log("Mkay, you clicked hamburger.")
         //Create the form elements and append them to the form
