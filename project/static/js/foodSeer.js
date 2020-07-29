@@ -137,7 +137,8 @@ function foodDeleter(whichFood, whichChoice){
     console.log("DEBUG: Reached the foodDeleter.");
     var foodDeletion = {
         FoodType: whichFood,
-        FoodID: whichChoice
+        FoodID: whichChoice,
+        UserID: userID
     }; //Make JSON to send to food API for SQL
 
     var jsonString = JSON.stringify(foodDeletion);

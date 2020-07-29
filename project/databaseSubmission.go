@@ -150,6 +150,7 @@ func deleteFood(w http.ResponseWriter, req *http.Request) {
 	type foodDeletion struct {
 		FoodType string `json:"FoodType"`
 		FoodID   int    `json:"FoodID"`
+		UserID   int    `json:"UserID"`
 	}
 	//Unwrap from JSON
 	bs, err := ioutil.ReadAll(req.Body)
@@ -163,11 +164,11 @@ func deleteFood(w http.ResponseWriter, req *http.Request) {
 	//Determine if this is a hotdog or hamburger deletion
 	sqlStatement := ""
 	if theFoodDeletion.FoodType == "hotdog" {
-		sqlStatement = "DELETE FROM hot_dogs WHERE FOOD_ID=?"
+		sqlStatement = "DELETE FROM hot_dogs WHERE FOOD_ID=? AND USER_ID=?"
 		delDog, err := db.Prepare(sqlStatement)
 		check(err)
 
-		r, err := delDog.Exec(theFoodDeletion.FoodID)
+		r, err := delDog.Exec(theFoodDeletion.FoodID, theFoodDeletion.UserID)
 		check(err)
 
 		n, err := r.RowsAffected()
@@ -177,11 +178,11 @@ func deleteFood(w http.ResponseWriter, req *http.Request) {
 
 		fmt.Fprintln(w, 1)
 	} else if theFoodDeletion.FoodType == "hamburger" {
-		sqlStatement = "DELETE FROM hamburgers WHERE FOOD_ID=?"
+		sqlStatement = "DELETE FROM hamburgers WHERE FOOD_ID=? AND USER_ID=?"
 		delDog, err := db.Prepare(sqlStatement)
 		check(err)
 
-		r, err := delDog.Exec(theFoodDeletion.FoodID)
+		r, err := delDog.Exec(theFoodDeletion.FoodID, theFoodDeletion.UserID)
 		check(err)
 
 		n, err := r.RowsAffected()
@@ -480,14 +481,14 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 		fmt.Printf("DEBUG: Updating hotdog at id: %v\n", thefoodUpdate.FoodID)
 		var updatedHotdog Hotdog = thefoodUpdate.TheHotDog
 		sqlStatement = "UPDATE hot_dogs SET TYPE=?, CONDIMENT=?, CALORIES=?," +
-			"NAME=?, USER_ID=?, DATE_UPDATED=? WHERE ID=?"
+			"NAME=?, USER_ID=?, DATE_UPDATED=? WHERE FOOD_ID=? AND USER_ID=?"
 
 		stmt, err := db.Prepare(sqlStatement)
 		check(err)
 		theTimeNow := time.Now()
 		r, err := stmt.Exec(updatedHotdog.HotDogType, updatedHotdog.Condiment,
 			updatedHotdog.Calories, updatedHotdog.Name, updatedHotdog.UserID,
-			theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID)
+			theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID, thefoodUpdate.TheHotDog.UserID)
 		check(err)
 
 		n, err := r.RowsAffected()
@@ -495,28 +496,39 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 
 		fmt.Printf("%v\n", n)
 
-		fmt.Fprintln(w, 1)
-
+		if n < 1 {
+			fmt.Printf("Only %v rows effected, foodUpdate unsuccessful. No foodID found for: %v\n", n,
+				thefoodUpdate.FoodID)
+			fmt.Fprintln(w, 3)
+		} else {
+			fmt.Fprintln(w, 1)
+		}
 	} else if thefoodUpdate.FoodType == "hamburger" {
 		var updatedHamburger Hamburger = thefoodUpdate.TheHamburger
 		sqlStatement = "UPDATE hamburgers SET TYPE=?, CONDIMENT=?, CALORIES=?," +
-			"NAME=?, USER_ID=?, DATE_UPDATED=? WHERE ID=?"
+			"NAME=?, USER_ID=?, DATE_UPDATED=? WHERE FOOD_ID=? AND USER_ID=?"
 
 		stmt, err := db.Prepare(sqlStatement)
 		check(err)
 		theTimeNow := time.Now()
 		r, err := stmt.Exec(updatedHamburger.BurgerType, updatedHamburger.Condiment,
 			updatedHamburger.Calories, updatedHamburger.Name, updatedHamburger.UserID,
-			theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID)
+			theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID, thefoodUpdate.TheHamburger.UserID)
 		check(err)
 
 		n, err := r.RowsAffected()
 		check(err)
 
-		fmt.Printf("%v\n", n)
-
-		fmt.Fprintln(w, 2)
+		if n < 1 {
+			fmt.Printf("Only %v rows effected, foodUpdate unsuccessful. No foodID found for: %v\n", n,
+				thefoodUpdate.FoodID)
+			fmt.Fprintln(w, 3)
+		} else {
+			fmt.Printf("%v\n", n)
+			fmt.Fprintln(w, 2)
+		}
 	} else {
+		fmt.Printf("No good value sent through JSON to update food: %v\n", thefoodUpdate.FoodID)
 		fmt.Fprintln(w, 3)
 	}
 }

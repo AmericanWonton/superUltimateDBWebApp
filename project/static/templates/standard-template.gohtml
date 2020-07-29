@@ -820,35 +820,24 @@
             //Assign fields to pass to food deleter
             if (foodChoice.value == "hotdog"){
                 //See if the foodID field was assigned correctly
-                if (foodID.value < 0 || foodID.value > hotdogsArray.length - 1){
+                if (foodID.value < 0){
                     //bad selection
                     console.log("User inputted a wrong selection: " + foodID.value);
-                    alert("Please choose an ID for hotdog listed below.");
+                    alert("Please enter a foodID listed below.");
                     //location.reload(true);
                 } else {    
                     //Good Selection
-                    var foodDeletionMongo = {
-                        FoodType: "hotdog", //For hotdog
-                        TheHamburger: hamburgArray[foodChoice.value],
-                        TheHotDog: hotdogsArray[foodChoice.value]
-                    }; //Make JSON to send to food API for Mongo
-                    foodDeleter(foodChoice.value, hotdogIDArray[foodID.value]);
+                    foodDeleter(foodChoice.value, foodID);
                 }
             } else if (foodChoice.value == "hamburger"){
                 //See if the foodID field was assigned correctly
-                if (foodID.value < 0 || foodID.value > hamburgArray.length - 1){
+                if (foodID.value < 0){
                     //bad selection
                     console.log("User inputted a wrong selection: " + foodID.value);
-                    alert("Please choose an ID for hotdog listed below.");
+                    alert("Please enter a foodID listed below.");
                 } else {    
                     //Good Selection
-                    var foodDeletionMongo = {
-                        FoodType: "hamburger", //For hotdog
-                        TheHamburger: hamburgArray[foodChoice.value],
-                        TheHotDog: hotdogsArray[foodChoice.value]
-                    }; //Make JSON to send to food API for Mongo
-                    console.log("DEBUG: deleting a hamburger");
-                    foodDeleter(foodChoice.value, hamburgerIDArray[foodID.value], foodDeletionMongo);
+                    foodDeleter(foodChoice.value, foodID);
                 }
             } else {
                 console.log("Error, User selected nothing in the foodchoice" +
@@ -872,10 +861,10 @@
             //Assign fields to pass to food deleter
             if (foodChoice.value == "hotdog"){
                 //See if the foodID field was assigned correctly
-                if (foodIDNumber < 0 || foodIDNumber > hotdogsArray.length - 1){
+                if (foodIDNumber < 0){
                     //bad selection
                     console.log("User inputted a wrong selection: " + foodIDNumber);
-                    alert("Please choose an ID for hotdog listed below.");
+                    alert("Please enter a foodID listed below.");
                     location.reload(true);
                 } else {    
                     //Good Selection
@@ -884,14 +873,14 @@
                     aHotDog.Calories = caloriesNumber;
                     aHotDog.Name = foodName.value;
                     aHotDog.UserID = userID;
-                    foodChanger(foodChoice.value, hotdogIDArray[foodIDNumber], aHamburger, aHotDog);
+                    foodChanger(foodChoice.value, foodIDNumber, aHamburger, aHotDog);
                 }
             } else if (foodChoice.value == "hamburger"){
                 //See if the foodID field was assigned correctly
-                if (foodIDNumber < 0 || foodIDNumber > hamburgArray.length - 1){
+                if (foodIDNumber < 0){
                     //bad selection
                     console.log("User inputted a wrong selection: " + foodIDNumber);
-                    alert("Please choose an ID for hotdog listed below.");
+                    alert("Please enter a foodID listed below.");
                     location.reload(true);
                 } else {    
                     //Good Selection
@@ -900,7 +889,7 @@
                     aHamburger.Calories = caloriesNumber;
                     aHamburger.Name = foodName.value;
                     aHamburger.UserID = userID;
-                    foodChanger(foodChoice.value, hamburgerIDArray[foodIDNumber], aHamburger, aHotDog);
+                    foodChanger(foodChoice.value, foodIDNumber, aHamburger, aHotDog);
                 }
             } else {
                 console.log("Error, User selected nothing in the foodchoice" +

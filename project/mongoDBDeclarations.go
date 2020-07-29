@@ -275,7 +275,7 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 		var hotDogUpdate Hotdog = thefoodUpdate.TheHotDog
 		updatedHotDogMongo := MongoHotDog{
 			HotDogType:  hotDogUpdate.HotDogType,
-			Condiments:  []string{hotDogUpdate.Condiment},
+			Condiments:  turnFoodArray(hotDogUpdate.Condiment),
 			Calories:    hotDogUpdate.Calories,
 			Name:        hotDogUpdate.Name,
 			UserID:      hotDogUpdate.UserID,
@@ -283,7 +283,7 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 		}
 		//Add updatedHotDog to Document collection for Hotdogs
 		ic_collection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
-		filter := bson.D{{"UserID", updatedHotDogMongo.UserID}}                     //Here's our filter to look for
+		filter := bson.D{{"foodid", thefoodUpdate.FoodID}}                          //Here's our filter to look for
 		update := bson.D{                                                           //Here is our data to update
 			{"$set", bson.D{
 				{"HotDogType", updatedHotDogMongo.HotDogType},
@@ -294,10 +294,10 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 			}},
 		}
 
-		updateResult, err := ic_collection.UpdateMany(context.TODO(), filter, update)
+		updateResult, err := ic_collection.UpdateMany(theContext, filter, update)
 		if err != nil {
+			fmt.Printf("Error updating the hamburger: %v\n\n", err.Error())
 			fmt.Fprintln(w, 3) //Failure Response Response
-			log.Fatal(err)
 		} else {
 			//Our new UpdateResult
 			fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
@@ -309,7 +309,7 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 		var hamburgerUpdate Hamburger = thefoodUpdate.TheHamburger
 		updatedHamburgerMongo := MongoHamburger{
 			BurgerType:  hamburgerUpdate.BurgerType,
-			Condiments:  []string{hamburgerUpdate.Condiment},
+			Condiments:  turnFoodArray(hamburgerUpdate.Condiment),
 			Calories:    hamburgerUpdate.Calories,
 			Name:        hamburgerUpdate.Name,
 			UserID:      hamburgerUpdate.UserID,
@@ -317,7 +317,7 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 		}
 		//Add updatedHotDog to Document collection for Hotdogs
 		ic_collection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
-		filter := bson.D{{"UserID", updatedHamburgerMongo.UserID}}                     //Here's our filter to look for
+		filter := bson.D{{"foodid", thefoodUpdate.FoodID}}                             //Here's our filter to look for
 		update := bson.D{                                                              //Here is our data to update
 			{"$set", bson.D{
 				{"BurgerType", updatedHamburgerMongo.BurgerType},
@@ -330,14 +330,15 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 
 		updateResult, err := ic_collection.UpdateMany(context.TODO(), filter, update)
 		if err != nil {
+			fmt.Printf("There was an error updating hamburgers: %v\n\n", err)
 			fmt.Fprintln(w, 3) //Failure Response Response
-			log.Fatal(err)
 		} else {
 			//Our new UpdateResult
 			fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
 			fmt.Fprintln(w, 1) //Success Response
 		}
 	} else {
+		fmt.Printf("Unexpected JSON from update Food function: %v\n", thefoodUpdate.FoodType)
 		fmt.Fprintln(w, 3)
 	}
 }
@@ -346,9 +347,9 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 	//Our Food deletion struct
 	type foodDeletion struct {
-		FoodType     string    `json:"FoodType"`
-		TheHamburger Hamburger `json:"TheHamburger"`
-		TheHotDog    Hotdog    `json:"TheHotDog"`
+		FoodType string `json:"FoodType"`
+		FoodID   int    `json:"FoodID"`
+		UserID   int    `json:"UserID"`
 	}
 	//Unwrap from JSON
 	bs, err := ioutil.ReadAll(req.Body)
@@ -364,15 +365,14 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 		/* FIRST DELETE FROM HOTDOG COLLECTION*/
 		hotdogCollection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
 		deletes := []bson.M{
-			{"UserID": theFoodDeletion.TheHotDog.UserID},
+			{"UserID": theFoodDeletion.UserID},
 		} //Here's our filter to look for
-		deletes = append(deletes, bson.M{"HotDogType": bson.M{
-			"$eq": "",
-		}}, bson.M{"Condiments": bson.M{
-			"$eq": "foodSlurs[j]",
-		}}, bson.M{"Name": bson.M{
-			"$eq": "",
-		}})
+		deletes = append(deletes, bson.M{"UserID": bson.M{
+			"$eq": theFoodDeletion.UserID,
+		}}, bson.M{"foodid": bson.M{
+			"$eq": theFoodDeletion.FoodID,
+		}},
+		)
 
 		// create the slice of write models
 		var writes []mongo.WriteModel
@@ -388,7 +388,6 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 			logWriter("Error writing Mongo Delete Statement")
 			logWriter("\n")
 			logWriter(err.Error())
-			log.Fatal(err)
 		}
 		//Print Results
 		fmt.Printf("Deleted the following documents: %v\n", res.DeletedCount)
@@ -400,8 +399,14 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 	} else if theFoodDeletion.FoodType == "hamburger" {
 		hamburgerCollection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
 		deletes := []bson.M{
-			{"UserID": theFoodDeletion.TheHotDog.UserID},
+			{"UserID": theFoodDeletion.UserID},
 		} //Here's our filter to look for
+		deletes = append(deletes, bson.M{"UserID": bson.M{
+			"$eq": theFoodDeletion.UserID,
+		}}, bson.M{"foodid": bson.M{
+			"$eq": theFoodDeletion.FoodID,
+		}},
+		)
 
 		// create the slice of write models
 		var writes []mongo.WriteModel
@@ -417,7 +422,6 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 			logWriter("Error writing Mongo Delete Statement")
 			logWriter("\n")
 			logWriter(err.Error())
-			log.Fatal(err)
 		}
 		//Print Results
 		fmt.Printf("Deleted the following documents: %v\n", res.DeletedCount)
