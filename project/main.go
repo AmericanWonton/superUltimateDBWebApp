@@ -547,6 +547,9 @@ func handleRequests() {
 	myRouter.HandleFunc("/foodUpdateMongo", foodUpdateMongo).Methods("POST")           //Post Food Update!
 	myRouter.HandleFunc("/getAllFoodMongo", getAllFoodMongo).Methods("POST")           //Post All Foods to get!
 	myRouter.HandleFunc("/randomIDCreationAPI", randomIDCreationAPI).Methods("POST")   //Get Random IDS
+	//Database Insertion stuff
+	myRouter.HandleFunc("/hotDogInsertWebPage", hotDogInsertWebPage).Methods("POST")       //Post Hotdogs
+	myRouter.HandleFunc("/hamburgerInsertWebPage", hamburgerInsertWebPage).Methods("POST") //Post Hamburgers
 	//Validation Stuff
 	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
 	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames

@@ -159,11 +159,10 @@ func insertHotDogMongo(w http.ResponseWriter, req *http.Request) {
 		}
 		dataJSON, err := json.Marshal(theReturnData)
 		if err != nil {
-			fmt.Println("There's an error marshalling.")
+			fmt.Println("There's an error marshalling this hotdog.")
 			logWriter("There's an error marshalling.")
 		}
-		fmt.Printf("Error inserting results: \n%v\n", err)
-		fmt.Fprint(w, dataJSON)
+		fmt.Fprintf(w, string(dataJSON))
 	} else {
 		theReturnData := returnData{
 			SuccessMsg:     successMessage,
@@ -175,7 +174,7 @@ func insertHotDogMongo(w http.ResponseWriter, req *http.Request) {
 			fmt.Println("There's an error marshalling.")
 			logWriter("There's an error marshalling.")
 		}
-		fmt.Fprint(w, dataJSON)
+		fmt.Fprintf(w, string(dataJSON))
 		fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs) //Data insert results
 	}
 }
@@ -441,6 +440,8 @@ func randomIDCreation() int {
 	for foundID == false {
 		randInt = 0
 		randIntString = ""
+		//Create the random number, convert it to string
+		rand.Seed(time.Now().UTC().UnixNano())
 		for i := 0; i < 8; i++ {
 			randInt = rand.Intn(max-min) + min
 			randIntString = randIntString + strconv.Itoa(randInt)
@@ -454,7 +455,8 @@ func randomIDCreation() int {
 			log.Fatal(err)
 		}
 		//Search all our collections to see if this UserID is unique
-		canExit := true
+		canExit := []bool{true, true, true}
+		fmt.Printf("DEBUG: We are going to see if this ID is in our food or User DBs: %v\n", theID)
 		//User collection
 		userCollection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
 		var testAUser AUser
@@ -462,16 +464,12 @@ func randomIDCreation() int {
 		if theErr != nil {
 			if strings.Contains(theErr.Error(), "no documents in result") {
 				fmt.Printf("It's all good, this document wasn't found for User and our ID is clean.\n")
+				canExit[0] = true
 			} else {
 				fmt.Printf("DEBUG: We have another error for finding a unique UserID: \n%v\n", theErr)
-				canExit = false
+				canExit[0] = false
 				log.Fatal(theErr)
 			}
-		}
-		if testAUser.UserID == theID {
-			canExit = false
-		} else {
-			canExit = true
 		}
 		//Check hotdog collection
 		hotdogCollection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
@@ -486,18 +484,12 @@ func randomIDCreation() int {
 		theErr = hotdogCollection.FindOne(context.TODO(), theFilter).Decode(&testHotdog)
 		if theErr != nil {
 			if strings.Contains(theErr.Error(), "no documents in result") {
-				fmt.Printf("It's all good, this document wasn't found for User and our ID is clean.\n")
+				fmt.Printf("It's all good, this document wasn't found for User/Hotdog and our ID is clean.\n")
+				canExit[1] = true
 			} else {
 				fmt.Printf("DEBUG: We have another error for finding a unique UserID: \n%v\n", theErr)
-				canExit = false
-				log.Fatal(theErr)
+				canExit[1] = false
 			}
-		}
-		//Check to see if the ID was found for a hotdog database
-		if testAUser.UserID == theID {
-			canExit = false
-		} else {
-			canExit = true
 		}
 		//Check hamburger collection
 		hamburgerCollection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
@@ -512,21 +504,15 @@ func randomIDCreation() int {
 		theErr = hamburgerCollection.FindOne(context.TODO(), theFilter2).Decode(&testBurger)
 		if theErr != nil {
 			if strings.Contains(theErr.Error(), "no documents in result") {
-				fmt.Printf("It's all good, this document wasn't found for User and our ID is clean.\n")
+				canExit[2] = true
+				fmt.Printf("It's all good, this document wasn't found for User/hamburger and our ID is clean.\n")
 			} else {
 				fmt.Printf("DEBUG: We have another error for finding a unique UserID: \n%v\n", theErr)
-				canExit = false
-				log.Fatal(theErr)
+				canExit[2] = false
 			}
 		}
-		//Check to see if the ID was found for a hotdog database
-		if testAUser.UserID == theID {
-			canExit = false
-		} else {
-			canExit = true
-		}
 		//Final check to see if we can exit this loop
-		if canExit == true {
+		if canExit[0] == true && canExit[1] == true && canExit[2] == true {
 			finalID = theID
 			foundID = true
 		} else {
@@ -572,7 +558,7 @@ func randomIDCreationAPI(w http.ResponseWriter, req *http.Request) {
 		logWriter("There's an error marshalling.")
 	}
 
-	fmt.Fprint(w, dataJSON)
+	fmt.Fprintf(w, string(dataJSON))
 }
 
 //This should return foodIDS for a User or ALL Users for hotdogs

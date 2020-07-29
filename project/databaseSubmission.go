@@ -70,7 +70,7 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 			fmt.Println("There's an error marshalling.")
 			logWriter("There's an error marshalling.")
 		}
-		fmt.Fprint(w, dataJSON)
+		fmt.Fprintf(w, string(dataJSON))
 	} else {
 		hDogMarshaled, err := json.Marshal(postedHotDog)
 		if err != nil {
@@ -90,7 +90,7 @@ func insertHotDog(w http.ResponseWriter, req *http.Request) {
 			logWriter("There's an error marshalling.")
 		}
 
-		fmt.Fprint(w, dataJSON)
+		fmt.Fprintf(w, string(dataJSON))
 	}
 }
 
