@@ -562,6 +562,7 @@ func handleRequests() {
 }
 
 func main() {
+	rand.Seed(time.Now().UTC().UnixNano()) //Randomly Seed
 	//Write initial entry to log
 	//logWriter("Deployed superUltimateDBWebApp app.")
 	//open SQL connection

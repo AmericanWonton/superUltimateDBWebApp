@@ -445,7 +445,6 @@ func randomIDCreation() int {
 		randInt = 0
 		randIntString = ""
 		//Create the random number, convert it to string
-		rand.Seed(time.Now().UTC().UnixNano())
 		for i := 0; i < 8; i++ {
 			randInt = rand.Intn(max-min) + min
 			randIntString = randIntString + strconv.Itoa(randInt)
@@ -464,7 +463,7 @@ func randomIDCreation() int {
 		//User collection
 		userCollection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
 		var testAUser AUser
-		theErr := userCollection.FindOne(context.TODO(), bson.M{"userid": theID}).Decode(&testAUser)
+		theErr := userCollection.FindOne(theContext, bson.M{"userid": theID}).Decode(&testAUser)
 		if theErr != nil {
 			if strings.Contains(theErr.Error(), "no documents in result") {
 				fmt.Printf("It's all good, this document wasn't found for User and our ID is clean.\n")
@@ -485,7 +484,7 @@ func randomIDCreation() int {
 				bson.M{"foodid": theID},
 			},
 		}
-		theErr = hotdogCollection.FindOne(context.TODO(), theFilter).Decode(&testHotdog)
+		theErr = hotdogCollection.FindOne(theContext, theFilter).Decode(&testHotdog)
 		if theErr != nil {
 			if strings.Contains(theErr.Error(), "no documents in result") {
 				fmt.Printf("It's all good, this document wasn't found for User/Hotdog and our ID is clean.\n")
@@ -505,7 +504,7 @@ func randomIDCreation() int {
 				bson.M{"foodid": theID},
 			},
 		}
-		theErr = hamburgerCollection.FindOne(context.TODO(), theFilter2).Decode(&testBurger)
+		theErr = hamburgerCollection.FindOne(theContext, theFilter2).Decode(&testBurger)
 		if theErr != nil {
 			if strings.Contains(theErr.Error(), "no documents in result") {
 				canExit[2] = true
