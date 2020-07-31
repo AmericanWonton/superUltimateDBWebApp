@@ -827,7 +827,8 @@
                     //location.reload(true);
                 } else {    
                     //Good Selection
-                    foodDeleter(foodChoice.value, foodID);
+                    var foodNumber = Number(foodID.value);
+                    foodDeleter(foodChoice.value, foodNumber);
                 }
             } else if (foodChoice.value == "hamburger"){
                 //See if the foodID field was assigned correctly
@@ -837,7 +838,8 @@
                     alert("Please enter a foodID listed below.");
                 } else {    
                     //Good Selection
-                    foodDeleter(foodChoice.value, foodID);
+                    var foodNumber = Number(foodID.value);
+                    foodDeleter(foodChoice.value, foodNumber);
                 }
             } else {
                 console.log("Error, User selected nothing in the foodchoice" +

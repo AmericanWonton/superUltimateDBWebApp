@@ -103,23 +103,23 @@ func hotDogInsertWebPage(w http.ResponseWriter, req *http.Request) {
 
 func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 	//Declare the Struct
-	fmt.Println("Inserting hotdog record in Mongo/SQL.")
+	fmt.Println("Inserting Burger record in Mongo/SQL.")
 	//Collect JSON from Postman or wherever
 	//Get the byte slice from the request body ajax
 	bs, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("Here is our byte slice hotdog as a string for JSON: \n\n%v\n", string(bs))
+	fmt.Printf("Here is our byte slice Burger as a string for JSON: \n\n%v\n", string(bs))
 	//Marshal it into our type
 	var postedHamburger Hamburger
 	json.Unmarshal(bs, &postedHamburger)
-	//Protections for the hotdog name
+	//Protections for the Burger name
 	if strings.Compare(postedHamburger.BurgerType, "DEBUGTYPE") == 0 {
 		postedHamburger.BurgerType = "NONE"
 	}
-	//First give this hotdog a random ID
-	fmt.Printf("DEBUG: This is what our hotdog foodID is now: %v\n", postedHamburger.FoodID)
+	//First give this Burger a random ID
+	fmt.Printf("DEBUG: This is what our Burger foodID is now: %v\n", postedHamburger.FoodID)
 	randomFoodID := randomIDCreation()
 	postedHamburger.FoodID = randomFoodID
 	fmt.Printf("DEBUG: Here is our randomID now: %v\n", postedHamburger.FoodID)
@@ -131,7 +131,7 @@ func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 	//Define returned JSON
 	type returnData struct {
 		SuccessMsg        string         `json:"SuccessMsg"`
-		ReturnedHamburger MongoHamburger `json:"ReturnedHotDog"`
+		ReturnedHamburger MongoHamburger `json:"ReturnedHamburger"`
 		SuccessBool       bool           `json:"SuccessBool"`
 	}
 

@@ -10,7 +10,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -146,19 +145,22 @@ var template1 *template.Template
 
 func logWriter(logMessage string) {
 	//Logging info
-	fmt.Println("Writing log files.")
-	logFile, err := os.OpenFile("/tmp/superdblogs/superDBAppLog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	/*
+		fmt.Println("Writing log files.")
+		logFile, err := os.OpenFile("/tmp/superdblogs/superDBAppLog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
-	defer logFile.Close()
+		defer logFile.Close()
 
-	if err != nil {
-		//log.Fatalln("Failed opening file")
-		fmt.Println("Failed opening file")
-	}
+		if err != nil {
+			//log.Fatalln("Failed opening file")
+			fmt.Println("Failed opening file")
+		}
 
-	log.SetOutput(logFile)
+		log.SetOutput(logFile)
 
-	log.Println(logMessage)
+		log.Println(logMessage)
+	*/
+	fmt.Printf("DEBUG: Writing the following message in logwriter\n\n%v\n", logMessage)
 }
 
 /* FUNCMAP DEFINITION */
@@ -547,6 +549,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/foodUpdateMongo", foodUpdateMongo).Methods("POST")           //Post Food Update!
 	myRouter.HandleFunc("/getAllFoodMongo", getAllFoodMongo).Methods("POST")           //Post All Foods to get!
 	myRouter.HandleFunc("/randomIDCreationAPI", randomIDCreationAPI).Methods("POST")   //Get Random IDS
+	myRouter.HandleFunc("/foodDeleteMongo", foodDeleteMongo).Methods("POST")           //Delete some Foods
 	//Database Insertion stuff
 	myRouter.HandleFunc("/hotDogInsertWebPage", hotDogInsertWebPage).Methods("POST")       //Post Hotdogs
 	myRouter.HandleFunc("/hamburgerInsertWebPage", hamburgerInsertWebPage).Methods("POST") //Post Hamburgers

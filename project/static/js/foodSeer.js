@@ -142,7 +142,7 @@ function foodDeleter(whichFood, whichChoice){
     }; //Make JSON to send to food API for SQL
 
     var jsonString = JSON.stringify(foodDeletion);
-
+    console.log("Here is our json string for food deletion: " + jsonString);
     //Call Ajax to delete the foodRecord(SQL Database)
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/deleteFood', true);

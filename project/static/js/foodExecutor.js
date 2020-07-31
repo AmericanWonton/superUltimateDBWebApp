@@ -136,7 +136,7 @@ function revealFoodForm(foodChoice) {
         /* Let's start with form instruction first */
         var condimentInstruction = document.createElement("p");
         condimentInstruction.setAttribute("id", "condimentInstruction");
-        condimentInstruction.innerHTML = "To give this hotdog multiple condiments, give a space between each condiment.";
+        condimentInstruction.innerHTML = "To give this hamburger multiple condiments, give a space between each condiment.";
         var hamburgType = document.createElement("input");
         hamburgType.setAttribute("type", "text");
         hamburgType.setAttribute("id", "hamburgType");
@@ -184,7 +184,7 @@ function revealFoodForm(foodChoice) {
 
             //JSON String creation
             var toSend = {
-                HamburgerType: "",
+                BurgerType: "",
                 Condiment: "",
                 Calories: Number(caloriesType.value),
                 Name: "",
@@ -194,7 +194,7 @@ function revealFoodForm(foodChoice) {
                 DateUpdated: ""
             };
             
-            toSend.HamburgerType = hamburgType.value;
+            toSend.BurgerType = hamburgType.value;
             toSend.Condiment = condimentType.value;
             toSend.Name = nameType.value;
             toSend.UserID = userID;
@@ -441,7 +441,7 @@ function revealFoodForm(foodChoice) {
 
             //JSON String creation
             var toSend = {
-                HamburgerType: "",
+                BurgerType: "",
                 Condiment: "",
                 Calories: Number(caloriesType.value),
                 Name: "",
@@ -451,7 +451,7 @@ function revealFoodForm(foodChoice) {
                 DateUpdated: ""
             };
             var theIDNumber = Number(userIDInput.value);
-            toSend.HamburgerType = hamburgType.value;
+            toSend.BurgerType = hamburgType.value;
             toSend.Condiment = condimentType.value;
             toSend.Name = nameType.value;
             toSend.UserID = theIDNumber;

@@ -283,17 +283,25 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 		}
 		//Add updatedHotDog to Document collection for Hotdogs
 		ic_collection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
-		filter := bson.D{{"foodid", thefoodUpdate.FoodID}}                          //Here's our filter to look for
-		update := bson.D{                                                           //Here is our data to update
+		filter := bson.D{{"foodid", updatedHotDogMongo.FoodID},
+			{"userid", updatedHotDogMongo.UserID}} //Here's our filter to look for
+		update := bson.D{ //Here is our data to update
 			{"$set", bson.D{
-				{"HotDogType", updatedHotDogMongo.HotDogType},
-				{"Condiments", updatedHotDogMongo.Condiments},
-				{"Calories", updatedHotDogMongo.Calories},
-				{"Name", updatedHotDogMongo.Name},
-				{"DateUpdated", updatedHotDogMongo.DateUpdated},
+				{"hotdogtype", updatedHotDogMongo.HotDogType},
+			}},
+			{"$set", bson.D{
+				{"condiments", updatedHotDogMongo.Condiments},
+			}},
+			{"$set", bson.D{
+				{"calories", updatedHotDogMongo.Calories},
+			}},
+			{"$set", bson.D{
+				{"name", updatedHotDogMongo.Name},
+			}},
+			{"$set", bson.D{
+				{"dateupdated", updatedHotDogMongo.DateUpdated},
 			}},
 		}
-
 		updateResult, err := ic_collection.UpdateMany(theContext, filter, update)
 		if err != nil {
 			fmt.Printf("Error updating the hamburger: %v\n\n", err.Error())
@@ -317,14 +325,24 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 		}
 		//Add updatedHotDog to Document collection for Hotdogs
 		ic_collection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
-		filter := bson.D{{"foodid", thefoodUpdate.FoodID}}                             //Here's our filter to look for
-		update := bson.D{                                                              //Here is our data to update
+		filter := bson.D{{"foodid", updatedHamburgerMongo.FoodID},
+			{"userid", updatedHamburgerMongo.UserID}} //Here's our filter to look for
+
+		update := bson.D{ //Here is our data to update
 			{"$set", bson.D{
-				{"BurgerType", updatedHamburgerMongo.BurgerType},
-				{"Condiments", updatedHamburgerMongo.Condiments},
-				{"Calories", updatedHamburgerMongo.Calories},
-				{"Name", updatedHamburgerMongo.Name},
-				{"DateUpdated", updatedHamburgerMongo.DateUpdated},
+				{"hotdogtype", updatedHamburgerMongo.BurgerType},
+			}},
+			{"$set", bson.D{
+				{"condiments", updatedHamburgerMongo.Condiments},
+			}},
+			{"$set", bson.D{
+				{"calories", updatedHamburgerMongo.Calories},
+			}},
+			{"$set", bson.D{
+				{"name", updatedHamburgerMongo.Name},
+			}},
+			{"$set", bson.D{
+				{"dateupdated", updatedHamburgerMongo.DateUpdated},
 			}},
 		}
 
@@ -362,6 +380,8 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 
 	//Determine if this is a hotdog or hamburger deletion
 	if theFoodDeletion.FoodType == "hotdog" {
+		fmt.Printf("Deleting the following hotdog,(%v), from the following User: %v\n", theFoodDeletion.FoodID,
+			theFoodDeletion.UserID)
 		/* FIRST DELETE FROM HOTDOG COLLECTION*/
 		hotdogCollection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
 		deletes := []bson.M{
@@ -383,7 +403,7 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 		}
 
 		// run bulk write
-		res, err := hotdogCollection.BulkWrite(context.TODO(), writes)
+		res, err := hotdogCollection.BulkWrite(theContext, writes)
 		if err != nil {
 			logWriter("Error writing Mongo Delete Statement")
 			logWriter("\n")
@@ -397,6 +417,8 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 
 		fmt.Fprintln(w, 1)
 	} else if theFoodDeletion.FoodType == "hamburger" {
+		fmt.Printf("Deleting the following hamburger,(%v), from the following User: %v\n", theFoodDeletion.FoodID,
+			theFoodDeletion.UserID)
 		hamburgerCollection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
 		deletes := []bson.M{
 			{"UserID": theFoodDeletion.UserID},
@@ -417,7 +439,7 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 		}
 
 		// run bulk write
-		res, err := hamburgerCollection.BulkWrite(context.TODO(), writes)
+		res, err := hamburgerCollection.BulkWrite(theContext, writes)
 		if err != nil {
 			logWriter("Error writing Mongo Delete Statement")
 			logWriter("\n")
