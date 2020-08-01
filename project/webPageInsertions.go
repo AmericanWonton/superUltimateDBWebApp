@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 func hotDogInsertWebPage(w http.ResponseWriter, req *http.Request) {
@@ -67,10 +69,10 @@ func hotDogInsertWebPage(w http.ResponseWriter, req *http.Request) {
 		DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 	}
 	//Collect Data for Mongo
-	user_collection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
+	hotdogCollection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
 	collectedUsers := []interface{}{mongoHotDogInsert}
 	//Insert Our Data
-	insertManyResult, err2 := user_collection.InsertMany(theContext, collectedUsers)
+	insertManyResult, err2 := hotdogCollection.InsertMany(theContext, collectedUsers)
 	if err2 != nil {
 		theReturnData := returnData{
 			SuccessMsg:     failureMessage,
@@ -99,6 +101,30 @@ func hotDogInsertWebPage(w http.ResponseWriter, req *http.Request) {
 	}
 
 	fmt.Printf("DEBUG: %v rows effected.\n", n)
+
+	//Insert Hotdog data into User array
+	user_collection := mongoClient.Database("superdbtest1").Collection("users")
+	filterUserID := bson.D{{"userid", postedHotDog.UserID}}
+	var foundUser AUser
+	foundUser.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
+	theErr := user_collection.FindOne(theContext, filterUserID).Decode(&foundUser)
+	if theErr != nil {
+		if strings.Contains(theErr.Error(), "no documents in result") {
+			fmt.Printf("It's all good, this document didn't find this UserID: %v\n", postedHotDog.UserID)
+		} else {
+			fmt.Printf("DEBUG: We have another error for finding a unique UserID: %v\n%v\n", postedHotDog.UserID,
+				theErr)
+		}
+	}
+	fmt.Printf("Found the testUser: %v\n", foundUser)
+
+	foundUser.Hotdogs.Hotdogs = append(foundUser.Hotdogs.Hotdogs, mongoHotDogInsert)
+	successfulUserInsert := updateUser(foundUser) //Update this User with the new Hotdog Array
+	if successfulUserInsert == true {
+		fmt.Printf("This User's hotdogs was updated successfully: %v\n", foundUser.UserID)
+	} else {
+		fmt.Printf("This User's hotdogs were NOT updated successfully: %v\n", foundUser.UserID)
+	}
 }
 
 func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
@@ -159,10 +185,10 @@ func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 		DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 	}
 	//Collect Data for Mongo
-	user_collection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
+	hamburgerCollection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
 	collectedUsers := []interface{}{mongoHamburgerInsert}
 	//Insert Our Data
-	insertManyResult, err2 := user_collection.InsertMany(theContext, collectedUsers)
+	insertManyResult, err2 := hamburgerCollection.InsertMany(theContext, collectedUsers)
 	if err2 != nil {
 		theReturnData := returnData{
 			SuccessMsg:        failureMessage,
@@ -191,4 +217,28 @@ func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 	}
 
 	fmt.Printf("DEBUG: %v rows effected.\n", n)
+
+	//Insert Hamburger data into User array
+	userCollection := mongoClient.Database("superdbtest1").Collection("users")
+	filterUserID := bson.D{{"userid", postedHamburger.UserID}}
+	var foundUser AUser
+	foundUser.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
+	theErr := userCollection.FindOne(theContext, filterUserID).Decode(&foundUser)
+	if theErr != nil {
+		if strings.Contains(theErr.Error(), "no documents in result") {
+			fmt.Printf("It's all good, this document didn't find this UserID: %v\n", postedHamburger.UserID)
+		} else {
+			fmt.Printf("DEBUG: We have another error for finding a unique UserID: %v\n%v\n", postedHamburger.UserID,
+				theErr)
+		}
+	}
+	fmt.Printf("Found the testUser: %v\n", foundUser)
+
+	foundUser.Hamburgers.Hamburgers = append(foundUser.Hamburgers.Hamburgers, mongoHamburgerInsert)
+	successfulUserInsert := updateUser(foundUser) //Update this User with the new Hotdog Array
+	if successfulUserInsert == true {
+		fmt.Printf("This User's hamburgers was updated successfully: %v\n", foundUser.UserID)
+	} else {
+		fmt.Printf("This User's hamburgers were NOT updated successfully: %v\n", foundUser.UserID)
+	}
 }

@@ -478,7 +478,8 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 
 	//Determine if this is a hotdog or hamburger update
 	if thefoodUpdate.FoodType == "hotdog" {
-		fmt.Printf("DEBUG: Updating hotdog at id: %v\n", thefoodUpdate.FoodID)
+		fmt.Printf("DEBUG: Updating hotdog in SQL at foodid: %v and UserID: %v\n",
+			thefoodUpdate.FoodID, thefoodUpdate.TheHotDog.UserID)
 		var updatedHotdog Hotdog = thefoodUpdate.TheHotDog
 		sqlStatement = "UPDATE hot_dogs SET TYPE=?, CONDIMENT=?, CALORIES=?," +
 			"NAME=?, USER_ID=?, DATE_UPDATED=? WHERE FOOD_ID=? AND USER_ID=?"

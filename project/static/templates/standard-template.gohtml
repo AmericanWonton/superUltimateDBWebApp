@@ -860,7 +860,7 @@
             var caloriesNumber = Number(calories.value);
             var foodName = document.getElementById("foodName");
 
-            //Assign fields to pass to food deleter
+            //Assign fields to pass to food changer
             if (foodChoice.value == "hotdog"){
                 //See if the foodID field was assigned correctly
                 if (foodIDNumber < 0){
@@ -875,6 +875,7 @@
                     aHotDog.Calories = caloriesNumber;
                     aHotDog.Name = foodName.value;
                     aHotDog.UserID = userID;
+                    aHotDog.FoodID = foodID.value;
                     foodChanger(foodChoice.value, foodIDNumber, aHamburger, aHotDog);
                 }
             } else if (foodChoice.value == "hamburger"){
@@ -891,6 +892,7 @@
                     aHamburger.Calories = caloriesNumber;
                     aHamburger.Name = foodName.value;
                     aHamburger.UserID = userID;
+                    aHamburger.FoodID = foodID.value;
                     foodChanger(foodChoice.value, foodIDNumber, aHamburger, aHotDog);
                 }
             } else {

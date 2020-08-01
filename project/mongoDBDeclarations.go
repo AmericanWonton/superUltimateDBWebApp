@@ -83,6 +83,45 @@ func insertUsers(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs) //Data insert results
 }
 
+func updateUser(updatedUser AUser) bool {
+	success := true
+	theTimeNow := time.Now()
+	updatedUser.DateCreated = theTimeNow.Format("2006-01-02 15:04:05")
+	ic_collection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
+	theFilter := bson.M{
+		"userid": bson.M{
+			"$eq": updatedUser.UserID, // check if bool field has value of 'false'
+		},
+	}
+	updatedDocument := bson.M{
+		"$set": bson.M{
+			"username":    updatedUser.UserName,
+			"password":    updatedUser.Password,
+			"first":       updatedUser.First,
+			"last":        updatedUser.Last,
+			"role":        updatedUser.Role,
+			"userid":      updatedUser.UserID,
+			"datecreated": updatedUser.DateCreated,
+			"dateupdated": updatedUser.DateUpdated,
+			"hotdogs":     updatedUser.Hotdogs,
+			"hamburgers":  updatedUser.Hamburgers,
+		},
+	}
+	result, err := ic_collection.UpdateOne(
+		context.TODO(),
+		theFilter,
+		updatedDocument,
+	)
+	if err != nil {
+		fmt.Printf("There was an error replacing one of our User documents: %v\n", err.Error())
+		success = false
+		log.Printf("%v\n", err)
+	}
+	fmt.Printf("Replaced %v Documents! Beacuse it matched %v documents! We had the following UserID: %v\n",
+		result.ModifiedCount, result.MatchedCount, updatedUser.UserID)
+	return success
+}
+
 func insertHotDogs(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Inserting hotdog records in Mongo.")
 	//Collect JSON from Postman or wherever
@@ -278,33 +317,35 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 			Condiments:  turnFoodArray(hotDogUpdate.Condiment),
 			Calories:    hotDogUpdate.Calories,
 			Name:        hotDogUpdate.Name,
+			FoodID:      thefoodUpdate.FoodID,
 			UserID:      hotDogUpdate.UserID,
 			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 		}
 		//Add updatedHotDog to Document collection for Hotdogs
 		ic_collection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
-		filter := bson.D{{"foodid", updatedHotDogMongo.FoodID},
-			{"userid", updatedHotDogMongo.UserID}} //Here's our filter to look for
-		update := bson.D{ //Here is our data to update
-			{"$set", bson.D{
-				{"hotdogtype", updatedHotDogMongo.HotDogType},
-			}},
-			{"$set", bson.D{
-				{"condiments", updatedHotDogMongo.Condiments},
-			}},
-			{"$set", bson.D{
-				{"calories", updatedHotDogMongo.Calories},
-			}},
-			{"$set", bson.D{
-				{"name", updatedHotDogMongo.Name},
-			}},
-			{"$set", bson.D{
-				{"dateupdated", updatedHotDogMongo.DateUpdated},
-			}},
+		theFilter := bson.M{
+			"foodid": bson.M{
+				"$eq": thefoodUpdate.FoodID, // check if bool field has value of 'false'
+			},
+			"userid": bson.M{
+				"$eq": updatedHotDogMongo.UserID, // check if bool field has value of 'false'
+			},
 		}
-		updateResult, err := ic_collection.UpdateMany(theContext, filter, update)
+		updatedDocument := bson.M{
+			"$set": bson.M{
+				"hotdogtype":  updatedHotDogMongo.HotDogType,
+				"condiments":  updatedHotDogMongo.Condiments,
+				"calories":    updatedHotDogMongo.Calories,
+				"name":        updatedHotDogMongo.Name,
+				"foodid":      thefoodUpdate.FoodID,
+				"userid":      updatedHotDogMongo.UserID,
+				"datecreated": updatedHotDogMongo.DateCreated,
+				"dateupdated": updatedHotDogMongo.DateUpdated,
+			},
+		}
+		updateResult, err := ic_collection.UpdateOne(theContext, theFilter, updatedDocument)
 		if err != nil {
-			fmt.Printf("Error updating the hamburger: %v\n\n", err.Error())
+			fmt.Printf("Error updating the hotdog: %v\n\n", err.Error())
 			fmt.Fprintln(w, 3) //Failure Response Response
 		} else {
 			//Our new UpdateResult
@@ -320,33 +361,34 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 			Condiments:  turnFoodArray(hamburgerUpdate.Condiment),
 			Calories:    hamburgerUpdate.Calories,
 			Name:        hamburgerUpdate.Name,
+			FoodID:      thefoodUpdate.FoodID,
 			UserID:      hamburgerUpdate.UserID,
 			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 		}
 		//Add updatedHotDog to Document collection for Hotdogs
 		ic_collection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
-		filter := bson.D{{"foodid", updatedHamburgerMongo.FoodID},
-			{"userid", updatedHamburgerMongo.UserID}} //Here's our filter to look for
-
-		update := bson.D{ //Here is our data to update
-			{"$set", bson.D{
-				{"hotdogtype", updatedHamburgerMongo.BurgerType},
-			}},
-			{"$set", bson.D{
-				{"condiments", updatedHamburgerMongo.Condiments},
-			}},
-			{"$set", bson.D{
-				{"calories", updatedHamburgerMongo.Calories},
-			}},
-			{"$set", bson.D{
-				{"name", updatedHamburgerMongo.Name},
-			}},
-			{"$set", bson.D{
-				{"dateupdated", updatedHamburgerMongo.DateUpdated},
-			}},
+		theFilter := bson.M{
+			"foodid": bson.M{
+				"$eq": thefoodUpdate.FoodID, // check if bool field has value of 'false'
+			},
+			"userid": bson.M{
+				"$eq": updatedHamburgerMongo.UserID, // check if bool field has value of 'false'
+			},
+		}
+		updatedDocument := bson.M{
+			"$set": bson.M{
+				"burgertype":  updatedHamburgerMongo.BurgerType,
+				"condiments":  updatedHamburgerMongo.Condiments,
+				"calories":    updatedHamburgerMongo.Calories,
+				"name":        updatedHamburgerMongo.Name,
+				"foodid":      thefoodUpdate.FoodID,
+				"userid":      updatedHamburgerMongo.UserID,
+				"datecreated": updatedHamburgerMongo.DateCreated,
+				"dateupdated": updatedHamburgerMongo.DateUpdated,
+			},
 		}
 
-		updateResult, err := ic_collection.UpdateMany(context.TODO(), filter, update)
+		updateResult, err := ic_collection.UpdateOne(context.TODO(), theFilter, updatedDocument)
 		if err != nil {
 			fmt.Printf("There was an error updating hamburgers: %v\n\n", err)
 			fmt.Fprintln(w, 3) //Failure Response Response
@@ -414,6 +456,36 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 		logWriter("Deleted the following documents: " + string(res.DeletedCount) + "\n")
 
 		/* NOW DELETE FROM USER COLLECITON */
+		userCollection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
+		theFilter := bson.M{
+			"userid": bson.M{
+				"$eq": theFoodDeletion.UserID, // check if bool field has value of 'false'
+			},
+		}
+		var foundUser AUser
+		theTimeNow := time.Now()
+		foundUser.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
+		theErr := userCollection.FindOne(theContext, theFilter).Decode(&foundUser)
+		if theErr != nil {
+			if strings.Contains(theErr.Error(), "no documents in result") {
+				fmt.Printf("It's all good, this document wasn't found for User,(%v) and our ID is clean.\n",
+					theFoodDeletion.UserID)
+			} else {
+				fmt.Printf("DEBUG: We have another error for finding a unique UserID: %v \n%v\n",
+					theFoodDeletion.UserID, theErr)
+			}
+		}
+		//Remove Hotdog
+		for j := 0; j < len(foundUser.Hotdogs.Hotdogs); j++ {
+			if foundUser.Hotdogs.Hotdogs[j].FoodID == theFoodDeletion.FoodID {
+				copy(foundUser.Hotdogs.Hotdogs[j:], foundUser.Hotdogs.Hotdogs[j+1:])                     //Shift element over 1
+				foundUser.Hotdogs.Hotdogs[len(foundUser.Hotdogs.Hotdogs)-1] = MongoHotDog{}              //Erase with 0 value
+				foundUser.Hotdogs.Hotdogs = foundUser.Hotdogs.Hotdogs[:len(foundUser.Hotdogs.Hotdogs)-1] //Truncate
+				return                                                                                   //Exit Loop
+			}
+		}
+		//Update User
+		updateUser(foundUser)
 
 		fmt.Fprintln(w, 1)
 	} else if theFoodDeletion.FoodType == "hamburger" {

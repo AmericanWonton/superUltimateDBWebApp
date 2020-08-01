@@ -82,16 +82,16 @@ function foodChanger(whichFood, whichChoice, hamburgObj, hotdogObj){
             if (item == 1) {
                 //Hotdog Update
                 console.log(item);
-                alert("Hotdog updated");
+                console.log("Hotdog Updated!")
                 location.reload(true);
             } else if (item == 2) {
                 //Hamburger Update
                 console.log(item);
-                alert("Hamburger Updated");
+                console.log("Hamburger Updated");
                 location.reload(true);
             } else if (item == 3) {
                 console.log(item);
-                alert("No food item updated; something went cooky :( ");
+                alert("No food item updated; something went cooky :(");
                 location.reload(true);
             } else {
                 alert("No food item updated; something went cooky :( ");
@@ -112,12 +112,12 @@ function foodChanger(whichFood, whichChoice, hamburgObj, hotdogObj){
             if (item == 1) {
                 //Hotdog Update
                 console.log(item);
-                alert("Hotdog updated");
+                console.log("Hotdog updated");
                 location.reload(true);
             } else if (item == 2) {
                 //Hamburger Update
                 console.log(item);
-                alert("Hamburger Updated");
+                console.log("Hamburger Updated");
                 location.reload(true);
             } else if (item == 3) {
                 console.log(item);
