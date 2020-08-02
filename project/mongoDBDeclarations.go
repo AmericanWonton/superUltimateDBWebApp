@@ -108,7 +108,7 @@ func updateUser(updatedUser AUser) bool {
 		},
 	}
 	result, err := ic_collection.UpdateOne(
-		context.TODO(),
+		theContext,
 		theFilter,
 		updatedDocument,
 	)
@@ -117,7 +117,7 @@ func updateUser(updatedUser AUser) bool {
 		success = false
 		log.Printf("%v\n", err)
 	}
-	fmt.Printf("Replaced %v Documents! Beacuse it matched %v documents! We had the following UserID: %v\n",
+	fmt.Printf("Updated %v Documents for Users! Beacuse it matched %v documents! We had the following UserID: %v\n",
 		result.ModifiedCount, result.MatchedCount, updatedUser.UserID)
 	return success
 }
@@ -183,7 +183,7 @@ func insertHotDogMongo(w http.ResponseWriter, req *http.Request) {
 	user_collection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
 	collectedUsers := []interface{}{mongoHotDogInsert}
 	//Insert Our Data
-	insertManyResult, err := user_collection.InsertMany(context.TODO(), collectedUsers)
+	insertManyResult, err := user_collection.InsertMany(theContext, collectedUsers)
 	//Define the data to return
 	type returnData struct {
 		SuccessMsg     string      `json:"SuccessMsg"`
@@ -350,6 +350,36 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 		} else {
 			//Our new UpdateResult
 			fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
+			/* NOW UPDATE FROM USER COLLECITON */
+			userCollection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
+			theFilter := bson.M{
+				"userid": bson.M{
+					"$eq": thefoodUpdate.TheHotDog.UserID, // check if bool field has value of 'false'
+				},
+			}
+			var foundUser AUser
+			theTimeNow := time.Now()
+			foundUser.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
+			theErr := userCollection.FindOne(theContext, theFilter).Decode(&foundUser)
+			if theErr != nil {
+				if strings.Contains(theErr.Error(), "no documents in result") {
+					fmt.Printf("It's all good, this document wasn't found for User,(%v) and our ID is clean.\n",
+						thefoodUpdate.TheHotDog.UserID)
+				} else {
+					fmt.Printf("DEBUG: We have another error for finding a UserID: %v \n%v\n",
+						thefoodUpdate.TheHotDog.UserID, theErr)
+				}
+			}
+			/* UPDATE USER HOTDOGS */
+			for i := 0; i < len(foundUser.Hotdogs.Hotdogs); i++ {
+				if foundUser.Hotdogs.Hotdogs[i].FoodID == thefoodUpdate.FoodID {
+					//Update this food
+					foundUser.Hotdogs.Hotdogs[i] = updatedHotDogMongo
+				}
+				return //exit Loop
+			}
+			updateUser(foundUser)
+
 			fmt.Fprintln(w, 1) //Success Response
 		}
 	} else if thefoodUpdate.FoodType == "hamburger" {
@@ -395,6 +425,35 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 		} else {
 			//Our new UpdateResult
 			fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
+			/* NOW UPDATE FROM USER COLLECITON */
+			userCollection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
+			theFilter := bson.M{
+				"userid": bson.M{
+					"$eq": thefoodUpdate.TheHamburger.UserID, // check if bool field has value of 'false'
+				},
+			}
+			var foundUser AUser
+			theTimeNow := time.Now()
+			foundUser.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
+			theErr := userCollection.FindOne(theContext, theFilter).Decode(&foundUser)
+			if theErr != nil {
+				if strings.Contains(theErr.Error(), "no documents in result") {
+					fmt.Printf("It's all good, this document wasn't found for User,(%v) and our ID is clean.\n",
+						thefoodUpdate.TheHotDog.UserID)
+				} else {
+					fmt.Printf("DEBUG: We have another error for finding a unique UserID: %v \n%v\n",
+						thefoodUpdate.TheHamburger.UserID, theErr)
+				}
+			}
+			/* UPDATE USER HOTDOGS */
+			for i := 0; i < len(foundUser.Hamburgers.Hamburgers); i++ {
+				if foundUser.Hamburgers.Hamburgers[i].FoodID == thefoodUpdate.FoodID {
+					//Update this food
+					foundUser.Hamburgers.Hamburgers[i] = updatedHamburgerMongo
+				}
+				return //exit Loop
+			}
+			updateUser(foundUser)
 			fmt.Fprintln(w, 1) //Success Response
 		}
 	} else {
@@ -477,11 +536,13 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 		}
 		//Remove Hotdog
 		for j := 0; j < len(foundUser.Hotdogs.Hotdogs); j++ {
+			fmt.Printf("DEBUG: Here is the %v foodID: %v\n", j, foundUser.Hotdogs.Hotdogs[j].FoodID)
 			if foundUser.Hotdogs.Hotdogs[j].FoodID == theFoodDeletion.FoodID {
 				copy(foundUser.Hotdogs.Hotdogs[j:], foundUser.Hotdogs.Hotdogs[j+1:])                     //Shift element over 1
 				foundUser.Hotdogs.Hotdogs[len(foundUser.Hotdogs.Hotdogs)-1] = MongoHotDog{}              //Erase with 0 value
 				foundUser.Hotdogs.Hotdogs = foundUser.Hotdogs.Hotdogs[:len(foundUser.Hotdogs.Hotdogs)-1] //Truncate
-				return                                                                                   //Exit Loop
+				fmt.Printf("DEBUG: The Hotdog is now: %v\n", foundUser.Hotdogs)
+				return //Exit Loop
 			}
 		}
 		//Update User
@@ -520,6 +581,40 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 		//Print Results
 		fmt.Printf("Deleted the following documents: %v\n", res.DeletedCount)
 		logWriter("Deleted the following documents: " + string(res.DeletedCount) + "\n")
+
+		/* NOW DELETE FROM USER COLLECITON */
+		userCollection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
+		theFilter := bson.M{
+			"userid": bson.M{
+				"$eq": theFoodDeletion.UserID, // check if bool field has value of 'false'
+			},
+		}
+		var foundUser AUser
+		theTimeNow := time.Now()
+		foundUser.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
+		theErr := userCollection.FindOne(theContext, theFilter).Decode(&foundUser)
+		if theErr != nil {
+			if strings.Contains(theErr.Error(), "no documents in result") {
+				fmt.Printf("It's all good, this document wasn't found for User,(%v) and our ID is clean.\n",
+					theFoodDeletion.UserID)
+			} else {
+				fmt.Printf("DEBUG: We have another error for finding a unique UserID: %v \n%v\n",
+					theFoodDeletion.UserID, theErr)
+			}
+		}
+		//Remove Hotdog
+		for j := 0; j < len(foundUser.Hamburgers.Hamburgers); j++ {
+			fmt.Printf("DEBUG: Here is the %v foodID: %v\n", j, foundUser.Hamburgers.Hamburgers[j].FoodID)
+			if foundUser.Hamburgers.Hamburgers[j].FoodID == theFoodDeletion.FoodID {
+				copy(foundUser.Hamburgers.Hamburgers[j:], foundUser.Hamburgers.Hamburgers[j+1:])                           //Shift element over 1
+				foundUser.Hamburgers.Hamburgers[len(foundUser.Hamburgers.Hamburgers)-1] = MongoHamburger{}                 //Erase with 0 value
+				foundUser.Hamburgers.Hamburgers = foundUser.Hamburgers.Hamburgers[:len(foundUser.Hamburgers.Hamburgers)-1] //Truncate
+				fmt.Printf("DEBUG: The Hamburgers is now: %v\n", foundUser.Hamburgers.Hamburgers)
+				return //Exit Loop
+			}
+		}
+		//Update User
+		updateUser(foundUser)
 
 		fmt.Fprintln(w, 2)
 	} else {

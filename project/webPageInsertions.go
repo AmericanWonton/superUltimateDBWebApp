@@ -29,7 +29,6 @@ func hotDogInsertWebPage(w http.ResponseWriter, req *http.Request) {
 		postedHotDog.HotDogType = "NONE"
 	}
 	//First give this hotdog a random ID
-	fmt.Printf("DEBUG: This is what our hotdog foodID is now: %v\n", postedHotDog.FoodID)
 	randomFoodID := randomIDCreation()
 	postedHotDog.FoodID = randomFoodID
 	fmt.Printf("DEBUG: Here is our randomID now: %v\n", postedHotDog.FoodID)
@@ -56,6 +55,8 @@ func hotDogInsertWebPage(w http.ResponseWriter, req *http.Request) {
 	check(err)
 	stmt.Close() //Close the SQL
 
+	fmt.Printf("DEBUG: %v rows effected for SQL.\n", n)
+
 	//Insert into Mongo
 	//Declare Mongo Dog
 	mongoHotDogInsert := MongoHotDog{
@@ -74,6 +75,7 @@ func hotDogInsertWebPage(w http.ResponseWriter, req *http.Request) {
 	//Insert Our Data
 	insertManyResult, err2 := hotdogCollection.InsertMany(theContext, collectedUsers)
 	if err2 != nil {
+		//Marshal the bad news
 		theReturnData := returnData{
 			SuccessMsg:     failureMessage,
 			ReturnedHotDog: mongoHotDogInsert,
@@ -86,44 +88,66 @@ func hotDogInsertWebPage(w http.ResponseWriter, req *http.Request) {
 		}
 		fmt.Fprintf(w, string(dataJSON))
 	} else {
-		theReturnData := returnData{
-			SuccessMsg:     successMessage,
-			ReturnedHotDog: mongoHotDogInsert,
-			SuccessBool:    true,
-		}
-		dataJSON, err := json.Marshal(theReturnData)
-		if err != nil {
-			fmt.Println("There's an error marshalling.")
-			logWriter("There's an error marshalling.")
-		}
-		fmt.Fprintf(w, string(dataJSON))
-		fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs) //Data insert results
-	}
-
-	fmt.Printf("DEBUG: %v rows effected.\n", n)
-
-	//Insert Hotdog data into User array
-	user_collection := mongoClient.Database("superdbtest1").Collection("users")
-	filterUserID := bson.D{{"userid", postedHotDog.UserID}}
-	var foundUser AUser
-	foundUser.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
-	theErr := user_collection.FindOne(theContext, filterUserID).Decode(&foundUser)
-	if theErr != nil {
-		if strings.Contains(theErr.Error(), "no documents in result") {
-			fmt.Printf("It's all good, this document didn't find this UserID: %v\n", postedHotDog.UserID)
+		//Insert Hotdog data into User array
+		user_collection := mongoClient.Database("superdbtest1").Collection("users")
+		filterUserID := bson.M{"userid": postedHotDog.UserID}
+		var foundUser AUser
+		foundUser.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
+		theErr := user_collection.FindOne(theContext, filterUserID).Decode(&foundUser)
+		if theErr != nil {
+			if strings.Contains(theErr.Error(), "no documents in result") {
+				fmt.Printf("It's all good, this document didn't find this UserID: %v\n", postedHotDog.UserID)
+			} else {
+				fmt.Printf("DEBUG: We have an error finding User for this hotdogUserID: %v\n%v\n", postedHotDog.UserID,
+					theErr)
+			}
+			//Marshal the bad news
+			theReturnData := returnData{
+				SuccessMsg:     failureMessage,
+				ReturnedHotDog: mongoHotDogInsert,
+				SuccessBool:    false,
+			}
+			dataJSON, err := json.Marshal(theReturnData)
+			if err != nil {
+				fmt.Println("There's an error marshalling this hotdog.")
+				logWriter("There's an error marshalling.")
+			}
+			fmt.Fprintf(w, string(dataJSON))
 		} else {
-			fmt.Printf("DEBUG: We have another error for finding a unique UserID: %v\n%v\n", postedHotDog.UserID,
-				theErr)
+			//Start updating User
+			fmt.Printf("Found the foundUser: %v\n", foundUser)
+			foundUser.Hotdogs.Hotdogs = append(foundUser.Hotdogs.Hotdogs, mongoHotDogInsert)
+			successfulUserInsert := updateUser(foundUser) //Update this User with the new Hotdog Array
+			if successfulUserInsert == true {
+				fmt.Printf("This User's hotdogs was updated successfully: %v\n", foundUser.UserID)
+				theReturnData := returnData{
+					SuccessMsg:     successMessage,
+					ReturnedHotDog: mongoHotDogInsert,
+					SuccessBool:    true,
+				}
+				dataJSON, err := json.Marshal(theReturnData)
+				if err != nil {
+					fmt.Println("There's an error marshalling.")
+					logWriter("There's an error marshalling.")
+				}
+				fmt.Fprintf(w, string(dataJSON))
+				fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs) //Data insert results
+			} else {
+				fmt.Printf("This User's hotdogs were NOT updated successfully: %v\n", foundUser.UserID)
+				//Marshal the bad news
+				theReturnData := returnData{
+					SuccessMsg:     failureMessage,
+					ReturnedHotDog: mongoHotDogInsert,
+					SuccessBool:    false,
+				}
+				dataJSON, err := json.Marshal(theReturnData)
+				if err != nil {
+					fmt.Println("There's an error marshalling this hotdog.")
+					logWriter("There's an error marshalling.")
+				}
+				fmt.Fprintf(w, string(dataJSON))
+			}
 		}
-	}
-	fmt.Printf("Found the testUser: %v\n", foundUser)
-
-	foundUser.Hotdogs.Hotdogs = append(foundUser.Hotdogs.Hotdogs, mongoHotDogInsert)
-	successfulUserInsert := updateUser(foundUser) //Update this User with the new Hotdog Array
-	if successfulUserInsert == true {
-		fmt.Printf("This User's hotdogs was updated successfully: %v\n", foundUser.UserID)
-	} else {
-		fmt.Printf("This User's hotdogs were NOT updated successfully: %v\n", foundUser.UserID)
 	}
 }
 
@@ -172,6 +196,8 @@ func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 	check(err)
 	stmt.Close() //Close the SQL
 
+	fmt.Printf("DEBUG: %v rows effected for SQL.\n", n)
+
 	//Insert into Mongo
 	//Declare Mongo Dog
 	mongoHamburgerInsert := MongoHamburger{
@@ -202,43 +228,63 @@ func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 		}
 		fmt.Fprintf(w, string(dataJSON))
 	} else {
-		theReturnData := returnData{
-			SuccessMsg:        successMessage,
-			ReturnedHamburger: mongoHamburgerInsert,
-			SuccessBool:       true,
-		}
-		dataJSON, err := json.Marshal(theReturnData)
-		if err != nil {
-			fmt.Println("There's an error marshalling.")
-			logWriter("There's an error marshalling.")
-		}
-		fmt.Fprintf(w, string(dataJSON))
-		fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs) //Data insert results
-	}
-
-	fmt.Printf("DEBUG: %v rows effected.\n", n)
-
-	//Insert Hamburger data into User array
-	userCollection := mongoClient.Database("superdbtest1").Collection("users")
-	filterUserID := bson.D{{"userid", postedHamburger.UserID}}
-	var foundUser AUser
-	foundUser.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
-	theErr := userCollection.FindOne(theContext, filterUserID).Decode(&foundUser)
-	if theErr != nil {
-		if strings.Contains(theErr.Error(), "no documents in result") {
-			fmt.Printf("It's all good, this document didn't find this UserID: %v\n", postedHamburger.UserID)
+		//Insert Hamburger data into User array
+		userCollection := mongoClient.Database("superdbtest1").Collection("users")
+		filterUserID := bson.M{"userid": postedHamburger.UserID}
+		var foundUser AUser
+		foundUser.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
+		theErr := userCollection.FindOne(theContext, filterUserID).Decode(&foundUser)
+		if theErr != nil {
+			if strings.Contains(theErr.Error(), "no documents in result") {
+				fmt.Printf("It's all good, this document didn't find this UserID: %v\n", postedHamburger.UserID)
+			} else {
+				fmt.Printf("DEBUG: We had an error finding a User for this hamburgerUserID: %v\n%v\n", postedHamburger.UserID,
+					theErr)
+			}
+			theReturnData := returnData{
+				SuccessMsg:        failureMessage,
+				ReturnedHamburger: mongoHamburgerInsert,
+				SuccessBool:       false,
+			}
+			dataJSON, err := json.Marshal(theReturnData)
+			if err != nil {
+				fmt.Println("There's an error marshalling this hamburger.")
+				logWriter("There's an error marshalling.")
+			}
+			fmt.Fprintf(w, string(dataJSON))
 		} else {
-			fmt.Printf("DEBUG: We have another error for finding a unique UserID: %v\n%v\n", postedHamburger.UserID,
-				theErr)
-		}
-	}
-	fmt.Printf("Found the testUser: %v\n", foundUser)
+			fmt.Printf("Found the testUser: %v\n", foundUser)
 
-	foundUser.Hamburgers.Hamburgers = append(foundUser.Hamburgers.Hamburgers, mongoHamburgerInsert)
-	successfulUserInsert := updateUser(foundUser) //Update this User with the new Hotdog Array
-	if successfulUserInsert == true {
-		fmt.Printf("This User's hamburgers was updated successfully: %v\n", foundUser.UserID)
-	} else {
-		fmt.Printf("This User's hamburgers were NOT updated successfully: %v\n", foundUser.UserID)
+			foundUser.Hamburgers.Hamburgers = append(foundUser.Hamburgers.Hamburgers, mongoHamburgerInsert)
+			successfulUserInsert := updateUser(foundUser) //Update this User with the new Hotdog Array
+			if successfulUserInsert == true {
+				fmt.Printf("This User's hamburgers was updated successfully: %v\n", foundUser.UserID)
+				theReturnData := returnData{
+					SuccessMsg:        successMessage,
+					ReturnedHamburger: mongoHamburgerInsert,
+					SuccessBool:       true,
+				}
+				dataJSON, err := json.Marshal(theReturnData)
+				if err != nil {
+					fmt.Println("There's an error marshalling.")
+					logWriter("There's an error marshalling.")
+				}
+				fmt.Fprintf(w, string(dataJSON))
+				fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs) //Data insert results
+			} else {
+				fmt.Printf("This User's hamburgers were NOT updated successfully: %v\n", foundUser.UserID)
+				theReturnData := returnData{
+					SuccessMsg:        failureMessage,
+					ReturnedHamburger: mongoHamburgerInsert,
+					SuccessBool:       false,
+				}
+				dataJSON, err := json.Marshal(theReturnData)
+				if err != nil {
+					fmt.Println("There's an error marshalling this hamburger.")
+					logWriter("There's an error marshalling.")
+				}
+				fmt.Fprintf(w, string(dataJSON))
+			}
+		}
 	}
 }

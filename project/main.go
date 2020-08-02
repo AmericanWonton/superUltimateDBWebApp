@@ -10,7 +10,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"strconv"
 	"strings"
 	"sync"
 	"text/template"
@@ -391,50 +390,8 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 		dbSessions[newCookie.Value] = session{username, time.Now()}
 		// store user in dbUsers
 		//Make User and USERID
-		goodNum := false
-		theID := 0
+		theID := randomIDCreation()
 
-		for goodNum == false {
-			//Query the database for all IDS
-			row, err := db.Query(`SELECT user_id FROM users;`)
-			check(err)
-			defer row.Close()
-			//Build the random, unique integer to be assigned to this User
-			goodNumFound := true //A second checker to break this loop
-			randInt := 0         //The random integer added onto ID
-			var databaseID int   //The ID returned from the database while searching
-			randIntString := ""  //The integer built through a string...
-			min, max := 0, 9     //The min and Max value for our randInt
-			for i := 0; i < 8; i++ {
-				randInt = rand.Intn(max-min) + min
-				randIntString = randIntString + strconv.Itoa(randInt)
-			}
-			theID, err = strconv.Atoi(randIntString)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			//Check to see if the built number is taken.
-			for row.Next() {
-				err = row.Scan(&databaseID)
-				check(err)
-				if databaseID == theID {
-					//Found the number, need to create another one!
-					fmt.Printf("Found the ID, %v, in the database: %v. Creating another one...\n",
-						theID, databaseID)
-					goodNumFound = false
-					break
-				} else {
-
-				}
-			}
-			//Final check to see if we need to go through this loop again
-			if goodNumFound == false {
-				goodNum = false
-			} else {
-				goodNum = true
-			}
-		}
 		fmt.Println("DEBUG: Adding User data to SQL database")
 		//Add User to the SQL Database
 		bsString := []byte(password)                  //Encode Password
@@ -467,7 +424,7 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 			First:       firstname,
 			Last:        lastname,
 			Role:        role,
-			UserID:      randomIDCreation(),
+			UserID:      theID,
 			DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
 			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 			Hotdogs:     MongoHotDogs{},
