@@ -84,9 +84,10 @@ func insertUsers(w http.ResponseWriter, req *http.Request) {
 }
 
 func updateUser(updatedUser AUser) bool {
+	fmt.Printf("DEBUG: We're in updateUser. Here's the User to update: %v\n", updatedUser)
 	success := true
 	theTimeNow := time.Now()
-	updatedUser.DateCreated = theTimeNow.Format("2006-01-02 15:04:05")
+	updatedUser.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
 	ic_collection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
 	theFilter := bson.M{
 		"userid": bson.M{
@@ -319,6 +320,7 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 			Name:        hotDogUpdate.Name,
 			FoodID:      thefoodUpdate.FoodID,
 			UserID:      hotDogUpdate.UserID,
+			DateCreated: hotDogUpdate.DateCreated,
 			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 		}
 		//Add updatedHotDog to Document collection for Hotdogs
@@ -369,18 +371,25 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 					fmt.Printf("DEBUG: We have another error for finding a UserID: %v \n%v\n",
 						thefoodUpdate.TheHotDog.UserID, theErr)
 				}
-			}
-			/* UPDATE USER HOTDOGS */
-			for i := 0; i < len(foundUser.Hotdogs.Hotdogs); i++ {
-				if foundUser.Hotdogs.Hotdogs[i].FoodID == thefoodUpdate.FoodID {
-					//Update this food
-					foundUser.Hotdogs.Hotdogs[i] = updatedHotDogMongo
+			} else {
+				/* UPDATE USER HOTDOGS */
+				fmt.Printf("Finding a hotdog,(%v), to update for this User:\n %v\n", thefoodUpdate.FoodID,
+					foundUser)
+				newHDogSlice := []MongoHotDog{}
+				for i := 0; i < len(foundUser.Hotdogs.Hotdogs); i++ {
+					if foundUser.Hotdogs.Hotdogs[i].FoodID == thefoodUpdate.FoodID {
+						fmt.Printf("Not adding this food, using new Hotdog instead.\n")
+						newHDogSlice = append(newHDogSlice, updatedHotDogMongo)
+					} else {
+						newHDogSlice = append(newHDogSlice, foundUser.Hotdogs.Hotdogs[i])
+					}
 				}
-				return //exit Loop
-			}
-			updateUser(foundUser)
+				foundUser.Hotdogs.Hotdogs = newHDogSlice
+				fmt.Printf("We are sending the User data to update: %v\n", foundUser)
+				updateUser(foundUser)
 
-			fmt.Fprintln(w, 1) //Success Response
+				fmt.Fprintln(w, 1) //Success Response
+			}
 		}
 	} else if thefoodUpdate.FoodType == "hamburger" {
 		fmt.Printf("DEBUG: Updating Hamburger at id: %v\n", thefoodUpdate.FoodID)
@@ -393,6 +402,7 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 			Name:        hamburgerUpdate.Name,
 			FoodID:      thefoodUpdate.FoodID,
 			UserID:      hamburgerUpdate.UserID,
+			DateCreated: hamburgerUpdate.DateCreated,
 			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 		}
 		//Add updatedHotDog to Document collection for Hotdogs
@@ -425,6 +435,7 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 		} else {
 			//Our new UpdateResult
 			fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
+
 			/* NOW UPDATE FROM USER COLLECITON */
 			userCollection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
 			theFilter := bson.M{
@@ -444,17 +455,24 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 					fmt.Printf("DEBUG: We have another error for finding a unique UserID: %v \n%v\n",
 						thefoodUpdate.TheHamburger.UserID, theErr)
 				}
-			}
-			/* UPDATE USER HOTDOGS */
-			for i := 0; i < len(foundUser.Hamburgers.Hamburgers); i++ {
-				if foundUser.Hamburgers.Hamburgers[i].FoodID == thefoodUpdate.FoodID {
-					//Update this food
-					foundUser.Hamburgers.Hamburgers[i] = updatedHamburgerMongo
+			} else {
+				fmt.Printf("Finding a hamburger,(%v), to update for this User:\n %v\n", thefoodUpdate.FoodID,
+					foundUser)
+				/* UPDATE USER HAMBURGERS */
+				newHamburgerSlice := []MongoHamburger{}
+				for i := 0; i < len(foundUser.Hamburgers.Hamburgers); i++ {
+					if foundUser.Hamburgers.Hamburgers[i].FoodID == thefoodUpdate.FoodID {
+						fmt.Printf("DEBUG: We've found the food to update, skipping it and appending the new hamburger\n")
+						newHamburgerSlice = append(newHamburgerSlice, updatedHamburgerMongo)
+					} else {
+						newHamburgerSlice = append(newHamburgerSlice, foundUser.Hamburgers.Hamburgers[i])
+					}
 				}
-				return //exit Loop
+				foundUser.Hamburgers.Hamburgers = newHamburgerSlice
+				fmt.Printf("DEBUG: Sending updated hamburgers to User for updating:\n %v\n", foundUser)
+				updateUser(foundUser)
+				fmt.Fprintln(w, 1) //Success Response
 			}
-			updateUser(foundUser)
-			fmt.Fprintln(w, 1) //Success Response
 		}
 	} else {
 		fmt.Printf("Unexpected JSON from update Food function: %v\n", thefoodUpdate.FoodType)
@@ -533,22 +551,25 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 				fmt.Printf("DEBUG: We have another error for finding a unique UserID: %v \n%v\n",
 					theFoodDeletion.UserID, theErr)
 			}
-		}
-		//Remove Hotdog
-		for j := 0; j < len(foundUser.Hotdogs.Hotdogs); j++ {
-			fmt.Printf("DEBUG: Here is the %v foodID: %v\n", j, foundUser.Hotdogs.Hotdogs[j].FoodID)
-			if foundUser.Hotdogs.Hotdogs[j].FoodID == theFoodDeletion.FoodID {
-				copy(foundUser.Hotdogs.Hotdogs[j:], foundUser.Hotdogs.Hotdogs[j+1:])                     //Shift element over 1
-				foundUser.Hotdogs.Hotdogs[len(foundUser.Hotdogs.Hotdogs)-1] = MongoHotDog{}              //Erase with 0 value
-				foundUser.Hotdogs.Hotdogs = foundUser.Hotdogs.Hotdogs[:len(foundUser.Hotdogs.Hotdogs)-1] //Truncate
-				fmt.Printf("DEBUG: The Hotdog is now: %v\n", foundUser.Hotdogs)
-				return //Exit Loop
+		} else {
+			fmt.Printf("DEBUG: We found the User and we'll delete the Hotdogs: %v\n", foundUser.Hotdogs.Hotdogs)
+			//Remove Hotdog
+			newHDogSlice := []MongoHotDog{}
+			for j := 0; j < len(foundUser.Hotdogs.Hotdogs); j++ {
+				fmt.Printf("DEBUG: Here is the %v foodID: %v\n", j, foundUser.Hotdogs.Hotdogs[j].FoodID)
+				if foundUser.Hotdogs.Hotdogs[j].FoodID == theFoodDeletion.FoodID {
+					fmt.Printf("DEBUG: We ignoring this hotdog and adding the others to our slice.\n")
+				} else {
+					newHDogSlice = append(newHDogSlice, foundUser.Hotdogs.Hotdogs[j])
+				}
 			}
-		}
-		//Update User
-		updateUser(foundUser)
+			//Update User
+			foundUser.Hotdogs.Hotdogs = newHDogSlice
+			fmt.Printf("Giving new User data for deletion:\n %v\n", foundUser)
+			updateUser(foundUser)
 
-		fmt.Fprintln(w, 1)
+			fmt.Fprintln(w, 1)
+		}
 	} else if theFoodDeletion.FoodType == "hamburger" {
 		fmt.Printf("Deleting the following hamburger,(%v), from the following User: %v\n", theFoodDeletion.FoodID,
 			theFoodDeletion.UserID)
@@ -601,22 +622,23 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 				fmt.Printf("DEBUG: We have another error for finding a unique UserID: %v \n%v\n",
 					theFoodDeletion.UserID, theErr)
 			}
-		}
-		//Remove Hotdog
-		for j := 0; j < len(foundUser.Hamburgers.Hamburgers); j++ {
-			fmt.Printf("DEBUG: Here is the %v foodID: %v\n", j, foundUser.Hamburgers.Hamburgers[j].FoodID)
-			if foundUser.Hamburgers.Hamburgers[j].FoodID == theFoodDeletion.FoodID {
-				copy(foundUser.Hamburgers.Hamburgers[j:], foundUser.Hamburgers.Hamburgers[j+1:])                           //Shift element over 1
-				foundUser.Hamburgers.Hamburgers[len(foundUser.Hamburgers.Hamburgers)-1] = MongoHamburger{}                 //Erase with 0 value
-				foundUser.Hamburgers.Hamburgers = foundUser.Hamburgers.Hamburgers[:len(foundUser.Hamburgers.Hamburgers)-1] //Truncate
-				fmt.Printf("DEBUG: The Hamburgers is now: %v\n", foundUser.Hamburgers.Hamburgers)
-				return //Exit Loop
+		} else {
+			//Remove Hamburger
+			hamburgerSlice := []MongoHamburger{}
+			for j := 0; j < len(foundUser.Hamburgers.Hamburgers); j++ {
+				fmt.Printf("DEBUG: Here is the %v foodID: %v\n", j, foundUser.Hamburgers.Hamburgers[j].FoodID)
+				if foundUser.Hamburgers.Hamburgers[j].FoodID == theFoodDeletion.FoodID {
+					fmt.Printf("DEBUG: We will not include this Hamburger in the slice.\n")
+				} else {
+					hamburgerSlice = append(hamburgerSlice, foundUser.Hamburgers.Hamburgers[j])
+				}
 			}
-		}
-		//Update User
-		updateUser(foundUser)
+			//Update User
+			fmt.Printf("DEBUG: Updating the User with the deleted Hamburger(s):\n%v\n", foundUser)
+			updateUser(foundUser)
 
-		fmt.Fprintln(w, 2)
+			fmt.Fprintln(w, 2)
+		}
 	} else {
 		fmt.Fprintln(w, 3)
 	}
