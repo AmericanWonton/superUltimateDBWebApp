@@ -1682,6 +1682,22 @@
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
+                                //Create UserID Info Section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "UserID";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHamburgers[y].UserID;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
                                 //Create DateCreated Info Section
                                 var udcFieldInfoTxtDiv = document.createElement("div");
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
@@ -1832,6 +1848,22 @@
                                 var udcfText = document.createElement("p");
                                 udcfText.setAttribute("id", "udcfText");
                                 udcfText.innerHTML = dataOBJ.TheHotDogs[i].FoodID;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create UserID section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "UserID";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHotDogs[i].UserID;
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
