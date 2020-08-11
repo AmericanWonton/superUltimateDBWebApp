@@ -37,12 +37,14 @@
                 {{template "foodSeer" $theID}}
             {{else if eq $theRole "IT"}}
                 <p>Hey, you're logged in {{.User.Role}}! Now you can do IT stuff!</p>
+                {{$theID := .User.UserID}}
+                {{template "IT-action"}}
+                {{template "foodExecutor" $theID}}
+                {{template "foodSeer" $theID}}
             {{else}}
                 <p>Whoops! Error here! Go back!</p>
             {{end}}
         {{end}}
-        
-
 
         {{/* Here is our footer */}}
         

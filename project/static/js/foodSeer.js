@@ -133,12 +133,12 @@ function foodChanger(whichFood, whichChoice, hamburgObj, hotdogObj){
     xhr.send(jsonString);
 }
 
-function foodDeleter(whichFood, whichChoice){
+function foodDeleter(whichFood, whichChoice, whichUserID){
     console.log("DEBUG: Reached the foodDeleter.");
     var foodDeletion = {
         FoodType: whichFood,
         FoodID: whichChoice,
-        UserID: userID
+        UserID: whichUserID
     }; //Make JSON to send to food API for SQL
 
     var jsonString = JSON.stringify(foodDeletion);

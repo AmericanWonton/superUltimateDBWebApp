@@ -555,12 +555,16 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 			fmt.Printf("DEBUG: We found the User and we'll delete the Hotdogs: %v\n", foundUser.Hotdogs.Hotdogs)
 			//Remove Hotdog
 			newHDogSlice := []MongoHotDog{}
-			for j := 0; j < len(foundUser.Hotdogs.Hotdogs); j++ {
-				fmt.Printf("DEBUG: Here is the %v foodID: %v\n", j, foundUser.Hotdogs.Hotdogs[j].FoodID)
-				if foundUser.Hotdogs.Hotdogs[j].FoodID == theFoodDeletion.FoodID {
-					fmt.Printf("DEBUG: We ignoring this hotdog and adding the others to our slice.\n")
-				} else {
-					newHDogSlice = append(newHDogSlice, foundUser.Hotdogs.Hotdogs[j])
+			if len(foundUser.Hotdogs.Hotdogs) == 1 {
+				newHDogSlice = nil
+			} else {
+				for j := 0; j < len(foundUser.Hotdogs.Hotdogs); j++ {
+					fmt.Printf("DEBUG: Here is the %v foodID: %v\n", j, foundUser.Hotdogs.Hotdogs[j].FoodID)
+					if foundUser.Hotdogs.Hotdogs[j].FoodID == theFoodDeletion.FoodID {
+						fmt.Printf("DEBUG: We ignoring this hotdog and adding the others to our slice.\n")
+					} else {
+						newHDogSlice = append(newHDogSlice, foundUser.Hotdogs.Hotdogs[j])
+					}
 				}
 			}
 			//Update User
@@ -625,15 +629,20 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 		} else {
 			//Remove Hamburger
 			hamburgerSlice := []MongoHamburger{}
-			for j := 0; j < len(foundUser.Hamburgers.Hamburgers); j++ {
-				fmt.Printf("DEBUG: Here is the %v foodID: %v\n", j, foundUser.Hamburgers.Hamburgers[j].FoodID)
-				if foundUser.Hamburgers.Hamburgers[j].FoodID == theFoodDeletion.FoodID {
-					fmt.Printf("DEBUG: We will not include this Hamburger in the slice.\n")
-				} else {
-					hamburgerSlice = append(hamburgerSlice, foundUser.Hamburgers.Hamburgers[j])
+			if len(foundUser.Hamburgers.Hamburgers) == 1 {
+				hamburgerSlice = nil
+			} else {
+				for j := 0; j < len(foundUser.Hamburgers.Hamburgers); j++ {
+					fmt.Printf("DEBUG: Here is the %v foodID: %v\n", j, foundUser.Hamburgers.Hamburgers[j].FoodID)
+					if foundUser.Hamburgers.Hamburgers[j].FoodID == theFoodDeletion.FoodID {
+						fmt.Printf("DEBUG: We will not include this Hamburger in the slice.\n")
+					} else {
+						hamburgerSlice = append(hamburgerSlice, foundUser.Hamburgers.Hamburgers[j])
+					}
 				}
 			}
 			//Update User
+			foundUser.Hamburgers.Hamburgers = hamburgerSlice
 			fmt.Printf("DEBUG: Updating the User with the deleted Hamburger(s):\n%v\n", foundUser)
 			updateUser(foundUser)
 

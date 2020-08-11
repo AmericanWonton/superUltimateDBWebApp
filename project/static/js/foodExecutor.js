@@ -382,7 +382,7 @@ function revealFoodForm(foodChoice) {
         /* Let's start with form instruction first */
         var condimentInstruction = document.createElement("p");
         condimentInstruction.setAttribute("id", "condimentInstruction");
-        condimentInstruction.innerHTML = "To give this hotdog multiple condiments, give a space between each condiment.";
+        condimentInstruction.innerHTML = "To give this hamburger multiple condiments, give a space between each condiment.";
         var hamburgType = document.createElement("input");
         hamburgType.setAttribute("type", "text");
         hamburgType.setAttribute("id", "hamburgType");
