@@ -100,15 +100,27 @@ function revealFoodForm(foodChoice) {
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
                         //location.reload(true); //Reload Page
                     } else if (dataReturned.SuccessBool === false){
-                        //Data NOT inserted properly
-                        hDogType.value = "";
-                        condimentType.value = "";
-                        caloriesType.value = "";
-                        nameType.value = "";
-                        console.log("There was an issue submitting your hotdog :(");
-                        //alert("There was an issue submitting your hotdog :(");
-                        theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        //location.reload(true); //Reload Page
+                        var foulLanguage = dataReturned.SuccessMsg.includes("foul language");
+                        if (foulLanguage == true){
+                            hDogType.value = "";
+                            condimentType.value = "";
+                            caloriesType.value = "";
+                            nameType.value = "";
+                            console.log("Hotdog contained foul language. Please re-enter.");
+                            //alert("There was an issue submitting your hotdog :(");
+                            theDiv.innerHTML = ""; //Remove any child elements if any remain
+                            //location.reload(true); //Reload Page
+                        } else {
+                            //Data NOT inserted properly
+                            hDogType.value = "";
+                            condimentType.value = "";
+                            caloriesType.value = "";
+                            nameType.value = "";
+                            console.log("There was an issue submitting your hotdog :(");
+                            //alert("There was an issue submitting your hotdog :(");
+                            theDiv.innerHTML = ""; //Remove any child elements if any remain
+                            //location.reload(true); //Reload Page
+                        }
                     } else {
                         //No appropriate Response recieved
                         console.log("Error submitting data for hotDogInsertWebPage, please send again.");
@@ -219,14 +231,26 @@ function revealFoodForm(foodChoice) {
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
                         location.reload(true); //Reload Page
                     } else if (dataReturned.SuccessBool === false){
-                        //Data NOT inserted properly
-                        hamburgType.value = "";
-                        condimentType.value = "";
-                        caloriesType.value = "";
-                        nameType.value = "";
-                        alert("There was an issue submitting your hamburger :(")
-                        theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
+                        var foulLanguage = dataReturned.SuccessMsg.includes("foul language");
+                        if (foulLanguage == true){
+                            //Data NOT inserted properly
+                            hamburgType.value = "";
+                            condimentType.value = "";
+                            caloriesType.value = "";
+                            nameType.value = "";
+                            alert("Hamburger contained foul language. Please re-enter.");
+                            theDiv.innerHTML = ""; //Remove any child elements if any remain
+                            location.reload(true); //Reload Page
+                        }else{
+                            //Data NOT inserted properly
+                            hamburgType.value = "";
+                            condimentType.value = "";
+                            caloriesType.value = "";
+                            nameType.value = "";
+                            alert("There was an issue submitting your hamburger :(")
+                            theDiv.innerHTML = ""; //Remove any child elements if any remain
+                            location.reload(true); //Reload Page
+                        }
                     } else {
                         //No appropriate Response recieved
                         alert("Error submitting data, please send again.")
@@ -347,15 +371,28 @@ function revealFoodForm(foodChoice) {
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
                         location.reload(true); //Reload Page
                     } else if (dataReturned.SuccessBool === false){
-                        //Data NOT inserted properly
-                        hDogType.value = "";
-                        condimentType.value = "";
-                        caloriesType.value = "";
-                        nameType.value = "";
-                        userIDInput.value = "";
-                        alert("There was an issue submitting your hotdog :(")
-                        theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
+                        var foulLanguage = dataReturned.SuccessMsg.includes("foul language");
+                        if (foulLanguage == true){
+                            //Data NOT inserted properly
+                            hDogType.value = "";
+                            condimentType.value = "";
+                            caloriesType.value = "";
+                            nameType.value = "";
+                            userIDInput.value = "";
+                            alert("Hotdog contained foul language. Please re-enter.");
+                            theDiv.innerHTML = ""; //Remove any child elements if any remain
+                            location.reload(true); //Reload Page
+                        } else {
+                            //Data NOT inserted properly
+                            hDogType.value = "";
+                            condimentType.value = "";
+                            caloriesType.value = "";
+                            nameType.value = "";
+                            userIDInput.value = "";
+                            alert("There was an issue submitting your hotdog :(");
+                            theDiv.innerHTML = ""; //Remove any child elements if any remain
+                            location.reload(true); //Reload Page
+                        }
                     } else {
                         //No appropriate Response recieved
                         alert("Error submitting data, please send again.")
@@ -477,15 +514,28 @@ function revealFoodForm(foodChoice) {
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
                         location.reload(true); //Reload Page
                     } else if (dataReturned.SuccessBool === false){
-                        //Data NOT inserted properly
-                        hamburgType.value = "";
-                        condimentType.value = "";
-                        caloriesType.value = "";
-                        nameType.value = "";
-                        userIDInput.value = "";
-                        alert("There was an issue submitting your hamburger :(")
-                        theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
+                        var foulLanguage = dataReturned.SuccessMsg.includes("foul language");
+                        if (foulLanguage == true){
+                            //Data NOT inserted properly
+                            hamburgType.value = "";
+                            condimentType.value = "";
+                            caloriesType.value = "";
+                            nameType.value = "";
+                            userIDInput.value = "";
+                            alert("Hamburger contained foul language. Please re-enter.");
+                            theDiv.innerHTML = ""; //Remove any child elements if any remain
+                            location.reload(true); //Reload Page
+                        } else{
+                            //Data NOT inserted properly
+                            hamburgType.value = "";
+                            condimentType.value = "";
+                            caloriesType.value = "";
+                            nameType.value = "";
+                            userIDInput.value = "";
+                            alert("There was an issue submitting your hamburger :(");
+                            theDiv.innerHTML = ""; //Remove any child elements if any remain
+                            location.reload(true); //Reload Page
+                        }
                     } else {
                         //No appropriate Response recieved
                         alert("Error submitting data, please send again.")

@@ -164,7 +164,7 @@ func createSendDataUser() []User {
 		ourUsers = append(ourUsers, ourUser)
 		//Add the User to our database
 		jsonValue, _ := json.Marshal(ourUser)
-		response, err := http.Post("http://localhost:8080/insertUser", "application/json", bytes.NewBuffer(jsonValue))
+		response, err := http.Post("http://3.135.9.238:8080/insertUser", "application/json", bytes.NewBuffer(jsonValue))
 		if err != nil {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
 		} else {
@@ -202,7 +202,7 @@ func createSendDataHDog(ourUsers []User) []Hotdog {
 		//Add the hotdog to the database
 		//Add the User to our database
 		jsonValue, _ := json.Marshal(aHotdog)
-		response, err := http.Post("http://localhost:8080/insertHotDog", "application/json", bytes.NewBuffer(jsonValue))
+		response, err := http.Post("http://3.135.9.238:8080/insertHotDog", "application/json", bytes.NewBuffer(jsonValue))
 		if err != nil {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
 		} else {
@@ -240,7 +240,7 @@ func createSendDataHam(ourUsers []User) []Hamburger {
 		//Add the hotdog to the database
 		//Add the User to our database
 		jsonValue, _ := json.Marshal(aBurger)
-		response, err := http.Post("http://localhost:8080/insertHamburger", "application/json", bytes.NewBuffer(jsonValue))
+		response, err := http.Post("http://3.135.9.238:8080/insertHamburger", "application/json", bytes.NewBuffer(jsonValue))
 		if err != nil {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
 		} else {

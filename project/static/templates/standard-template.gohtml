@@ -190,10 +190,11 @@
                     });
                     xhr.send(jsonString);
                     console.log("Redirecting to a window")
-                    window.location.replace("http://localhost:80");
+                    window.location.replace("http://3.135.9.238:80");
                 } else if (role.value == "admin") {
                     alert("Standby future admin, we will be approving your login shortly!" +
-                    "\n" + "If you want to partially mess around with data, consider signing up as IT!");
+                    "\n" + "If you want to partially mess around with data, consider signing up as IT!\n" +
+                    "Please email jbkeller@gmail.com if you have any questions.");
                 } else if (role.value == "IT") {
                     //Create User
                     var xhr = new XMLHttpRequest();
@@ -212,7 +213,7 @@
                     });
                     xhr.send(jsonString);
                     console.log("Redirecting to a window")
-                    window.location.replace("http://localhost:80");
+                    window.location.replace("http://3.135.9.238:80");
                 } else {
                     alert("Whoops, got the wrong value for our role part of the form.");
                 }
@@ -268,6 +269,9 @@
                         document.querySelector('#submit_button').disabled = true;
                     } else if (item == 'TooLong'){
                         usernameErr.textContent = 'Username must be under 20 characters';
+                        document.querySelector('#submit_button').disabled = true;
+                    } else if (item == 'ContainsLanguage'){
+                        usernameErr.textContent = 'Username is innapropriate';
                         document.querySelector('#submit_button').disabled = true;
                     } else if (item == 'true') {
                         usernameErr.textContent = 'Username taken - Try another name!';
@@ -931,9 +935,9 @@
 {{define "admin-action"}}
     {{/* Divs for javascript refference*/}}
     <div class="actionDiv">
-        <img src="static/images/png/System-Administrator-01.png"  class="actionimg" alt="admin">
+        <img src="static/images/jpg/IT-GUY.jpg"  class="actionimg" alt="IT Person">
         <br><br>
-        <p class="actionInstructionText">Okay Admin, what data would you like to read/make?</p>
+        <p class="actionInstructionText">Okay IT person, what data would you like to read/make?</p>
         <br>
         {{/* See food section...maybe update it too */}}
         <p>
@@ -944,7 +948,7 @@
             SEE FOOD
         </button>
         <button id="actionInstructionButton2">
-            Hide food
+            HIDE FOOD
         </button>
         <input type="number" id="userID" name="userID" placeholder="userID" maxlength=8>
         <div id="foodSeer">
@@ -954,6 +958,7 @@
                     <option value="hamburger">hamburger</option>
                 </select>
                 <input type="number" id="foodID" name="foodID" placeholder="foodNumber" minlength=1 maxlength=20>
+                <input type="number" id="theUserID" name="theUserID" placeholder="user ID" minlength=1 maxlength=20>
                 <input type="text" id="foodType" name="foodType" placeholder="foodType" minlength=1 maxlength=48>
                 <input type="text" id="condimentType" name="condimentType" placeholder="condiments" minlength=1 maxlength=48>
                 <input type="number" id="calories" name="calories" placeholder="calories" minlength=1 maxlength=8>
@@ -1011,7 +1016,7 @@
             var jsonString = JSON.stringify(toSend);
 
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/getAllFoodUser', true);
+            xhr.open('POST', '/getAllFoodMongo', true);
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.addEventListener('readystatechange', function(){
                 if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
@@ -1028,35 +1033,57 @@
                         var hotdogsGoodCount = true; //Used for not displaying hotdogs
                         var hamburgerGoodCount = true; //Used for displaying hotdogs
                         //Update Hotdog and Hamburger Arrays
-                        if (dataOBJ.TheHamburgers[0].BurgerType == "DEBUGTYPE"){
+                        //Update Hamburger Arrays
+                        if (dataOBJ.HaveHamburgers == false){
                             console.log("DEBUG: We have no burgers to deliver");
                             hamburgerGoodCount = false;
                         } else {
-                            for (var x = 0; x < dataOBJ.ID_Hamburgers.length; x++) {
-                                hamburgerIDArray.push(dataOBJ.ID_Hamburgers[x]);
+                            for (var x = 0; x < dataOBJ.TheHamburgers.length; x++) {
+                                var condimentsString = ""; //Declare string to display Condiments
                                 hamburgerChoice = hamburgerChoice + 1;
                                 aHamburger.BurgerType = dataOBJ.TheHamburgers[x].BurgerType;
-                                aHamburger.Condiment = dataOBJ.TheHamburgers[x].Condiment;
+                                if (dataOBJ.TheHamburgers[x].Condiments.length == 0){
+                                    console.log("DEBUG: This Hamburger has no condiments.");
+                                    condimentsString = "No condiments";
+                                } else {
+                                    for (var i = 0; i < dataOBJ.TheHamburgers[x].Condiments.length; i++){
+                                        condimentsString = condimentsString + dataOBJ.TheHamburgers[x].Condiments[i] + " ";
+                                    }
+                                    aHamburger.Condiments = condimentsString;
+                                }
                                 aHamburger.Calories = dataOBJ.TheHamburgers[x].Calories;
                                 aHamburger.Name = dataOBJ.TheHamburgers[x].Name;
+                                aHamburger.FoodID = dataOBJ.TheHamburgers[x].FoodID;
                                 aHamburger.UserID = dataOBJ.TheHamburgers[x].UserID;
+                                aHamburger.DateCreated = dataOBJ.TheHamburgers[x].DateCreated;
+                                aHamburger.DateUpdated = dataOBJ.TheHamburgers[x].DateUpdated;
                                 hamburgArray.push(aHamburger); //Add the Hamburger to the Hamburger array
                             }
                         }
-                        
-                        if (dataOBJ.TheHotDogs[0].HotDogType == "DEBUGTYPE"){
-                            console.log("DEBUG: WE AIN'T FOUND SHIT FOR HOTDOGS");
+                        //Update Hotdog arrays
+                        if (dataOBJ.HaveHotDogs == false){
+                            console.log("DEBUG: NO HOT DOGS TO UPDATE");
                             hotdogsGoodCount = false;
                         } else {
-                            for (var y = 0; y < dataOBJ.ID_HotDogs.length; y++) {
-                                console.log("DEBUG: We're adding hotdogs ids");
-                                hotdogIDArray.push(dataOBJ.ID_HotDogs[y]);
+                            for (var y = 0; y < dataOBJ.TheHotDogs.length; y++) {
+                                var condimentsString = ""; //Declare string to display Condiments
                                 hotDogChoice = hotDogChoice + 1;
                                 aHotDog.HotDogType = dataOBJ.TheHotDogs[y].HotDogType;
-                                aHotDog.Condiment = dataOBJ.TheHotDogs[y].Condiment;
+                                if (dataOBJ.TheHotDogs[y].Condiments.length == 0){
+                                    console.log("DEBUG: This hotdog has no condiments.");
+                                    condimentsString = "No Condiments";
+                                } else{
+                                    for (var i = 0; i < dataOBJ.TheHotDogs[y].Condiments.length; i++){
+                                        condimentsString = condimentsString + dataOBJ.TheHotDogs[y].Condiments[i] + " ";
+                                    }
+                                    aHotDog.Condiments = condimentsString;
+                                }
                                 aHotDog.Calories = dataOBJ.TheHotDogs[y].Calories;
                                 aHotDog.Name = dataOBJ.TheHotDogs[y].Name;
+                                aHotDog.FoodID = dataOBJ.TheHotDogs[y].FoodID;
                                 aHotDog.UserID = dataOBJ.TheHotDogs[y].UserID;
+                                aHotDog.DateCreated = dataOBJ.TheHotDogs[y].DateCreated;
+                                aHotDog.DateUpdated = dataOBJ.TheHotDogs[y].DateUpdated;
                                 hotdogsArray.push(aHotDog); //Add the hotdog to the hotdog array
                             }
                         }
@@ -1065,7 +1092,7 @@
                         if (hamburgerGoodCount == false){
                             console.log("We won't be displaying hamburgers.");
                         } else {
-                            for (var y = 0; y < dataOBJ.ID_Hamburgers.length; y++) {
+                            for (var y = 0; y < dataOBJ.TheHamburgers.length; y++) {
                                 //Create container for Hamburger info
                                 var udContainerDiv = document.createElement("div");
                                 udContainerDiv.setAttribute("id", "udContainerDiv");
@@ -1075,7 +1102,7 @@
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
                                 udcfText.setAttribute("id", "udcfText");
-                                udcfText.innerHTML = "HamburgerID";
+                                udcfText.innerHTML = "Food Order Hamburger";
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
                                 var udcFieldInfoTxtDiv = document.createElement("div");
@@ -1103,6 +1130,7 @@
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
                                 //Create Condiment info section
+                                var condimentsString = ""; //Declare string to display Condiments
                                 var udcFieldInfoTxtDiv = document.createElement("div");
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
@@ -1114,7 +1142,16 @@
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
                                 udcfText.setAttribute("id", "udcfText");
-                                udcfText.innerHTML = dataOBJ.TheHamburgers[y].Condiment;
+                                if (dataOBJ.TheHamburgers[y].Condiments.length == 0){
+                                    console.log("DEBUG: This Hamburger has no condiments.");
+                                    condimentsString = "No condiments";
+                                    udcfText.innerHTML = condimentsString
+                                } else {
+                                    for (var i = 0; i < dataOBJ.TheHamburgers[y].Condiments.length; i++){
+                                        condimentsString = condimentsString + dataOBJ.TheHamburgers[y].Condiments[i] + " ";
+                                    }
+                                    udcfText.innerHTML = condimentsString
+                                }
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
@@ -1150,7 +1187,23 @@
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
-                                //Create UserID info section
+                                //Create FoodID Info Section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "FoodID";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHamburgers[y].FoodID;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create UserID Info Section
                                 var udcFieldInfoTxtDiv = document.createElement("div");
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
@@ -1166,6 +1219,38 @@
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
+                                //Create DateCreated Info Section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "DateCreated";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHamburgers[y].DateCreated;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create DateUpdated Info Section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "DateUpdated";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHamburgers[y].DateUpdated;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                 
                                 //All the divs fields for the container are added. Add this to the hamseer!
                                 hamSeerDiv.appendChild(udContainerDiv);
                             }
@@ -1177,7 +1262,6 @@
                             console.log("We won't be displaying hot dogs.");
                         } else {
                             for (var i = 0; i < dataOBJ.TheHotDogs.length; i++) {
-                                console.log("We're displaying hotodogs");
                                 //Create container for hotdog info
                                 var udContainerDiv = document.createElement("div");
                                 udContainerDiv.setAttribute("id", "udContainerDiv");
@@ -1187,7 +1271,7 @@
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
                                 udcfText.setAttribute("id", "udcfText");
-                                udcfText.innerHTML = "HotdogID";
+                                udcfText.innerHTML = "Food Order Hotdog";
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
                                 var udcFieldInfoTxtDiv = document.createElement("div");
@@ -1215,6 +1299,7 @@
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
                                 //Create Condiment info section
+                                var condimentsString = ""; //Declare string to display Condiments
                                 var udcFieldInfoTxtDiv = document.createElement("div");
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
@@ -1226,7 +1311,16 @@
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
                                 udcfText.setAttribute("id", "udcfText");
-                                udcfText.innerHTML = dataOBJ.TheHotDogs[i].Condiment;
+                                if (dataOBJ.TheHotDogs[i].Condiments.length == 0){
+                                    console.log("DEBUG: This Hamburger has no condiments.");
+                                    condimentsString = "No condiments";
+                                    udcfText.innerHTML = condimentsString
+                                } else {
+                                    for (var n = 0; n < dataOBJ.TheHotDogs[i].Condiments.length; n++){
+                                        condimentsString = condimentsString + dataOBJ.TheHotDogs[i].Condiments[n] + " ";
+                                    }
+                                    udcfText.innerHTML = condimentsString
+                                }
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
@@ -1262,7 +1356,23 @@
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
-                                //Create UserID info section
+                                //Create FoodID section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "FoodID";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHotDogs[i].FoodID;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create UserID section
                                 var udcFieldInfoTxtDiv = document.createElement("div");
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
                                 var udcfText = document.createElement("p");
@@ -1275,6 +1385,38 @@
                                 var udcfText = document.createElement("p");
                                 udcfText.setAttribute("id", "udcfText");
                                 udcfText.innerHTML = dataOBJ.TheHotDogs[i].UserID;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create DateCreated info section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "DateCreated";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHotDogs[i].DateCreated;
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create DateUpdated info section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "DateUpdated";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = dataOBJ.TheHotDogs[i].DateUpdated;
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
@@ -1292,8 +1434,7 @@
                         console.log("Either User has no data or no data could be retrieved.");
                         alert("Either User has no data or no data could be retrieved.");
                         //DEBUG: PRINT A MESSAGE TO USER HERE.
-                    }
-                    
+                    } 
                 }
             });
             xhr.send(jsonString);
@@ -1304,40 +1445,32 @@
             //Declare input variable names to work with
             var foodChoice = document.getElementById("foodChoice");
             var foodID = document.getElementById("foodID");
+            var userIDElement = document.getElementById("theUserID");
+            var theUserID = Number(userIDElement.value);
             
             //Assign fields to pass to food deleter
             if (foodChoice.value == "hotdog"){
                 //See if the foodID field was assigned correctly
-                if (foodID.value < 0 || foodID.value > hotdogsArray.length - 1){
+                if (foodID.value < 0){
                     //bad selection
                     console.log("User inputted a wrong selection: " + foodID.value);
-                    alert("Please choose an ID for hotdog listed below.");
+                    alert("Please enter a foodID listed below.");
                     //location.reload(true);
                 } else {    
                     //Good Selection
-                    var foodDeletionMongo = {
-                        FoodType: "hotdog", //For hotdog
-                        TheHamburger: hamburgArray[foodChoice.value],
-                        TheHotDog: hotdogsArray[foodChoice.value]
-                    }; //Make JSON to send to food API for Mongo
-                    console.log("DEBUG: Deleting a hotdog");
-                    foodDeleter(foodChoice.value, hotdogIDArray[foodID.value], foodDeletionMongo);
+                    var foodNumber = Number(foodID.value);
+                    foodDeleter(foodChoice.value, foodNumber, theUserID);
                 }
             } else if (foodChoice.value == "hamburger"){
                 //See if the foodID field was assigned correctly
-                if (foodID.value < 0 || foodID.value > hamburgArray.length - 1){
+                if (foodID.value < 0){
                     //bad selection
                     console.log("User inputted a wrong selection: " + foodID.value);
-                    alert("Please choose an ID for hotdog listed below.");
+                    alert("Please enter a foodID listed below.");
                 } else {    
                     //Good Selection
-                    var foodDeletionMongo = {
-                        FoodType: "hamburger", //For hotdog
-                        TheHamburger: hamburgArray[foodChoice.value],
-                        TheHotDog: hotdogsArray[foodChoice.value]
-                    }; //Make JSON to send to food API for Mongo
-                    console.log("DEBUG: deleting a hamburger");
-                    foodDeleter(foodChoice.value, hotdogIDArray[foodID.value], foodDeletionMongo);
+                    var foodNumber = Number(foodID.value);
+                    foodDeleter(foodChoice.value, foodNumber, theUserID);
                 }
             } else {
                 console.log("Error, User selected nothing in the foodchoice" +
@@ -1346,27 +1479,27 @@
                 location.reload(true);
             }
         });
-
         //Update food upon the correct selection
         foodUpdateBtn.addEventListener("click", function(){
             //Declare input variable names to work with
             var foodChoice = document.getElementById("foodChoice");
             var foodID = document.getElementById("foodID");
             var foodIDNumber = Number(foodID.value);
+            var userIDElement = document.getElementById("theUserID");
+            var theUserID = Number(userIDElement.value);
             var foodType = document.getElementById("foodType");
             var condimentType = document.getElementById("condimentType");
             var calories = document.getElementById("calories");
             var caloriesNumber = Number(calories.value);
             var foodName = document.getElementById("foodName");
-            var theUserID = Number(userIDInput.value);
 
-            //Assign fields to pass to food deleter
+            //Assign fields to pass to food changer
             if (foodChoice.value == "hotdog"){
                 //See if the foodID field was assigned correctly
-                if (foodIDNumber < 0 || foodIDNumber > hotdogsArray.length - 1){
+                if (foodIDNumber < 0){
                     //bad selection
                     console.log("User inputted a wrong selection: " + foodIDNumber);
-                    alert("Please choose an ID for hotdog listed below.");
+                    alert("Please enter a foodID listed below.");
                     location.reload(true);
                 } else {    
                     //Good Selection
@@ -1375,14 +1508,15 @@
                     aHotDog.Calories = caloriesNumber;
                     aHotDog.Name = foodName.value;
                     aHotDog.UserID = theUserID;
-                    foodChanger(foodChoice.value, hotdogIDArray[foodIDNumber], aHamburger, aHotDog);
+                    aHotDog.FoodID = foodID.value;
+                    foodChanger(foodChoice.value, foodIDNumber, aHamburger, aHotDog);
                 }
             } else if (foodChoice.value == "hamburger"){
                 //See if the foodID field was assigned correctly
-                if (foodIDNumber < 0 || foodIDNumber > hamburgArray.length - 1){
+                if (foodIDNumber < 0){
                     //bad selection
                     console.log("User inputted a wrong selection: " + foodIDNumber);
-                    alert("Please choose an ID for hotdog listed below.");
+                    alert("Please enter a foodID listed below.");
                     location.reload(true);
                 } else {    
                     //Good Selection
@@ -1391,7 +1525,8 @@
                     aHamburger.Calories = caloriesNumber;
                     aHamburger.Name = foodName.value;
                     aHamburger.UserID = theUserID;
-                    foodChanger(foodChoice.value, hamburgerIDArray[foodIDNumber], aHamburger, aHotDog);
+                    aHamburger.FoodID = foodID.value;
+                    foodChanger(foodChoice.value, foodIDNumber, aHamburger, aHotDog);
                 }
             } else {
                 console.log("Error, User selected nothing in the foodchoice" +
@@ -1400,13 +1535,10 @@
                 location.reload(true);
             }
         });
-
         //Hide all foods
         hideFoodButton.addEventListener("click", function(){
             location.reload(true);
         });
-
-
     </script>
 {{end}}
 {{/*ENDING OF ADMIN ACTION PAGE */}}
