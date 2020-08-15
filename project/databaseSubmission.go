@@ -478,55 +478,85 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 
 	//Determine if this is a hotdog or hamburger update
 	if thefoodUpdate.FoodType == "hotdog" {
-		fmt.Printf("DEBUG: Updating hotdog in SQL at foodid: %v and UserID: %v\n",
-			thefoodUpdate.FoodID, thefoodUpdate.TheHotDog.UserID)
 		var updatedHotdog Hotdog = thefoodUpdate.TheHotDog
-		sqlStatement = "UPDATE hot_dogs SET TYPE=?, CONDIMENT=?, CALORIES=?," +
-			"NAME=?, USER_ID=?, DATE_UPDATED=? WHERE FOOD_ID=? AND USER_ID=?"
-
-		stmt, err := db.Prepare(sqlStatement)
-		check(err)
-		theTimeNow := time.Now()
-		r, err := stmt.Exec(updatedHotdog.HotDogType, updatedHotdog.Condiment,
-			updatedHotdog.Calories, updatedHotdog.Name, updatedHotdog.UserID,
-			theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID, thefoodUpdate.TheHotDog.UserID)
-		check(err)
-
-		n, err := r.RowsAffected()
-		check(err)
-
-		fmt.Printf("%v\n", n)
-
-		if n < 1 {
-			fmt.Printf("Only %v rows effected, foodUpdate unsuccessful. No foodID found for: %v\n", n,
-				thefoodUpdate.FoodID)
-			fmt.Fprintln(w, 3)
+		/* CHECK TO SEE IF THE FIELDS ARE OKAY */
+		canPost := true
+		if containsLanguage(updatedHotdog.HotDogType) {
+			canPost = false
+		} else if containsLanguage(updatedHotdog.Condiment) {
+			canPost = false
+		} else if containsLanguage(updatedHotdog.Name) {
+			canPost = false
 		} else {
-			fmt.Fprintln(w, 1)
+			canPost = true
+		}
+		if canPost == true {
+			sqlStatement = "UPDATE hot_dogs SET TYPE=?, CONDIMENT=?, CALORIES=?," +
+				"NAME=?, USER_ID=?, DATE_UPDATED=? WHERE FOOD_ID=? AND USER_ID=?"
+
+			stmt, err := db.Prepare(sqlStatement)
+			check(err)
+			theTimeNow := time.Now()
+			r, err := stmt.Exec(updatedHotdog.HotDogType, updatedHotdog.Condiment,
+				updatedHotdog.Calories, updatedHotdog.Name, updatedHotdog.UserID,
+				theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID, thefoodUpdate.TheHotDog.UserID)
+			check(err)
+
+			n, err := r.RowsAffected()
+			check(err)
+
+			fmt.Printf("%v\n", n)
+
+			if n < 1 {
+				fmt.Printf("Only %v rows effected, foodUpdate unsuccessful. No foodID found for: %v\n", n,
+					thefoodUpdate.FoodID)
+				fmt.Fprintln(w, 3)
+			} else {
+				fmt.Fprintln(w, 1)
+			}
+		} else {
+			fmt.Printf("Language detected in food. Update unsuccessful.\n")
+			fmt.Fprintln(w, 4)
 		}
 	} else if thefoodUpdate.FoodType == "hamburger" {
 		var updatedHamburger Hamburger = thefoodUpdate.TheHamburger
-		sqlStatement = "UPDATE hamburgers SET TYPE=?, CONDIMENT=?, CALORIES=?," +
-			"NAME=?, USER_ID=?, DATE_UPDATED=? WHERE FOOD_ID=? AND USER_ID=?"
-
-		stmt, err := db.Prepare(sqlStatement)
-		check(err)
-		theTimeNow := time.Now()
-		r, err := stmt.Exec(updatedHamburger.BurgerType, updatedHamburger.Condiment,
-			updatedHamburger.Calories, updatedHamburger.Name, updatedHamburger.UserID,
-			theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID, thefoodUpdate.TheHamburger.UserID)
-		check(err)
-
-		n, err := r.RowsAffected()
-		check(err)
-
-		if n < 1 {
-			fmt.Printf("Only %v rows effected, foodUpdate unsuccessful. No foodID found for: %v\n", n,
-				thefoodUpdate.FoodID)
-			fmt.Fprintln(w, 3)
+		/* CHECK TO SEE IF THE FIELDS ARE OKAY */
+		canPost := true
+		if containsLanguage(updatedHamburger.BurgerType) {
+			canPost = false
+		} else if containsLanguage(updatedHamburger.Condiment) {
+			canPost = false
+		} else if containsLanguage(updatedHamburger.Name) {
+			canPost = false
 		} else {
-			fmt.Printf("%v\n", n)
-			fmt.Fprintln(w, 2)
+			canPost = true
+		}
+		if canPost == true {
+			sqlStatement = "UPDATE hamburgers SET TYPE=?, CONDIMENT=?, CALORIES=?," +
+				"NAME=?, USER_ID=?, DATE_UPDATED=? WHERE FOOD_ID=? AND USER_ID=?"
+
+			stmt, err := db.Prepare(sqlStatement)
+			check(err)
+			theTimeNow := time.Now()
+			r, err := stmt.Exec(updatedHamburger.BurgerType, updatedHamburger.Condiment,
+				updatedHamburger.Calories, updatedHamburger.Name, updatedHamburger.UserID,
+				theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID, thefoodUpdate.TheHamburger.UserID)
+			check(err)
+
+			n, err := r.RowsAffected()
+			check(err)
+
+			if n < 1 {
+				fmt.Printf("Only %v rows effected, foodUpdate unsuccessful. No foodID found for: %v\n", n,
+					thefoodUpdate.FoodID)
+				fmt.Fprintln(w, 3)
+			} else {
+				fmt.Printf("%v\n", n)
+				fmt.Fprintln(w, 2)
+			}
+		} else {
+			fmt.Printf("Language detected in food. Update unsuccessful.\n")
+			fmt.Fprintln(w, 4)
 		}
 	} else {
 		fmt.Printf("No good value sent through JSON to update food: %v\n", thefoodUpdate.FoodID)

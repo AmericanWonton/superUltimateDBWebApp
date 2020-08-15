@@ -23,9 +23,9 @@ var slurs []string = []string{"penis", "vagina", "dick", "cunt", "asshole", "fag
 
 func containsLanguage(theText string) bool {
 	hasLanguage := false
-
+	textLower := strings.ToLower(theText)
 	for i := 0; i < len(slurs); i++ {
-		if strings.Contains(theText, slurs[i]) {
+		if strings.Contains(textLower, slurs[i]) {
 			hasLanguage = true
 			return hasLanguage
 		}

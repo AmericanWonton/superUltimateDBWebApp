@@ -77,6 +77,9 @@ Need to get the PID Number:
 pidof NAME-OF-BINARY
 Then, enter the pidof like follows:
 kill -9 THE_PIDOF-NUMBER
+/* YOU CAN ALSO RUN THIS WEBPAGE AS A BACKGROUND COMMAND AND STILL USE THE TERMINAL, THEN KILL IT IF NEEDED */
+https://www.tecmint.com/run-linux-command-process-in-background-detach-process/
+http://linuxcommand.org/lc3_lts0100.php
 
 2. Creating a Docker GoLang Image: https://www.udemy.com/course/go-programming-language/learn/lecture/6404232#overview
 

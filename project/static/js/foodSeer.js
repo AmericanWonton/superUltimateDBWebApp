@@ -93,6 +93,10 @@ function foodChanger(whichFood, whichChoice, hamburgObj, hotdogObj){
                 console.log(item);
                 alert("No food item updated; something went cooky :(");
                 location.reload(true);
+            } else if (item == 4){
+                console.log(item);
+                alert("The food contained derogatory terms. Please update food again.");
+                location.reload(true);
             } else {
                 alert("No food item updated; something went cooky :( ");
                 console.log("Unexpected output at foodUpdater function.");
@@ -122,6 +126,10 @@ function foodChanger(whichFood, whichChoice, hamburgObj, hotdogObj){
             } else if (item == 3) {
                 console.log(item);
                 alert("No food item updated; something went cooky :( ");
+                location.reload(true);
+            } else if (item ==4){
+                console.log(item);
+                alert("The food contained derogatory terms. Please update food again.");
                 location.reload(true);
             } else {
                 alert("No food item updated; something went cooky :( ");
