@@ -510,6 +510,8 @@ func handleRequests() {
 	//Database Insertion stuff
 	myRouter.HandleFunc("/hotDogInsertWebPage", hotDogInsertWebPage).Methods("POST")       //Post Hotdogs
 	myRouter.HandleFunc("/hamburgerInsertWebPage", hamburgerInsertWebPage).Methods("POST") //Post Hamburgers
+	//File Handling Stuff
+	myRouter.HandleFunc("/fileInsert", fileInsert).Methods("POST") //Post Hotdogs
 	//Validation Stuff
 	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
 	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames

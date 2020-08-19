@@ -289,7 +289,7 @@ func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 				}
 				fmt.Fprintf(w, string(dataJSON))
 			} else {
-				fmt.Printf("Found the testUser: %v\n", foundUser)
+				fmt.Printf("DEBUG: Found the testUser: %v\n", foundUser)
 
 				foundUser.Hamburgers.Hamburgers = append(foundUser.Hamburgers.Hamburgers, mongoHamburgerInsert)
 				successfulUserInsert := updateUser(foundUser) //Update this User with the new Hotdog Array
@@ -305,6 +305,13 @@ func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 						fmt.Println("There's an error marshalling.")
 						logWriter("There's an error marshalling.")
 					}
+					//UPDATE GLOBAL DATA FOR FILE UPLOAD
+					awsuserID = postedHamburger.UserID
+					awsuserID = postedHamburger.FoodID
+					awsphotoName = postedHamburger.Name
+					awsfoodType = "HAMBURGER"
+					awsdateUpdated = postedHamburger.DateCreated
+					awsdateCreated = postedHamburger.DateUpdated
 					fmt.Fprintf(w, string(dataJSON))
 					fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs) //Data insert results
 				} else {

@@ -149,6 +149,7 @@ function revealFoodForm(foodChoice) {
         var condimentInstruction = document.createElement("p");
         condimentInstruction.setAttribute("id", "condimentInstruction");
         condimentInstruction.innerHTML = "To give this hamburger multiple condiments, give a space between each condiment.";
+
         var hamburgType = document.createElement("input");
         hamburgType.setAttribute("type", "text");
         hamburgType.setAttribute("id", "hamburgType");
@@ -173,6 +174,19 @@ function revealFoodForm(foodChoice) {
         nameType.setAttribute("maxlength", 48);
         nameType.setAttribute("name", "nameType");
         nameType.setAttribute("placeholder", "Hamburger Name");
+        /* Create Picture Form */
+        var documentForm = document.createElement("form");
+        documentForm.setAttribute("id", "submit-picture-form");
+        documentForm.setAttribute("enctype", "multipart/form-data");
+        documentForm.setAttribute("action", "/fileInsert");
+        documentForm.setAttribute("method", "POST");
+        documentForm.setAttribute("onload", "");
+        var docButtonInput = document.createElement("input");
+        docButtonInput.setAttribute("id", "docButtonInput");
+        docButtonInput.setAttribute("name", "newFile");
+        docButtonInput.setAttribute("type", "file");
+        /* Add input to the above form for document selection */
+        documentForm.appendChild(docButtonInput);
         var submitButton = document.createElement("button");
         submitButton.setAttribute("id", "submitButton");
         submitButton.innerHTML = "SUBMIT";
@@ -227,6 +241,7 @@ function revealFoodForm(foodChoice) {
                         condimentType.value = "";
                         caloriesType.value = "";
                         nameType.value = "";
+                        pictureSubmit(documentForm);
                         alert("Hamburger submitted successfully!")
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
                         location.reload(true); //Reload Page
@@ -260,6 +275,9 @@ function revealFoodForm(foodChoice) {
                 }
             });
             xhr.send(jsonString);
+
+            //Send Photo Data for Hamburger
+            
         });
         //Append "Form Data"
         theDiv.appendChild(condimentInstruction);
@@ -267,6 +285,7 @@ function revealFoodForm(foodChoice) {
         theDiv.appendChild(condimentType);
         theDiv.appendChild(caloriesType);
         theDiv.appendChild(nameType);
+        theDiv.appendChild(documentForm);
         theDiv.appendChild(submitButton);
         //Dispaly the form to click on
         theDiv.style.display = "block";
