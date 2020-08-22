@@ -67,8 +67,8 @@ func fileInsert(w http.ResponseWriter, r *http.Request) {
 	s, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-east-2"),
 		Credentials: credentials.NewStaticCredentials(
-			"AKIAIX2UAECCA64TXU5A",                     // id
-			"PA6U40kfPSNAt+OC7GECpITjy7Mt0eSPfs1ndasw", // secret
+			"",  // id
+			"",  // secret
 			""), // token can be left blank for now
 	})
 	if err != nil {
