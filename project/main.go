@@ -117,14 +117,14 @@ type ViewData struct {
 }
 
 //Here's our session struct
-type session struct {
+type theSession struct {
 	username     string
 	lastActivity time.Time
 }
 
 //Session Database info
-var dbUsers = map[string]User{}       // user ID, user
-var dbSessions = map[string]session{} // session ID, session
+var dbUsers = map[string]User{}          // user ID, user
+var dbSessions = map[string]theSession{} // session ID, session
 var dbSessionsCleaned time.Time
 
 //mySQL database declarations
@@ -328,7 +328,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 					}
 					cookie.MaxAge = sessionLength
 					http.SetCookie(w, cookie)
-					dbSessions[cookie.Value] = session{username, time.Now()}
+					dbSessions[cookie.Value] = theSession{username, time.Now()}
 					http.Redirect(w, r, "/mainPage", http.StatusSeeOther)
 					return
 				}
@@ -387,7 +387,7 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 		}
 		newCookie.MaxAge = sessionLength
 		http.SetCookie(w, newCookie)
-		dbSessions[newCookie.Value] = session{username, time.Now()}
+		dbSessions[newCookie.Value] = theSession{username, time.Now()}
 		// store user in dbUsers
 		//Make User and USERID
 		theID := randomIDCreation()

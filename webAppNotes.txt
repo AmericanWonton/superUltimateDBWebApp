@@ -62,9 +62,9 @@ A User can: 1. See ALL of the hotdogs/hamburgers they made, and can update THEIR
 1. Creating an Amazon Instance: https://www.udemy.com/course/go-programming-language/learn/lecture/6162772#overview
 KeyPair(Make sure you chmod 400 this, first!):
  D:\Go_Workspace\src\superUltimateDBWebApp\superUltimateDBWebApp\security\kp-superDB.pem
-KeyPair Login: ssh -i /d/goworkspace/src/superUltimateDBWebApp/superUltimateDBWebApp/security/kp-superDB.pem ubuntu@ec2-3-135-9-238.us-east-2.compute.amazonaws.com
+KeyPair Login: ssh -i /d/goworkspace/src/superUltimateDBWebApp/security/kp-superDB.pem ubuntu@ec2-3-135-9-238.us-east-2.compute.amazonaws.com
 To 'Secure Copy' a file into our server:
-scp -i /d/goworkspace/src/superUltimateDBWebApp/superUltimateDBWebApp/security/kp-superDB.pem superdbbuild1 ubuntu@ec2-3-135-9-238.us-east-2.compute.amazonaws.com:
+scp -i /d/goworkspace/src/superUltimateDBWebApp/security/kp-superDB.pem superdbbuild1 ubuntu@ec2-3-135-9-238.us-east-2.compute.amazonaws.com:
 //DON'T FORGET THAT COLON AT THE END, IT PUTS THE FILE IN THE ROOT DIRECTORY
 // You should be able to see it when logging in and typing ls
 //To build your binary for Ubuntu:
@@ -128,3 +128,24 @@ Important workaround for driver connections! You need to use Java string!
 https://stackoverflow.com/questions/55660134/cant-connect-to-mongo-cloud-mongodb-database-in-golang-on-ubuntu
 Mongo Shell access:
 mongo "mongodb+srv://superdbcluster.kswud.mongodb.net/superdbtest1" --username bigjohnny -pwd figleafs (replace with db)
+
+Linux Stuff:
+How to create a User from Root,(so you don't have to use sudo on stuff):
+https://linuxize.com/post/how-to-add-and-delete-users-on-ubuntu-18-04/
+To switch to User, type this:
+su -l USERNAME        (then enter your password)
+To exit back to root, type exit in the command line
+
+Fileserver Notes:
+A User I made is testuser. password is scoobz111
+name test room number 111
+
+
+Common Build Pairings:
+packr2 clean
+packr2 -v
+GOOS=linux GOARCH=amd64 packr2 build -o temporarybuild .
+ssh -i /d/goworkspace/src/superUltimateDBWebApp/security/kp-superDB.pem ubuntu@ec2-3-135-9-238.us-east-2.compute.amazonaws.com
+scp -i /d/goworkspace/src/superUltimateDBWebApp/security/kp-superDB.pem temporarybuild ubuntu@ec2-3-135-9-238.us-east-2.compute.amazonaws.com:
+
+scp -i /d/goworkspace/src/superUltimateDBWebApp/security/kp-superDB.pem superdbbuild1 ubuntu@ec2-3-135-9-238.us-east-2.compute.amazonaws.com:

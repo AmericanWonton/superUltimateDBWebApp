@@ -3,7 +3,7 @@ module superUltimateDBWebApp/superUltimateDBWebApp/project
 go 1.14
 
 require (
-	github.com/aws/aws-sdk-go v1.34.7 // indirect
+	github.com/aws/aws-sdk-go v1.34.7
 	github.com/go-mysql/errors v0.0.0-20180603193453-03314bea68e0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gobuffalo/envy v1.9.0 // indirect

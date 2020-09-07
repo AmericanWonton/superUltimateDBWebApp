@@ -185,8 +185,23 @@ function revealFoodForm(foodChoice) {
         docButtonInput.setAttribute("id", "docButtonInput");
         docButtonInput.setAttribute("name", "newFile");
         docButtonInput.setAttribute("type", "file");
+        var hiddenUserNum = document.createElement("hidden");
+        hiddenUserNum.setAttribute("id", "hiddenUserNum");
+        hiddenUserNum.setAttribute("name", "hiddenUserNum");
+        hiddenUserNum.setAttribute("value", userID);
+        var hiddenFoodType = document.createElement("hidden");
+        hiddenFoodType.setAttribute("id", "hiddenFoodType");
+        hiddenFoodType.setAttribute("name", "hiddenFoodType");
+        hiddenFoodType.setAttribute("value", "HAMBURGER");
+        var hiddenFoodNum = document.createElement("hidden");
+        hiddenFoodNum.setAttribute("id", "hiddenFoodNum");
+        hiddenFoodNum.setAttribute("name", "hiddenFoodNum");
+        hiddenFoodNum.setAttribute("value", 0);
         /* Add input to the above form for document selection */
         documentForm.appendChild(docButtonInput);
+        documentForm.appendChild(hiddenUserNum);
+        documentForm.appendChild(hiddenFoodType);
+        //documentForm.appendChild(hiddenFoodNum); Don't append unless food API is successful
         var submitButton = document.createElement("button");
         submitButton.setAttribute("id", "submitButton");
         submitButton.innerHTML = "SUBMIT";
@@ -241,6 +256,8 @@ function revealFoodForm(foodChoice) {
                         condimentType.value = "";
                         caloriesType.value = "";
                         nameType.value = "";
+                        hiddenFoodNum.setAttribute("value", dataReturned.ReturnedHamburger.FoodID);
+                        documentForm.appendChild(hiddenFoodType);
                         pictureSubmit(documentForm);
                         alert("Hamburger submitted successfully!")
                         theDiv.innerHTML = ""; //Remove any child elements if any remain

@@ -749,3 +749,89 @@ func deleteUsers(w http.ResponseWriter, req *http.Request) {
 	}
 	fmt.Fprint(w, string(theJSONMessage))
 }
+
+/*************** AMAZON PHOTO QUERIES *********************/
+//Insert Photos into SQL
+func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fileType string, size int64,
+	photoHash string, link string, foodType string, dateCreated string, dateUpdated string) bool {
+	successfulInsert := true
+	fmt.Printf("DEBUG: Inserting photos into SQL.\n")
+	theTimeNow := time.Now()
+	//Which Type of food?
+	if strings.Contains(foodType, "HOTDOGS") {
+		fmt.Printf("Inserting Hotdog Photo\n")
+		theStatement := "INSERT INTO user_photos" +
+			"(USER_ID, FOOD_ID, PHOTO_ID, PHOTO_NAME, FILE_TYPE, SIZE, PHOTO_HASH, LINK, FOOD_TYPE, DATE_CREATED, DATE_UPDATED) " +
+			"VALUES(?,?,?,?,?,?,?,?,?)"
+		stmt, err := db.Prepare(theStatement)
+
+		r, err := stmt.Exec(userid, foodid, photoid, photoName, fileType,
+			size, photoHash, link, foodType, theTimeNow.Format("2006-01-02 15:04:05"),
+			theTimeNow.Format("2006-01-02 15:04:05"))
+		check(err)
+
+		n, err := r.RowsAffected()
+		check(err)
+		fmt.Printf("%v rows effected.\n", n)
+		stmt.Close() //Close the SQL
+	} else {
+		fmt.Printf("Inserting Hamburger Photo into SQL\n")
+		theStatement := "INSERT INTO user_photos" +
+			"(USER_ID, FOOD_ID, PHOTO_ID, PHOTO_NAME, FILE_TYPE, SIZE, PHOTO_HASH, LINK, FOOD_TYPE, DATE_CREATED, DATE_UPDATED) " +
+			"VALUES(?,?,?,?,?,?,?,?,?)"
+		stmt, err := db.Prepare(theStatement)
+
+		r, err := stmt.Exec(userid, foodid, photoid, photoName, fileType,
+			size, photoHash, link, foodType, theTimeNow.Format("2006-01-02 15:04:05"),
+			theTimeNow.Format("2006-01-02 15:04:05"))
+		check(err)
+
+		n, err := r.RowsAffected()
+		check(err)
+		fmt.Printf("%v rows effected.\n", n)
+		stmt.Close() //Close the SQL
+	}
+
+	return successfulInsert
+}
+
+func getUserPhotos(userID int, theFood string) ([]string, []string) {
+	var thePhotoURLS []string
+	var theFileNames []string
+	if strings.Contains(theFood, "HOTDOG") {
+		stmt := "SELECT DISTINCT LINK, PHOTO_NAME FROM user_photos WHERE FOOD_TYPE = ? AND USER_ID = ?"
+		rows, err := db.Query(stmt, "HOTDOG", userID)
+		check(err)
+
+		var aPhotoURL string
+		var aFileName string
+		for rows.Next() {
+			err = rows.Scan(&aPhotoURL, &aFileName)
+			check(err)
+			thePhotoURLS = append(thePhotoURLS, aPhotoURL)
+			theFileNames = append(theFileNames, aFileName)
+		}
+		rows.Close()
+		fmt.Printf("There were %v Hotdog URLS returned for User, %v:\n%v\n%v\n", len(thePhotoURLS), userID, thePhotoURLS,
+			theFileNames)
+		return thePhotoURLS, theFileNames
+	} else {
+		stmt := "SELECT DISTINCT LINK, PHOTO_NAME FROM user_photos WHERE FOOD_TYPE = ? AND USER_ID = ?"
+		rows, err := db.Query(stmt, "HAMBURGER", userID)
+		check(err)
+
+		var aPhotoURL string
+		var aFileName string
+
+		for rows.Next() {
+			err = rows.Scan(&aPhotoURL, &aFileName)
+			check(err)
+			thePhotoURLS = append(thePhotoURLS, aPhotoURL)
+			theFileNames = append(theFileNames, aFileName)
+		}
+		rows.Close()
+		fmt.Printf("There were %v Hamburger URLS returned for User, %v:\n%v\n%v\n", len(thePhotoURLS), userID, thePhotoURLS,
+			theFileNames)
+		return thePhotoURLS, theFileNames
+	}
+}

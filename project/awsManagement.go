@@ -3,9 +3,11 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -42,11 +44,9 @@ type PhotoInsert struct {
 
 //Take a file form for submission
 func fileInsert(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("DEBUG: Sweetazz, you submitted a cooler file.\n")
-
-	//Parse the incoming form
+	fmt.Printf("DEBUG: Sweetass, you submitted a cooler file.\n")
+	//Specify Form side and parse form
 	maxSize := int64(1024000) // allow only 1MB of file size
-
 	err := r.ParseMultipartForm(maxSize)
 	if err != nil {
 		fmt.Printf("Image too large. Max Size: %v\n", maxSize)
@@ -54,50 +54,95 @@ func fileInsert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, fileHeader, err := r.FormFile("newFile") //Insert name of file element here
+	hiddenUserNum := r.FormValue("hiddenUserNum")
+	hiddenFoodType := r.FormValue("hiddenFoodType")
+	hiddenFoodNum := r.FormValue("hiddenFoodType")
+
+	file, fileHeader, err := r.FormFile("newFile2") //Insert name of file element here
 	if err != nil {
-		fmt.Printf("Could not get uploaded file. Error getting file submission.\n")
+		fmt.Printf("Could not get uploaded file. Error getting file submission: %v\n", err.Error())
 		log.Println(err)
 		return
 	}
-	defer file.Close()
+	//Defer closing the file
+	fmt.Printf("DEBUG: Writing the temporary file.\n")
+	//Make Directory for writing file
+	fmt.Printf("Here is just the fileheader: %v\n and here is the extension: %v\n",
+		filepath.Ext(fileHeader.Filename), fileHeader.Filename)
+	hexName := bson.NewObjectId().Hex()
+	fileExtension := filepath.Ext(fileHeader.Filename)
+	theFileName := hexName + fileExtension
+	theDir, _ := os.Getwd()
+	thePath := filepath.Join(theDir, "static", "images", "pictures", "31553001", "HOTDOGS")
+	os.MkdirAll(thePath, os.ModePerm)
+	//Write file on server
+	f, err := os.OpenFile(theFileName, os.O_WRONLY|os.O_CREATE, 0777)
 
+	if err != nil {
+		fmt.Printf("Error opening this file to store on server.\n")
+	}
+	io.Copy(f, file)
+	f.Close()
+	file.Close()
+	//Move file to folder
+	thePath2 := filepath.Join(theDir, "static", "images", "pictures", "31553001", "HOTDOGS", theFileName)
+	readFile, err := os.Open(theFileName)
+	if err != nil {
+		fmt.Printf("Error opening this file: %v\n", err.Error())
+	}
+	writeToFile, err := os.Create(thePath2)
+	if err != nil {
+		fmt.Printf("DEBUG: Error creating writeToFile: \n%v\n", err.Error())
+	}
+	//Move file Contents to folder
+	n, err := io.Copy(writeToFile, readFile)
+	if err != nil {
+		fmt.Printf("Error copying the contents of the one image to the other.\n%v\n", err.Error())
+	}
+	fmt.Printf("DEBUG: move the contents of n: %v\n", n)
+	readFile.Close()    //Close File
+	writeToFile.Close() //Close File
+	//Delete created file
+	removeErr := os.Remove(theFileName)
+	if removeErr != nil {
+		fmt.Printf("Error removing the file: %v\n", removeErr.Error())
+	}
+	/********************* SEND FILES TO AMAZON BUCKET **********************/
+	fmt.Printf("DEBUG: Sending files to Amazon.\n")
+	//Give a hex for the file value
 	// create an AWS session which can be
 	// reused if we're uploading many files
 	s, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-east-2"),
 		Credentials: credentials.NewStaticCredentials(
-			"",  // id
-			"",  // secret
+			"AKIAV7U75A66QIWGBCVK",                     // id
+			"BPwAJceAAI3xttbpaB6Dshdx0uB6ugvrknSXD7zi", // secret
 			""), // token can be left blank for now
 	})
 	if err != nil {
 		fmt.Printf("Could not upload file. Error creating session.\n")
 	}
-
-	//Give a hex for the file value
-	hexName := bson.NewObjectId().Hex()
-
-	fileName, err, okFileReturn := UploadFileToS3(hexName, s, file, fileHeader)
+	fileName, err := UploadFileToS3(hexName, s, file, fileHeader)
 	if err != nil {
 		fmt.Printf("Could not upload file...issue uploading to Amazon.\n")
-	} else if okFileReturn == false {
-		fmt.Printf("Error, could not submit file successfully to AWS.\n")
 	} else {
-		fmt.Printf("Image uploaded successfully to Amazon Bucket: %v\n", fileName)
-		fmt.Printf("DEBUG: Inserting values into Database now.\n")
-		//Insert values into our DBS
-		stringUserID := strconv.Itoa(awsuserID)
-		extension := filepath.Ext(fileHeader.Filename)
-		fileURL := "pictures/" + stringUserID + "/" + awsfoodType + hexName + extension
-		insertedPhoto := fileInsertDBS(awsfoodType, fileURL, awsuserID, awsfoodID, randomIDCreation(),
-			awsphotoName, extension, fileHeader.Size, hexName)
-		if insertedPhoto == true {
-			fmt.Println("DEBUG: Inserted photo information into our DBS.")
-		} else {
-			fmt.Println("DEBUG: Issue inserting photo information into our DBS.")
-		}
+		fmt.Printf("Image uploaded successfully to Amazon Bucket: %v\n", fileName) //print success
 	}
+	/********************* UPLOAD PHOTO DETAILS TO THE DATABASE **********************/
+	fmt.Printf("DEBUG: Uploading file to database.\n")
+	//Upload photo details to DB
+	extension := filepath.Ext(fileHeader.Filename)
+	fileURL := "pictures/31553001/HOTDOGS/" + hexName + extension
+	insertedPhoto := insertUserPhotos("HOTDOGS", fileURL, 31553001, fileHeader.Filename, extension, fileHeader.Size,
+		hexName)
+	if insertedPhoto == true {
+		fmt.Println("DEBUG: Inserted photo information into SQL DB.")
+	} else {
+		fmt.Println("DEBUG: Issue inserting photo information into SQL DB.")
+	}
+	//err1 := template1.ExecuteTemplate(w, "index.gohtml", someData)
+	//HandleError(w, err1)
+	http.Redirect(w, r, "/", 302)
 }
 
 // UploadFileToS3 saves a file to aws bucket and returns the url to // the file and an error if there's any
@@ -143,7 +188,7 @@ func fileInsertDBS(foodtype string, fileURL string, userID int, foodID int, phot
 	fmt.Printf("DEBUG: Inserting photos into SQL.\n")
 	theTimeNow := time.Now()
 	//Which Type of food?
-	if strings.Contains(foodtype, "HOTDOGS") {
+	if strings.Contains(foodtype, "HOTDOG") {
 		fmt.Printf("Inserting Hotdog Photo\n")
 		theStatement := "INSERT INTO user_photos" +
 			"(USER_ID, FOOD_ID, PHOTO_ID, PHOTO_NAME, FILE_TYPE, SIZE, PHOTO_HASH, LINK, FOOD_TYPE, DATE_CREATED, DATE_UPDATED) " +
@@ -184,7 +229,7 @@ func fileInsertDBS(foodtype string, fileURL string, userID int, foodID int, phot
 		} else {
 			fmt.Printf("Inserting photo for hotdogs was successful: %v\n", insertManyResult)
 		}
-	} else {
+	} else if strings.Contains(foodtype, "HAMBURGER") {
 		fmt.Printf("Inserting Hamburger Photo into SQL\n")
 		theStatement := "INSERT INTO user_photos" +
 			"(USER_ID, FOOD_ID, PHOTO_ID, PHOTO_NAME, FILE_TYPE, SIZE, PHOTO_HASH, LINK, FOOD_TYPE, DATE_CREATED, DATE_UPDATED) " +
@@ -222,9 +267,13 @@ func fileInsertDBS(foodtype string, fileURL string, userID int, foodID int, phot
 		insertManyResult, err2 := photoCollection.InsertMany(theContext, collectedUsers)
 		if err2 != nil {
 			fmt.Printf("We had an error inserting a photo into MongoSQL: %v\n", err2.Error())
+			successfulInsert = false
 		} else {
 			fmt.Printf("Inserting photo for hamburgers was successful: %v\n", insertManyResult)
 		}
+	} else {
+		fmt.Printf("Did not recieve the correct foodtype: %v\n", foodtype)
+		successfulInsert = false
 	}
 
 	return successfulInsert
