@@ -770,6 +770,27 @@ func randomIDCreation() int {
 				canExit[2] = false
 			}
 		}
+		//Check photo collection
+		photoCollection := mongoClient.Database("superdbtest1").Collection("userphotos") //Here's our collection
+		var userPhoto UserPhoto
+		//Give 0 values to determine if these IDs are found
+		theFilter3 := bson.M{
+			"$or": []interface{}{
+				bson.M{"userid": theID},
+				bson.M{"foodid": theID},
+				bson.M{"photoid": theID},
+			},
+		}
+		theErr = photoCollection.FindOne(theContext, theFilter3).Decode(&userPhoto)
+		if theErr != nil {
+			if strings.Contains(theErr.Error(), "no documents in result") {
+				canExit[2] = true
+				fmt.Printf("It's all good, this document wasn't found for User/hamburger/photo and our ID is clean.\n")
+			} else {
+				fmt.Printf("DEBUG: We have another error for finding a unique PhotoID: \n%v\n", theErr)
+				canExit[2] = false
+			}
+		}
 		//Final check to see if we can exit this loop
 		if canExit[0] == true && canExit[1] == true && canExit[2] == true {
 			finalID = theID
@@ -1061,4 +1082,71 @@ func turnFoodArray(foodString string) []string {
 	returnedFood = testArray
 
 	return returnedFood
+}
+
+//Insert Photo into DB
+func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fileType string, size int64,
+	photoHash string, link string, foodType string, dateCreated string, dateUpdated string) bool {
+	successfulInsert := true
+	fmt.Printf("DEBUG: Inserting photos into Mongo.\n")
+	theTimeNow := time.Now()
+
+	if strings.Contains(foodType, "HOTDOG") {
+		fmt.Printf("Inserting Hotdog Photo into MongoDB\n")
+		photoInsertion := UserPhoto{
+			UserID:      userid,
+			FoodID:      foodid,
+			PhotoID:     photoid,
+			PhotoName:   photoName,
+			FileType:    fileType,
+			Size:        size,
+			PhotoHash:   photoHash,
+			Link:        link,
+			FoodType:    foodType,
+			DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
+			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+		}
+		//Collect Data for Mongo
+		photoCollection := mongoClient.Database("superdbtest1").Collection("user-photos") //Here's our collection
+		collectedUsers := []interface{}{photoInsertion}
+		//Insert Our Data
+		insertManyResult, err := photoCollection.InsertMany(theContext, collectedUsers)
+		if err != nil {
+			fmt.Printf("Error inserting a hotdog photo in Mongo: %v\n", err.Error())
+			successfulInsert = false
+		} else {
+			fmt.Printf("Insertion successful: %v\n", insertManyResult)
+		}
+	} else if strings.Contains(foodType, "HAMBURGER") {
+		fmt.Printf("Inserting Hamburger Photo into MongoDB\n")
+		photoInsertion := UserPhoto{
+			UserID:      userid,
+			FoodID:      foodid,
+			PhotoID:     photoid,
+			PhotoName:   photoName,
+			FileType:    fileType,
+			Size:        size,
+			PhotoHash:   photoHash,
+			Link:        link,
+			FoodType:    foodType,
+			DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
+			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+		}
+		//Collect Data for Mongo
+		photoCollection := mongoClient.Database("superdbtest1").Collection("user-photos") //Here's our collection
+		collectedUsers := []interface{}{photoInsertion}
+		//Insert Our Data
+		insertManyResult, err := photoCollection.InsertMany(theContext, collectedUsers)
+		if err != nil {
+			fmt.Printf("Error inserting a hamburger photo in Mongo: %v\n", err.Error())
+			successfulInsert = false
+		} else {
+			fmt.Printf("Insertion successful: %v\n", insertManyResult)
+		}
+	} else {
+		fmt.Printf("Wrong food type returned for food photo data insertion: %v\n", foodType)
+		successfulInsert = false
+	}
+
+	return successfulInsert
 }

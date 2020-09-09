@@ -758,7 +758,7 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 	fmt.Printf("DEBUG: Inserting photos into SQL.\n")
 	theTimeNow := time.Now()
 	//Which Type of food?
-	if strings.Contains(foodType, "HOTDOGS") {
+	if strings.Contains(foodType, "HOTDOG") {
 		fmt.Printf("Inserting Hotdog Photo\n")
 		theStatement := "INSERT INTO user_photos" +
 			"(USER_ID, FOOD_ID, PHOTO_ID, PHOTO_NAME, FILE_TYPE, SIZE, PHOTO_HASH, LINK, FOOD_TYPE, DATE_CREATED, DATE_UPDATED) " +
@@ -774,7 +774,7 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 		check(err)
 		fmt.Printf("%v rows effected.\n", n)
 		stmt.Close() //Close the SQL
-	} else {
+	} else if strings.Contains(foodType, "HAMBURGER") {
 		fmt.Printf("Inserting Hamburger Photo into SQL\n")
 		theStatement := "INSERT INTO user_photos" +
 			"(USER_ID, FOOD_ID, PHOTO_ID, PHOTO_NAME, FILE_TYPE, SIZE, PHOTO_HASH, LINK, FOOD_TYPE, DATE_CREATED, DATE_UPDATED) " +
@@ -790,6 +790,9 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 		check(err)
 		fmt.Printf("%v rows effected.\n", n)
 		stmt.Close() //Close the SQL
+	} else {
+		fmt.Printf("Wrong food type returned for food photo data insertion: %v\n", foodType)
+		successfulInsert = false
 	}
 
 	return successfulInsert

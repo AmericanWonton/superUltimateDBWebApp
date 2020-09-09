@@ -109,6 +109,21 @@ type Hamburger struct {
 	DateUpdated string `json:"DateUpdated"`
 }
 
+//Here is our photo struct
+type UserPhoto struct {
+	UserID      int    `json:"UserID"`
+	FoodID      int    `json:"FoodID"`
+	PhotoID     int    `json:"PhotoID"`
+	PhotoName   string `json:"PhotoName"`
+	FileType    string `json:"FileType"`
+	Size        int64  `json:"Size"`
+	PhotoHash   string `json:"PhotoHash"`
+	Link        string `json:"Link"`
+	FoodType    string `json:"FoodType"`
+	DateCreated string `json:"DateCreated"`
+	DateUpdated string `json:"DateUpdated"`
+}
+
 //Here is our ViewData struct
 type ViewData struct {
 	User     User   `json:"User"`
@@ -253,6 +268,8 @@ func MustLoadBoxedTemplate(b *packr.Box) *template.Template {
 //Parse our templates
 func init() {
 	template1 = MustLoadBoxedTemplate(templatesBox)
+	//AmazonCredentialRead
+	getCreds()
 }
 
 // Handle Errors
