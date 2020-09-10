@@ -63,6 +63,8 @@ type MongoHotDog struct {
 	Name        string   `json:"Name"`
 	FoodID      int      `json:"FoodID"`
 	UserID      int      `json:"UserID"` //User WHOMST this hotDog belongs to
+	PhotoID     int      `json:"PhotoID"`
+	PhotoSrc    string   `json:"PhotoSrc"`
 	DateCreated string   `json:"DateCreated"`
 	DateUpdated string   `json:"DateUpdated"`
 }
@@ -78,6 +80,8 @@ type MongoHamburger struct {
 	Name        string   `json:"Name"`
 	FoodID      int      `json:"FoodID"`
 	UserID      int      `json:"UserID"` //User WHOMST this hotDog belongs to
+	PhotoID     int      `json:"PhotoID"`
+	PhotoSrc    string   `json:"PhotoSrc"`
 	DateCreated string   `json:"DateCreated"`
 	DateUpdated string   `json:"DateUpdated"`
 }
@@ -94,6 +98,8 @@ type Hotdog struct {
 	Name        string `json:"Name"`
 	UserID      int    `json:"UserID"` //User WHOMST this hotDog belongs to
 	FoodID      int    `json:"FoodID"`
+	PhotoID     int    `json:"PhotoID"`
+	PhotoSrc    string `json:"PhotoSrc"`
 	DateCreated string `json:"DateCreated"`
 	DateUpdated string `json:"DateUpdated"`
 }
@@ -105,6 +111,8 @@ type Hamburger struct {
 	Name        string `json:"Name"`
 	UserID      int    `json:"UserID"` //User WHOMST this hotDog belongs to
 	FoodID      int    `json:"FoodID"`
+	PhotoID     int    `json:"PhotoID"`
+	PhotoSrc    string `json:"PhotoSrc"`
 	DateCreated string `json:"DateCreated"`
 	DateUpdated string `json:"DateUpdated"`
 }

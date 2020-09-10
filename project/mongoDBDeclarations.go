@@ -8,6 +8,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -922,18 +923,30 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 	//Delcare our array of food returned
 	var returnedHotDogs []MongoHotDog
 	var returnedHamburgers []MongoHamburger
+	var returnedHDogPics []UserPhoto
+	var returnedHamPics []UserPhoto
+	var returnedHDogLink []string
+	var returnedHamLink []string
 	//Declare data struct to send back
 	type data struct {
 		SuccessMessage string           `json:"SuccessMessage"`
 		TheHotDogs     []MongoHotDog    `json:"TheHotDogs"`
 		TheHamburgers  []MongoHamburger `json:"TheHamburgers:`
+		TheHotDogsPics []UserPhoto      `json:"TheHotDogsPics"`
+		TheHamPics     []UserPhoto      `json:"TheHamPics"`
+		TheHDogLinks   []string         `json:"TheHDogLinks"`
+		TheHamLinks    []string         `json:"TheHamLinks"`
 		HaveHotDogs    bool             `json:"HaveHotDogs"`
 		HaveHamburgers bool             `json:"HaveHamburgers"`
+		HaveHDogPics   bool             `json:"HaveHDogPics"`
+		HaveHamPics    bool             `json:"HaveHamPics"`
 	}
 
 	//Search for UserID or for all
 	hotdogCollection := mongoClient.Database("superdbtest1").Collection("hotdogs")       //Here's our collection
 	hamburgerCollection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
+	picCollection := mongoClient.Database("superdbtest1").Collection("user-photos")      //Here's our collection
+
 	if theUser.UserID == 0 {
 		//Query Mongo for all hotdogs
 		theFilter := bson.M{}
@@ -988,6 +1001,48 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 
 		// Close the cursor once finished
 		curHam.Close(theContext)
+
+		//Query Mongo for ALL food pics for ALL Users
+		curPics, err := picCollection.Find(theContext, theFilter, findOptions)
+		if err != nil {
+			if strings.Contains(err.Error(), "no documents in result") {
+				fmt.Printf("No documents were returned for pictures in MongoDB: %v\n", err.Error())
+				logWriter("No documents were returned in MongoDB for Pictures: " + err.Error())
+			} else {
+				fmt.Printf("There was an error returning pictures for this User, %v: %v\n", theUser.UserID, err.Error())
+				logWriter("There was an error returning pictures in Mongo for this User " + err.Error())
+			}
+		}
+
+		//Loop over results and fill the pictues array
+		for curPics.Next(theContext) {
+			// create a value into which the single document can be decoded
+			var aPic UserPhoto
+			err := curHam.Decode(&aPic)
+			if err != nil {
+				fmt.Printf("Error decoding pictures in MongoDB for this User, %v: %v\n", theUser.UserID, err.Error())
+				logWriter("Error decoding pictures in MongoDB: " + err.Error())
+			}
+			//Determine if this is a hotdog or hamburger pic then add the appropriate links
+			if strings.Contains(aPic.FoodType, "HOTDOG") {
+				fmt.Printf("DEBUG: Adding a hotdog to the returned pic list.\n")
+				returnedHDogPics = append(returnedHDogPics, aPic)
+				filePath := filepath.Join("static", "images", aPic.Link)
+				returnedHDogLink = append(returnedHDogLink, filePath)
+			} else if strings.Contains(aPic.FoodType, "HAMBURGER") {
+				fmt.Printf("DEBUG: Adding a hamburger to the returned pic list.\n")
+				returnedHamPics = append(returnedHamPics, aPic)
+				filePath := filepath.Join("static", "images", aPic.Link)
+				returnedHamLink = append(returnedHamLink, filePath)
+			} else {
+				fmt.Printf("Error assigning picture to hamburger/hotdogs. FoodType is: %v\n", aPic.FoodType)
+			}
+		}
+
+		curPics.Close(theContext) //Close the cursor when finished
+
+		//Get the photo from Amazon if it's not already submitted
+		checkPhoto(returnedHDogPics, returnedHamPics)
 	} else {
 		//Query Mongo for all hotdogs for a User
 		theFilter := bson.M{"userid": theUser.UserID}
@@ -1043,6 +1098,48 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 
 		// Close the cursor once finished
 		curHam.Close(theContext)
+
+		//Query Mongo for all food pictures for this User
+		curPics, err := picCollection.Find(theContext, theFilter, findOptions)
+		if err != nil {
+			if strings.Contains(err.Error(), "no documents in result") {
+				fmt.Printf("No documents were returned for pictures in MongoDB: %v\n", err.Error())
+				logWriter("No documents were returned in MongoDB for Pictures: " + err.Error())
+			} else {
+				fmt.Printf("There was an error returning pictures for this User, %v: %v\n", theUser.UserID, err.Error())
+				logWriter("There was an error returning pictures in Mongo for this User " + err.Error())
+			}
+		}
+
+		//Loop over results and fill the pictues array
+		for curPics.Next(theContext) {
+			// create a value into which the single document can be decoded
+			var aPic UserPhoto
+			err := curHam.Decode(&aPic)
+			if err != nil {
+				fmt.Printf("Error decoding pictures in MongoDB for this User, %v: %v\n", theUser.UserID, err.Error())
+				logWriter("Error decoding pictures in MongoDB: " + err.Error())
+			}
+			//Determine if this is a hotdog or hamburger pic then add the appropriate links
+			if strings.Contains(aPic.FoodType, "HOTDOG") {
+				fmt.Printf("DEBUG: Adding a hotdog to the returned pic list.\n")
+				returnedHDogPics = append(returnedHDogPics, aPic)
+				filePath := filepath.Join("static", "images", aPic.Link)
+				returnedHDogLink = append(returnedHDogLink, filePath)
+			} else if strings.Contains(aPic.FoodType, "HAMBURGER") {
+				fmt.Printf("DEBUG: Adding a hamburger to the returned pic list.\n")
+				returnedHamPics = append(returnedHamPics, aPic)
+				filePath := filepath.Join("static", "images", aPic.Link)
+				returnedHamLink = append(returnedHamLink, filePath)
+			} else {
+				fmt.Printf("Error assigning picture to hamburger/hotdogs. FoodType is: %v\n", aPic.FoodType)
+			}
+		}
+
+		curPics.Close(theContext) //Close the cursor when finished
+
+		//Get the photo from Amazon if it's not already submitted
+		checkPhoto(returnedHDogPics, returnedHamPics)
 	}
 	//Assemble data to return
 	sendData := data{
@@ -1051,6 +1148,8 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 		TheHamburgers:  returnedHamburgers,
 		HaveHotDogs:    true,
 		HaveHamburgers: true,
+		HaveHDogPics:   true,
+		HaveHamPics:    true,
 	}
 
 	//Do a wellness check for the data
@@ -1062,6 +1161,12 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 	}
 	if len(sendData.TheHamburgers) <= 0 {
 		sendData.HaveHamburgers = false //Allow our loops to funciton properly in JS
+	}
+	if len(sendData.TheHDogLinks) <= 0 {
+		sendData.HaveHDogPics = false //Allow our loops to funciton properly in JS
+	}
+	if len(sendData.TheHamLinks) <= 0 {
+		sendData.HaveHamPics = false //Allow our loops to funciton properly in JS
 	}
 	//Marshal data to JSON
 	dataJSON, err := json.Marshal(sendData)
