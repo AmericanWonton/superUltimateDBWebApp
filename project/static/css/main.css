@@ -236,6 +236,27 @@
     border: 1px solid rgb(21, 175, 202);
 }
 
+#udcFieldInfoPicDiv {
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 45%;
+
+    /* styling */
+    margin: 1em;
+    padding: 1em;
+    /* debug */
+    border: 1px solid rgb(235, 194, 13);
+}
+
+#udfcFeildInfoPic{
+    width: fit-content;
+    height: fit-content;
+}
+
 #udcfText {
     /* styling */
     margin: .5em;

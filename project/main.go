@@ -536,7 +536,8 @@ func handleRequests() {
 	myRouter.HandleFunc("/hotDogInsertWebPage", hotDogInsertWebPage).Methods("POST")       //Post Hotdogs
 	myRouter.HandleFunc("/hamburgerInsertWebPage", hamburgerInsertWebPage).Methods("POST") //Post Hamburgers
 	//File Handling Stuff
-	myRouter.HandleFunc("/fileInsert", fileInsert).Methods("POST") //Post Hotdogs
+	myRouter.HandleFunc("/fileInsert", fileInsert).Methods("POST") //Insert a file
+	myRouter.HandleFunc("/checkSRC", checkSRC).Methods("POST")     //Check if directory exists
 	//Validation Stuff
 	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
 	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames

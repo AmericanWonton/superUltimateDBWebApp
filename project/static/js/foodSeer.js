@@ -39,6 +39,8 @@ var aHotDog = {
     Name: "",
     FoodID: 0,
     UserID: 0,
+    PhotoID: 0,
+    PhotoSrc: "",
     DateCreated: "",
     DateUpdated: ""
 }
@@ -49,6 +51,8 @@ var aHamburger = {
     Name: "",
     FoodID: 0,
     UserID: 0,
+    PhotoID: 0,
+    PhotoSrc: "",
     DateCreated: "",
     DateUpdated: ""
 }
@@ -207,4 +211,36 @@ function foodDeleter(whichFood, whichChoice, whichUserID){
         }
     });
     xhr.send(jsonString);
+}
+
+function srcChecker(theHamburger, theHotdog, whichFood){
+    var srcThere = true;
+    var photoChekcer = {
+        TheHamb: theHamburger,
+        TheHot: theHotdog,
+        TheFood: whichFood
+    };
+
+    var jsonString = JSON.stringify(photoChekcer);
+
+    //Call Ajax to check the fileRecord
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/checkSRC', true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.addEventListener('readystatechange', function(){
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+            var item = xhr.responseText;
+            var returnOBJ = JSON.parse(item);
+            if (returnOBJ.FoundSRC == true) {
+                //PicutreSRC found
+                srcThere = true;
+            } else {
+                //PictureSRC not found
+                srcThere = false;
+            }
+        }
+    });
+    xhr.send(jsonString);
+
+    return srcThere
 }

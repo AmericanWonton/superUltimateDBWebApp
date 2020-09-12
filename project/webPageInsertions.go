@@ -56,10 +56,13 @@ func hotDogInsertWebPage(w http.ResponseWriter, req *http.Request) {
 		postedHotDog.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
 
 		//Insert into SQL
-		stmt, err := db.Prepare("INSERT INTO hot_dogs(TYPE, CONDIMENT, CALORIES, NAME, USER_ID, FOOD_ID, DATE_CREATED, DATE_UPDATED) VALUES(?,?,?,?,?,?,?,?)")
+		theStatement := "INSERT INTO hot_dogs(TYPE, CONDIMENT, CALORIES, NAME, USER_ID," +
+			" FOOD_ID, PHOTO_ID, PHOTO_SRC, DATE_CREATED, DATE_UPDATED) VALUES(?,?,?,?,?,?,?,?,?,?)"
+		stmt, err := db.Prepare(theStatement)
 
 		r, err := stmt.Exec(postedHotDog.HotDogType, postedHotDog.Condiment, postedHotDog.Calories, postedHotDog.Name, postedHotDog.UserID,
-			postedHotDog.FoodID, postedHotDog.DateCreated, postedHotDog.DateUpdated)
+			postedHotDog.FoodID, 0, "",
+			postedHotDog.DateCreated, postedHotDog.DateUpdated)
 		check(err)
 
 		n, err := r.RowsAffected()
@@ -77,6 +80,8 @@ func hotDogInsertWebPage(w http.ResponseWriter, req *http.Request) {
 			Name:        postedHotDog.Name,
 			FoodID:      postedHotDog.FoodID,
 			UserID:      postedHotDog.UserID,
+			PhotoID:     0,
+			PhotoSrc:    "",
 			DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
 			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 		}
@@ -222,10 +227,13 @@ func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 		postedHamburger.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
 
 		//Insert into SQL
-		stmt, err := db.Prepare("INSERT INTO hamburgers(TYPE, CONDIMENT, CALORIES, NAME, USER_ID, FOOD_ID, DATE_CREATED, DATE_UPDATED) VALUES(?,?,?,?,?,?,?,?)")
+		theStatement := "INSERT INTO hamburgers(TYPE, CONDIMENT, CALORIES, NAME, USER_ID, " +
+			"FOOD_ID, PHOTO_ID, PHOTO_SRC,  DATE_CREATED, DATE_UPDATED) VALUES(?,?,?,?,?,?,?,?,?,?)"
+		stmt, err := db.Prepare(theStatement)
 
 		r, err := stmt.Exec(postedHamburger.BurgerType, postedHamburger.Condiment, postedHamburger.Calories, postedHamburger.Name, postedHamburger.UserID,
-			postedHamburger.FoodID, postedHamburger.DateCreated, postedHamburger.DateUpdated)
+			postedHamburger.FoodID, 0, "",
+			postedHamburger.DateCreated, postedHamburger.DateUpdated)
 		check(err)
 
 		n, err := r.RowsAffected()
@@ -243,6 +251,8 @@ func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 			Name:        postedHamburger.Name,
 			FoodID:      postedHamburger.FoodID,
 			UserID:      postedHamburger.UserID,
+			PhotoID:     0,
+			PhotoSrc:    "",
 			DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
 			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 		}

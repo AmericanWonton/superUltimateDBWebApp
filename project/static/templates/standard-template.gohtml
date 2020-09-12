@@ -483,6 +483,8 @@
                                 aHamburger.Name = dataOBJ.TheHamburgers[x].Name;
                                 aHamburger.FoodID = dataOBJ.TheHamburgers[x].FoodID;
                                 aHamburger.UserID = dataOBJ.TheHamburgers[x].UserID;
+                                aHamburger.PhotoID = dataOBJ.TheHamburgers[x].PhotoID;
+                                aHamburger.PhotoSrc = dataOBJ.TheHamburgers[x].PhotoSrc;
                                 aHamburger.DateCreated = dataOBJ.TheHamburgers[x].DateCreated;
                                 aHamburger.DateUpdated = dataOBJ.TheHamburgers[x].DateUpdated;
                                 hamburgArray.push(aHamburger); //Add the Hamburger to the Hamburger array
@@ -510,6 +512,8 @@
                                 aHotDog.Name = dataOBJ.TheHotDogs[y].Name;
                                 aHotDog.FoodID = dataOBJ.TheHotDogs[y].FoodID;
                                 aHotDog.UserID = dataOBJ.TheHotDogs[y].UserID;
+                                aHotDog.PhotoID = dataOBJ.TheHotDogs[y].PhotoID;
+                                aHotDog.PhotoSrc = dataOBJ.TheHotDogs[y].PhotoSrc;
                                 aHotDog.DateCreated = dataOBJ.TheHotDogs[y].DateCreated;
                                 aHotDog.DateUpdated = dataOBJ.TheHotDogs[y].DateUpdated;
                                 hotdogsArray.push(aHotDog); //Add the hotdog to the hotdog array
@@ -629,6 +633,27 @@
                                 udcfText.setAttribute("id", "udcfText");
                                 udcfText.innerHTML = dataOBJ.TheHamburgers[y].FoodID;
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create Photo Section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "Hamburger Photo";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udfcPic = document.createElement("img");
+                                udfcPic.setAttribute("id", "udfcFeildInfoPic");
+                                var photoThere = srcChecker(dataOBJ.TheHamburgers[y], aHotDog, 0); //Check to see if photo exists
+                                if (photoThere == true){
+                                    udfcPic.setAttribute("src", dataOBJ.TheHamburgers[y].PhotoSrc);
+                                } else {
+                                    udfcPic.setAttribute("src", "static/images/png/Photo-Unavailable.PNG");
+                                }
+                                udcFieldInfoTxtDiv.appendChild(udfcPic); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
                                 //Create DateCreated Info Section
