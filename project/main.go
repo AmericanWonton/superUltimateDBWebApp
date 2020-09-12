@@ -15,7 +15,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/gobuffalo/packr/v2"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -220,62 +219,9 @@ var funcMap = template.FuncMap{
 	"ReturnRoleIT":    User.ReturnRoleIT,
 }
 
-//Loading our templates in for ParseGlob: https://github.com/gobuffalo/packr/issues/16
-var templatesBox = packr.New("templates", "./static")
-
-func MustLoadBoxedTemplate(b *packr.Box) *template.Template {
-	t := template.Must(template.New("").Funcs(funcMap), err)
-	//t := template.New("")
-	err := b.Walk(func(p string, f packr.File) error {
-		if p == "" {
-			return nil
-		}
-		var err error
-		var csz int64
-		if finfo, err := f.FileInfo(); err != nil {
-			return err
-		} else {
-			// skip directory path
-			if finfo.IsDir() {
-				return nil
-			}
-			csz = finfo.Size()
-		}
-
-		// skip all files except .html
-		if !strings.Contains(p, ".html") && !strings.Contains(p, ".gohtml") {
-			//fmt.Printf("We are skipping this filename: %v\n", p)
-			return nil
-		}
-
-		// Normalize template name
-		n := p
-		if strings.HasPrefix(p, "\\") || strings.HasPrefix(p, "/") {
-			n = n[1:] // don't want template name to start with / ie. /index.html
-		}
-		// replace windows path seperator \ to normalized /
-		n = strings.Replace(n, "\\", "/", -1)
-
-		var h = make([]byte, 0, csz)
-
-		if h, err = b.Find(p); err != nil {
-			return err
-		}
-
-		if _, err = t.New(n).Parse(string(h)); err != nil {
-			return err
-		}
-		return nil
-	})
-	if err != nil {
-		panic("error loading template")
-	}
-	return t
-}
-
 //Parse our templates
 func init() {
-	template1 = MustLoadBoxedTemplate(templatesBox)
+	template1 = template.Must(template.ParseGlob("./static/templates/*"))
 	//AmazonCredentialRead
 	getCreds()
 }
@@ -365,7 +311,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	/* Execute template, handle error */
-	err1 := template1.ExecuteTemplate(w, "templates/index.gohtml", aUser)
+	err1 := template1.ExecuteTemplate(w, "index.gohtml", aUser)
 	HandleError(w, err1)
 }
 
@@ -378,7 +324,7 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err1 := template1.ExecuteTemplate(w, "templates/signup.gohtml", nil)
+	err1 := template1.ExecuteTemplate(w, "signup.gohtml", nil)
 	HandleError(w, err1)
 
 	fmt.Printf("Signup Endpoint Hit\n")
@@ -497,7 +443,7 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
 	}
-	err1 := template1.ExecuteTemplate(w, "templates/mainpage.gohtml", vd)
+	err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 	HandleError(w, err1)
 }
 
@@ -544,8 +490,8 @@ func handleRequests() {
 	//Middleware logging
 	myRouter.Handle("/", loggingMiddleware(http.HandlerFunc(logHandler)))
 	//Serve our static files
-	myRouter.Handle("/", http.FileServer(templatesBox))
-	myRouter.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(templatesBox)))
+	myRouter.Handle("/", http.FileServer(http.Dir("./static")))
+	myRouter.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	log.Fatal(http.ListenAndServe(":80", myRouter))
 }
 

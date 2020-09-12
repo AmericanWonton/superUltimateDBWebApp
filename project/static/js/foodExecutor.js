@@ -143,7 +143,7 @@ function revealFoodForm(foodChoice) {
         //Dispaly the form to click on
         theDiv.style.display = "block";
     } else if (foodChoice == 1) { //For Hamburger Selection
-        console.log("Mkay, you clicked hamburger.")
+        console.log("Mkay, you clicked hamburger. New String")
         //Create the form elements and append them to the form
         /* Let's start with form instruction first */
         var condimentInstruction = document.createElement("p");
@@ -178,7 +178,7 @@ function revealFoodForm(foodChoice) {
         var documentForm = document.createElement("form");
         documentForm.setAttribute("id", "submit-picture-form");
         documentForm.setAttribute("enctype", "multipart/form-data");
-        documentForm.setAttribute("action", "/fileInsert");
+        documentForm.setAttribute("action", "http://localhost:80/fileInsert");
         documentForm.setAttribute("method", "POST");
         documentForm.setAttribute("onload", "");
         var docButtonInput = document.createElement("input");
@@ -207,7 +207,7 @@ function revealFoodForm(foodChoice) {
         submitButton.innerHTML = "SUBMIT";
         
         submitButton.addEventListener("click", function(){
-            console.log("Submit button clicked, submitting hamburger data.");
+            console.log("Submit button clicked, submitting hamburger data. New String");
             //Ajax functionality for submitting forms
             //Field correction if fields aren't filled out
             if (hamburgType.value == ""){
@@ -259,9 +259,9 @@ function revealFoodForm(foodChoice) {
                         hiddenFoodNum.setAttribute("value", dataReturned.ReturnedHamburger.FoodID);
                         documentForm.appendChild(hiddenFoodType);
                         pictureSubmit(documentForm);
-                        alert("Hamburger submitted successfully!")
+                        //alert("Hamburger submitted successfully!")
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
+                        //location.reload(true); //Reload Page
                     } else if (dataReturned.SuccessBool === false){
                         var foulLanguage = dataReturned.SuccessMsg.includes("foul language");
                         if (foulLanguage == true){

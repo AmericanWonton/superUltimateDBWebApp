@@ -809,6 +809,27 @@
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
+                                //Create Photo Section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "Hamburger Photo";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udfcPic = document.createElement("img");
+                                udfcPic.setAttribute("id", "udfcFeildInfoPic");
+                                var photoThere = srcChecker(aHamburger, dataOBJ.TheHotDogs[i], 1); //Check to see if photo exists
+                                if (photoThere == true){
+                                    udfcPic.setAttribute("src", dataOBJ.TheHotDogs[i].PhotoSrc);
+                                } else {
+                                    udfcPic.setAttribute("src", "static/images/png/Photo-Unavailable.PNG");
+                                }
+                                udcFieldInfoTxtDiv.appendChild(udfcPic); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
                                 //Create DateCreated info section
                                 var udcFieldInfoTxtDiv = document.createElement("div");
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
