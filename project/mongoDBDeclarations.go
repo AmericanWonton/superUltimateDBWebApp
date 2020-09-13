@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -320,6 +321,8 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 			Name:        hotDogUpdate.Name,
 			FoodID:      thefoodUpdate.FoodID,
 			UserID:      hotDogUpdate.UserID,
+			PhotoID:     hotDogUpdate.PhotoID,
+			PhotoSrc:    hotDogUpdate.PhotoSrc,
 			DateCreated: hotDogUpdate.DateCreated,
 			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 		}
@@ -356,6 +359,8 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 					"name":        updatedHotDogMongo.Name,
 					"foodid":      thefoodUpdate.FoodID,
 					"userid":      updatedHotDogMongo.UserID,
+					"photoid":     updatedHotDogMongo.PhotoID,
+					"photosrc":    updatedHotDogMongo.PhotoSrc,
 					"datecreated": updatedHotDogMongo.DateCreated,
 					"dateupdated": updatedHotDogMongo.DateUpdated,
 				},
@@ -420,6 +425,8 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 			Name:        hamburgerUpdate.Name,
 			FoodID:      thefoodUpdate.FoodID,
 			UserID:      hamburgerUpdate.UserID,
+			PhotoID:     hamburgerUpdate.PhotoID,
+			PhotoSrc:    hamburgerUpdate.PhotoSrc,
 			DateCreated: hamburgerUpdate.DateCreated,
 			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 		}
@@ -456,6 +463,8 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 					"name":        updatedHamburgerMongo.Name,
 					"foodid":      thefoodUpdate.FoodID,
 					"userid":      updatedHamburgerMongo.UserID,
+					"photoid":     updatedHamburgerMongo.PhotoID,
+					"photosrc":    updatedHamburgerMongo.PhotoSrc,
 					"datecreated": updatedHamburgerMongo.DateCreated,
 					"dateupdated": updatedHamburgerMongo.DateUpdated,
 				},
@@ -945,7 +954,7 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 	//Search for UserID or for all
 	hotdogCollection := mongoClient.Database("superdbtest1").Collection("hotdogs")       //Here's our collection
 	hamburgerCollection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
-	picCollection := mongoClient.Database("superdbtest1").Collection("user-photos")      //Here's our collection
+	picCollection := mongoClient.Database("superdbtest1").Collection("userphotos")       //Here's our collection
 
 	if theUser.UserID == 0 {
 		//Query Mongo for all hotdogs
@@ -1189,6 +1198,19 @@ func turnFoodArray(foodString string) []string {
 	return returnedFood
 }
 
+//This is for turning the foodArray into a string
+func sortFoodArray(foodArray []string) string {
+	var returnString string
+	for n := 0; n < len(foodArray); n++ {
+		if n != len(foodArray)-1 {
+			returnString = returnString + foodArray[n] + " "
+		} else {
+			returnString = returnString + foodArray[n]
+		}
+	}
+	return returnString
+}
+
 //Insert Photo into DB
 func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fileType string, size int64,
 	photoHash string, link string, foodType string, dateCreated string, dateUpdated string) bool {
@@ -1212,7 +1234,7 @@ func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fil
 			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 		}
 		//Collect Data for Mongo
-		photoCollection := mongoClient.Database("superdbtest1").Collection("user-photos") //Here's our collection
+		photoCollection := mongoClient.Database("superdbtest1").Collection("userphotos") //Here's our collection
 		collectedUsers := []interface{}{photoInsertion}
 		//Insert Our Data
 		insertManyResult, err := photoCollection.InsertMany(theContext, collectedUsers)
@@ -1221,6 +1243,70 @@ func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fil
 			successfulInsert = false
 		} else {
 			fmt.Printf("Insertion successful: %v\n", insertManyResult)
+			/******** UPDATE HOTDOG AND USER COLLECTIONS *******/
+			var aHotDogMongo MongoHotDog // create a value into which the single document can be decoded
+			hotdogCollection := mongoClient.Database("superdbtest1").Collection("hotdogs")
+			theFilter := bson.M{"foodid": foodid}
+			findOptions := options.Find()
+			curHDog, err := hotdogCollection.Find(theContext, theFilter, findOptions)
+			if err != nil {
+				if strings.Contains(err.Error(), "no documents in result") {
+					fmt.Printf("No documents were returned for hotdogs in MongoDB: %v\n", err.Error())
+					logWriter("No documents were returned in MongoDB for Hotdogs: " + err.Error())
+				} else {
+					fmt.Printf("There was an error returning hotdogs for this Hotdog, %v: %v\n",
+						foodid, err.Error())
+					logWriter("There was an error returning hotdogs in Mongo for this User " + err.Error())
+				}
+			}
+			//Loop over query results and fill hotdogs array
+			for curHDog.Next(theContext) {
+				err := curHDog.Decode(&aHotDogMongo)
+				if err != nil {
+					fmt.Printf("Error decoding hotdogs in MongoDB for this User, %v: %v\n",
+						foodid, err.Error())
+					logWriter("Error decoding hotdogs in MongoDB: " + err.Error())
+				}
+			}
+			// Close the cursor once finished
+			curHDog.Close(theContext)
+			//Update Dogs
+			type foodUpdate struct {
+				FoodType     string    `json:"FoodType"`
+				FoodID       int       `json:"FoodID"`
+				TheHamburger Hamburger `json:"TheHamburger"`
+				TheHotDog    Hotdog    `json:"TheHotDog"`
+			}
+			newLink := filepath.Join("static", "images", link)
+			fixedLink := urlFixer(newLink)
+			aHotDog := Hotdog{
+				HotDogType:  aHotDogMongo.HotDogType,
+				Condiment:   sortFoodArray(aHotDogMongo.Condiments),
+				Calories:    aHotDogMongo.Calories,
+				Name:        aHotDogMongo.Name,
+				UserID:      aHotDogMongo.UserID,
+				FoodID:      aHotDogMongo.FoodID,
+				PhotoID:     photoid,
+				PhotoSrc:    fixedLink,
+				DateCreated: aHotDogMongo.DateCreated,
+				DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+			}
+			hDogUpdate := foodUpdate{
+				FoodType:     "hotdog",
+				FoodID:       foodid,
+				TheHamburger: Hamburger{},
+				TheHotDog:    aHotDog,
+			}
+			jsonValue, _ := json.Marshal(hDogUpdate)
+			response, err := http.Post("http://localhost:80/foodUpdateMongo",
+				"application/json", bytes.NewBuffer(jsonValue))
+			if err != nil {
+				fmt.Printf("The HTTP request failed with error %s\n", err)
+				successfulInsert = false
+			} else {
+				data, _ := ioutil.ReadAll(response.Body)
+				fmt.Println(string(data))
+			}
 		}
 	} else if strings.Contains(foodType, "HAMBURGER") {
 		fmt.Printf("Inserting Hamburger Photo into MongoDB\n")
@@ -1238,7 +1324,7 @@ func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fil
 			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 		}
 		//Collect Data for Mongo
-		photoCollection := mongoClient.Database("superdbtest1").Collection("user-photos") //Here's our collection
+		photoCollection := mongoClient.Database("superdbtest1").Collection("userphotos") //Here's our collection
 		collectedUsers := []interface{}{photoInsertion}
 		//Insert Our Data
 		insertManyResult, err := photoCollection.InsertMany(theContext, collectedUsers)
@@ -1247,6 +1333,70 @@ func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fil
 			successfulInsert = false
 		} else {
 			fmt.Printf("Insertion successful: %v\n", insertManyResult)
+			/******** UPDATE HAMBURGER AND USER COLLECTIONS *******/
+			var aHamMongo MongoHamburger // create a value into which the single document can be decoded
+			hamburgerCollection := mongoClient.Database("superdbtest1").Collection("hamburgers")
+			theFilter := bson.M{"foodid": foodid}
+			findOptions := options.Find()
+			curHam, err := hamburgerCollection.Find(theContext, theFilter, findOptions)
+			if err != nil {
+				if strings.Contains(err.Error(), "no documents in result") {
+					fmt.Printf("No documents were returned for hamburgers in MongoDB: %v\n", err.Error())
+					logWriter("No documents were returned in MongoDB for hamburgers: " + err.Error())
+				} else {
+					fmt.Printf("There was an error returning hamburgers for this Hamburger, %v: %v\n",
+						foodid, err.Error())
+					logWriter("There was an error returning hamburgers in Mongo for this User " + err.Error())
+				}
+			}
+			//Loop over query results and fill hotdogs array
+			for curHam.Next(theContext) {
+				err := curHam.Decode(&aHamMongo)
+				if err != nil {
+					fmt.Printf("Error decoding hamburgers in MongoDB for this User, %v: %v\n",
+						foodid, err.Error())
+					logWriter("Error decoding hamburgers in MongoDB: " + err.Error())
+				}
+			}
+			// Close the cursor once finished
+			curHam.Close(theContext)
+			//Update Hamburgers
+			type foodUpdate struct {
+				FoodType     string    `json:"FoodType"`
+				FoodID       int       `json:"FoodID"`
+				TheHamburger Hamburger `json:"TheHamburger"`
+				TheHotDog    Hotdog    `json:"TheHotDog"`
+			}
+			newLink := filepath.Join("static", "images", link)
+			fixedLink := urlFixer(newLink)
+			aHam := Hamburger{
+				BurgerType:  aHamMongo.BurgerType,
+				Condiment:   sortFoodArray(aHamMongo.Condiments),
+				Calories:    aHamMongo.Calories,
+				Name:        aHamMongo.Name,
+				UserID:      aHamMongo.UserID,
+				FoodID:      aHamMongo.FoodID,
+				PhotoID:     photoid,
+				PhotoSrc:    fixedLink,
+				DateCreated: aHamMongo.DateCreated,
+				DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+			}
+			hamUpdate := foodUpdate{
+				FoodType:     "hamburger",
+				FoodID:       foodid,
+				TheHamburger: aHam,
+				TheHotDog:    Hotdog{},
+			}
+			jsonValue, _ := json.Marshal(hamUpdate)
+			response, err := http.Post("http://localhost:80/foodUpdateMongo",
+				"application/json", bytes.NewBuffer(jsonValue))
+			if err != nil {
+				fmt.Printf("The HTTP request failed with error %s\n", err)
+				successfulInsert = false
+			} else {
+				data, _ := ioutil.ReadAll(response.Body)
+				fmt.Println(string(data))
+			}
 		}
 	} else {
 		fmt.Printf("Wrong food type returned for food photo data insertion: %v\n", foodType)

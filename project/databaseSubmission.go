@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -492,14 +494,15 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 		}
 		if canPost == true {
 			sqlStatement = "UPDATE hot_dogs SET TYPE=?, CONDIMENT=?, CALORIES=?," +
-				"NAME=?, USER_ID=?, DATE_UPDATED=? WHERE FOOD_ID=? AND USER_ID=?"
+				"NAME=?, PHOTO_ID=?, PHOTO_SRC=?, DATE_UPDATED=? WHERE FOOD_ID=?"
 
 			stmt, err := db.Prepare(sqlStatement)
 			check(err)
 			theTimeNow := time.Now()
 			r, err := stmt.Exec(updatedHotdog.HotDogType, updatedHotdog.Condiment,
-				updatedHotdog.Calories, updatedHotdog.Name, updatedHotdog.UserID,
-				theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID, thefoodUpdate.TheHotDog.UserID)
+				updatedHotdog.Calories, updatedHotdog.Name, updatedHotdog.PhotoID,
+				updatedHotdog.PhotoSrc, updatedHotdog.UserID,
+				theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID)
 			check(err)
 
 			n, err := r.RowsAffected()
@@ -533,14 +536,15 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 		}
 		if canPost == true {
 			sqlStatement = "UPDATE hamburgers SET TYPE=?, CONDIMENT=?, CALORIES=?," +
-				"NAME=?, USER_ID=?, DATE_UPDATED=? WHERE FOOD_ID=? AND USER_ID=?"
+				"NAME=?, PHOTO_ID=?, PHOTO_SRC=?, DATE_UPDATED=? WHERE FOOD_ID=?"
 
 			stmt, err := db.Prepare(sqlStatement)
 			check(err)
 			theTimeNow := time.Now()
 			r, err := stmt.Exec(updatedHamburger.BurgerType, updatedHamburger.Condiment,
-				updatedHamburger.Calories, updatedHamburger.Name, updatedHamburger.UserID,
-				theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID, thefoodUpdate.TheHamburger.UserID)
+				updatedHamburger.Calories, updatedHamburger.Name, updatedHamburger.PhotoID,
+				updatedHamburger.PhotoSrc,
+				theTimeNow.Format("2006-01-02 15:04:05"), updatedHamburger.FoodID)
 			check(err)
 
 			n, err := r.RowsAffected()
@@ -762,7 +766,7 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 		fmt.Printf("Inserting Hotdog Photo\n")
 		theStatement := "INSERT INTO user_photos" +
 			"(USER_ID, FOOD_ID, PHOTO_ID, PHOTO_NAME, FILE_TYPE, SIZE, PHOTO_HASH, LINK, FOOD_TYPE, DATE_CREATED, DATE_UPDATED) " +
-			"VALUES(?,?,?,?,?,?,?,?,?)"
+			"VALUES(?,?,?,?,?,?,?,?,?,?,?)"
 		stmt, err := db.Prepare(theStatement)
 
 		r, err := stmt.Exec(userid, foodid, photoid, photoName, fileType,
@@ -774,11 +778,52 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 		check(err)
 		fmt.Printf("%v rows effected.\n", n)
 		stmt.Close() //Close the SQL
+		/********* UPDATE SQL WITH PHOTO INFORMATION ************/
+		type foodUpdate struct {
+			FoodType     string    `json:"FoodType"`
+			FoodID       int       `json:"FoodID"`
+			TheHamburger Hamburger `json:"TheHamburger"`
+			TheHotDog    Hotdog    `json:"TheHotDog"`
+		}
+		//Get Hotdog from FoodID
+		var theHotDog Hotdog
+		theStmt := "SELECT TYPE, CONDIMENT, CALORIES, NAME, USER_ID, FOOD_ID, " +
+			"PHOTO_ID, PHOTO_SRC, DATE_CREATED, DATE_UPDATED FROM hot_dogs WHERE FOOD_ID = ?"
+		rows, err := db.Query(theStmt, foodid)
+		check(err)
+		for rows.Next() {
+			err = rows.Scan(&theHotDog.HotDogType, &theHotDog.Condiment, &theHotDog.Calories,
+				&theHotDog.Name, &theHotDog.UserID, &theHotDog.FoodID,
+				&theHotDog.PhotoID, &theHotDog.PhotoSrc, &theHotDog.DateCreated, &theHotDog.DateUpdated)
+			check(err)
+			theHotDog.PhotoID = photoid
+			newLink := filepath.Join("static", "images", link)
+			theLink := urlFixer(newLink)
+			theHotDog.PhotoSrc = theLink
+			theHotDog.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
+			fmt.Printf("DEBUG: Here is our hotdog: %v\n", theHotDog)
+		}
+		rows.Close()
+		hotDogUpdate := foodUpdate{
+			FoodType:     "hotdog",
+			FoodID:       foodid,
+			TheHamburger: Hamburger{},
+			TheHotDog:    theHotDog,
+		}
+		jsonValue, _ := json.Marshal(hotDogUpdate)
+		response, err := http.Post("http://localhost:80/updateFood", "application/json", bytes.NewBuffer(jsonValue))
+		if err != nil {
+			fmt.Printf("The HTTP request failed with error %s\n", err)
+			successfulInsert = false
+		} else {
+			data, _ := ioutil.ReadAll(response.Body)
+			fmt.Println(string(data))
+		}
 	} else if strings.Contains(foodType, "HAMBURGER") {
 		fmt.Printf("Inserting Hamburger Photo into SQL\n")
-		theStatement := "INSERT INTO user_photos" +
+		theStatement := "INSERT INTO user_photos " +
 			"(USER_ID, FOOD_ID, PHOTO_ID, PHOTO_NAME, FILE_TYPE, SIZE, PHOTO_HASH, LINK, FOOD_TYPE, DATE_CREATED, DATE_UPDATED) " +
-			"VALUES(?,?,?,?,?,?,?,?,?)"
+			"VALUES(?,?,?,?,?,?,?,?,?,?,?)"
 		stmt, err := db.Prepare(theStatement)
 
 		r, err := stmt.Exec(userid, foodid, photoid, photoName, fileType,
@@ -790,6 +835,47 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 		check(err)
 		fmt.Printf("%v rows effected.\n", n)
 		stmt.Close() //Close the SQL
+		/********* UPDATE SQL WITH PHOTO INFORMATION ************/
+		type foodUpdate struct {
+			FoodType     string    `json:"FoodType"`
+			FoodID       int       `json:"FoodID"`
+			TheHamburger Hamburger `json:"TheHamburger"`
+			TheHotDog    Hotdog    `json:"TheHotDog"`
+		}
+		//Get Hotdog from FoodID
+		var theHamb Hamburger
+		theStmt := "SELECT TYPE, CONDIMENT, CALORIES, NAME, USER_ID, FOOD_ID, " +
+			"PHOTO_ID, PHOTO_SRC, DATE_CREATED, DATE_UPDATED FROM hamburgers WHERE FOOD_ID = ?"
+		rows, err := db.Query(theStmt, foodid)
+		check(err)
+		for rows.Next() {
+			err = rows.Scan(&theHamb.BurgerType, &theHamb.Condiment, &theHamb.Calories,
+				&theHamb.Name, &theHamb.UserID, &theHamb.FoodID,
+				&theHamb.PhotoID, &theHamb.PhotoSrc, &theHamb.DateCreated, &theHamb.DateUpdated)
+			check(err)
+			theHamb.PhotoID = photoid
+			newLink := filepath.Join("static", "images", link)
+			theLink := urlFixer(newLink)
+			theHamb.PhotoSrc = theLink
+			theHamb.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
+			fmt.Printf("DEBUG: Here is our hotdog: %v\n", theHamb)
+		}
+		rows.Close()
+		hamUpdate := foodUpdate{
+			FoodType:     "hamburger",
+			FoodID:       foodid,
+			TheHamburger: theHamb,
+			TheHotDog:    Hotdog{},
+		}
+		jsonValue, _ := json.Marshal(hamUpdate)
+		response, err := http.Post("http://localhost:80/updateFood", "application/json", bytes.NewBuffer(jsonValue))
+		if err != nil {
+			fmt.Printf("The HTTP request failed with error %s\n", err)
+			successfulInsert = false
+		} else {
+			data, _ := ioutil.ReadAll(response.Body)
+			fmt.Println(string(data))
+		}
 	} else {
 		fmt.Printf("Wrong food type returned for food photo data insertion: %v\n", foodType)
 		successfulInsert = false

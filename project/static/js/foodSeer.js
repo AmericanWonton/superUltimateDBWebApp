@@ -159,6 +159,32 @@ function foodDeleter(whichFood, whichChoice, whichUserID){
 
     var jsonString = JSON.stringify(foodDeletion);
     console.log("Here is our json string for food deletion: " + jsonString);
+    //Delete Food Photo First from Amazon and directory
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/deletePhotoFromS3', true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.addEventListener('readystatechange', function(){
+        if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+            var item = xhr.responseText;
+            if (item == 1){
+                console.log(item);
+                alert("Hotdog successfully deleted");
+                location.reload(true);
+            }else if (item == 2){
+                console.log(item);
+                alert("Hamburger Deleted");
+                location.reload(true);
+            } else if (item == 3) {
+                console.log(item);
+                alert("Trouble deleting food item");
+                location.reload(true);
+            } else {
+                console.log("Unexpected output at foodDeletion function: " + item);
+                location.reload(true);
+            }
+        }
+    });
+    xhr.send(jsonString);
     //Call Ajax to delete the foodRecord(SQL Database)
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/deleteFood', true);
@@ -222,7 +248,7 @@ function srcChecker(theHamburger, theHotdog, whichFood){
     };
 
     var jsonString = JSON.stringify(photoChekcer);
-
+    console.log("Checking to see if photo exists"); //DEBUG
     //Call Ajax to check the fileRecord
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/checkSRC', true);
@@ -233,9 +259,11 @@ function srcChecker(theHamburger, theHotdog, whichFood){
             var returnOBJ = JSON.parse(item);
             if (returnOBJ.FoundSRC == true) {
                 //PicutreSRC found
+                console.log("Photo found"); //DEBUG
                 srcThere = true;
             } else {
                 //PictureSRC not found
+                console.log("Photo not found"); //DEBUG
                 srcThere = false;
             }
         }

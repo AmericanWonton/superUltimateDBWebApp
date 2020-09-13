@@ -190,7 +190,7 @@
                     });
                     xhr.send(jsonString);
                     console.log("Redirecting to a window")
-                    window.location.replace("http://3.135.9.238:80");
+                    window.location.replace("http://localhost:80");
                 } else if (role.value == "admin") {
                     alert("Standby future admin, we will be approving your login shortly!" +
                     "\n" + "If you want to partially mess around with data, consider signing up as IT!\n" +
@@ -213,7 +213,7 @@
                     });
                     xhr.send(jsonString);
                     console.log("Redirecting to a window")
-                    window.location.replace("http://3.135.9.238:80");
+                    window.location.replace("http://localhost:80");
                 } else {
                     alert("Whoops, got the wrong value for our role part of the form.");
                 }
@@ -371,6 +371,7 @@
     {{/* Divs for javascript refference*/}}
     <div class="actionDiv">
         <img src="static/images/jpg/hide-pain-harold.jpg"  class="actionimg" alt="harold">
+        
         <br><br>
         <p class="actionInstructionText">Okay User, what data would you like to read/make?</p>
         <br>
@@ -485,6 +486,7 @@
                                 aHamburger.UserID = dataOBJ.TheHamburgers[x].UserID;
                                 aHamburger.PhotoID = dataOBJ.TheHamburgers[x].PhotoID;
                                 aHamburger.PhotoSrc = dataOBJ.TheHamburgers[x].PhotoSrc;
+                                console.log("Here is the src in this hamburger: " + dataOBJ.TheHamburgers[x].PhotoSrc); //DEBUG
                                 aHamburger.DateCreated = dataOBJ.TheHamburgers[x].DateCreated;
                                 aHamburger.DateUpdated = dataOBJ.TheHamburgers[x].DateUpdated;
                                 hamburgArray.push(aHamburger); //Add the Hamburger to the Hamburger array
@@ -649,9 +651,14 @@
                                 udfcPic.setAttribute("id", "udfcFeildInfoPic");
                                 var photoThere = srcChecker(dataOBJ.TheHamburgers[y], aHotDog, 0); //Check to see if photo exists
                                 if (photoThere == true){
-                                    udfcPic.setAttribute("src", dataOBJ.TheHamburgers[y].PhotoSrc);
+                                    console.log("We found the source: " + dataOBJ.TheHamburgers[y].PhotoSrc); //DEBUG
+                                    udfcPic.src = String(dataOBJ.TheHamburgers[y].PhotoSrc);
+                                    // udfcPic.setAttribute("src", dataOBJ.TheHamburgers[y].PhotoSrc);
+                                    udfcPic.setAttribute("alt", "Food Pic: " + dataOBJ.TheHamburgers[y].PhotoSrc);
                                 } else {
-                                    udfcPic.setAttribute("src", "static/images/png/Photo-Unavailable.PNG");
+                                    console.log("Source not found: " + dataOBJ.TheHamburgers[y].PhotoSrc);
+                                    udfcPic.setAttribute("src", "static/images/png/Photo-Unavailable.png");
+                                    udfcPic.setAttribute("alt", "Food Pic Not Found.");
                                 }
                                 udcFieldInfoTxtDiv.appendChild(udfcPic); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
@@ -823,9 +830,13 @@
                                 udfcPic.setAttribute("id", "udfcFeildInfoPic");
                                 var photoThere = srcChecker(aHamburger, dataOBJ.TheHotDogs[i], 1); //Check to see if photo exists
                                 if (photoThere == true){
-                                    udfcPic.setAttribute("src", dataOBJ.TheHotDogs[i].PhotoSrc);
+                                    console.log("We found the source: " + dataOBJ.TheHotDogs[i].PhotoSrc); //DEBUG
+                                    udfcPic.src = String(dataOBJ.TheHotDogs[i].PhotoSrc);
+                                    udfcPic.setAttribute("alt", "Food Pic: " + dataOBJ.TheHotDogs[i].PhotoSrc);
                                 } else {
-                                    udfcPic.setAttribute("src", "static/images/png/Photo-Unavailable.PNG");
+                                    console.log("Source not found: " + dataOBJ.TheHotDogs[i].PhotoSrc);
+                                    udfcPic.setAttribute("src", "static/images/png/Photo-Unavailable.png");
+                                    udfcPic.setAttribute("alt", "Food Pic Not Found.");
                                 }
                                 udcFieldInfoTxtDiv.appendChild(udfcPic); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container

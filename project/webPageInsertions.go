@@ -190,7 +190,6 @@ func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("Here is our byte slice Burger as a string for JSON: \n\n%v\n", string(bs))
 	//Marshal it into our type
 	var postedHamburger Hamburger
 	json.Unmarshal(bs, &postedHamburger)
@@ -217,10 +216,8 @@ func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 	}
 	if canPost == true {
 		//First give this Burger a random ID
-		fmt.Printf("DEBUG: This is what our Burger foodID is now: %v\n", postedHamburger.FoodID)
 		randomFoodID := randomIDCreation()
 		postedHamburger.FoodID = randomFoodID
-		fmt.Printf("DEBUG: Here is our randomID now: %v\n", postedHamburger.FoodID)
 		//Give the correct time to this hotdog
 		theTimeNow := time.Now()
 		postedHamburger.DateCreated = theTimeNow.Format("2006-01-02 15:04:05")
@@ -299,7 +296,6 @@ func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 				}
 				fmt.Fprintf(w, string(dataJSON))
 			} else {
-				fmt.Printf("DEBUG: Found the testUser: %v\n", foundUser)
 
 				foundUser.Hamburgers.Hamburgers = append(foundUser.Hamburgers.Hamburgers, mongoHamburgerInsert)
 				successfulUserInsert := updateUser(foundUser) //Update this User with the new Hotdog Array

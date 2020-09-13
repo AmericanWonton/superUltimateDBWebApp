@@ -379,7 +379,7 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 		}
 		jsonValue, _ := json.Marshal(insertedUser)
-		response, err := http.Post("http://3.135.9.238:80/insertUser", "application/json", bytes.NewBuffer(jsonValue))
+		response, err := http.Post("http://localhost:80/insertUser", "application/json", bytes.NewBuffer(jsonValue))
 		if err != nil {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
 		} else {
@@ -405,7 +405,7 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 			Users: []AUser{insertionUser},
 		}
 		jsonValue2, _ := json.Marshal(insertionUsers)
-		response2, err := http.Post("http://3.135.9.238:80/insertUsers", "application/json", bytes.NewBuffer(jsonValue2))
+		response2, err := http.Post("http://localhost:80/insertUsers", "application/json", bytes.NewBuffer(jsonValue2))
 		if err != nil {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
 		} else {
@@ -482,8 +482,9 @@ func handleRequests() {
 	myRouter.HandleFunc("/hotDogInsertWebPage", hotDogInsertWebPage).Methods("POST")       //Post Hotdogs
 	myRouter.HandleFunc("/hamburgerInsertWebPage", hamburgerInsertWebPage).Methods("POST") //Post Hamburgers
 	//File Handling Stuff
-	myRouter.HandleFunc("/fileInsert", fileInsert).Methods("POST") //Insert a file
-	myRouter.HandleFunc("/checkSRC", checkSRC).Methods("POST")     //Check if directory exists
+	myRouter.HandleFunc("/fileInsert", fileInsert).Methods("POST")               //Insert a file
+	myRouter.HandleFunc("/checkSRC", checkSRC).Methods("POST")                   //Check if directory exists
+	myRouter.HandleFunc("/deletePhotoFromS3", deletePhotoFromS3).Methods("POST") //Delete S3 Photo
 	//Validation Stuff
 	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
 	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames
