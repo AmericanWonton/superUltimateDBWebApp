@@ -168,15 +168,15 @@ function foodDeleter(whichFood, whichChoice, whichUserID){
             var item = xhr.responseText;
             if (item == 1){
                 console.log(item);
-                alert("Hotdog successfully deleted");
+                alert("Hotdog pic successfully deleted");
                 location.reload(true);
             }else if (item == 2){
                 console.log(item);
-                alert("Hamburger Deleted");
+                alert("Hamburger pic Deleted");
                 location.reload(true);
             } else if (item == 3) {
                 console.log(item);
-                alert("Trouble deleting food item");
+                alert("Trouble deleting food pic item");
                 location.reload(true);
             } else {
                 console.log("Unexpected output at foodDeletion function: " + item);

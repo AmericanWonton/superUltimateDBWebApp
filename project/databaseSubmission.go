@@ -924,3 +924,12 @@ func getUserPhotos(userID int, theFood string) ([]string, []string) {
 		return thePhotoURLS, theFileNames
 	}
 }
+
+func deleteUserPhoto(foodID int) {
+	stmt := "DELETE FROM user_photos WHERE FOOD_ID = ?"
+	rows, err := db.Query(stmt, foodID)
+	check(err)
+	rows.Close()
+
+	fmt.Printf("DEBUG: Deleted photos from SQL\n")
+}

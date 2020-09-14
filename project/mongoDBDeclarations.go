@@ -1211,6 +1211,7 @@ func sortFoodArray(foodArray []string) string {
 	return returnString
 }
 
+/********* AMAZON QUERIES **********/
 //Insert Photo into DB
 func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fileType string, size int64,
 	photoHash string, link string, foodType string, dateCreated string, dateUpdated string) bool {
@@ -1404,4 +1405,36 @@ func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fil
 	}
 
 	return successfulInsert
+}
+
+func mongoPhotoDeletion(foodID int) {
+	fmt.Printf("Deleting the photo for this ID: %v\n", foodID)
+	/* FIRST DELETE FROM HOTDOG COLLECTION*/
+	picCollection := mongoClient.Database("superdbtest1").Collection("userphotos") //Here's our collection
+	deletes := []bson.M{
+		{"foodid": foodID},
+	} //Here's our filter to look for
+	deletes = append(deletes, bson.M{"foodid": bson.M{
+		"$eq": foodID,
+	}},
+	)
+
+	// create the slice of write models
+	var writes []mongo.WriteModel
+
+	for _, del := range deletes {
+		model := mongo.NewDeleteManyModel().SetFilter(del)
+		writes = append(writes, model)
+	}
+
+	// run bulk write
+	res, err := picCollection.BulkWrite(theContext, writes)
+	if err != nil {
+		logWriter("Error writing Mongo Delete Statement for photo deletion")
+		logWriter("\n")
+		logWriter(err.Error())
+	}
+	//Print Results
+	fmt.Printf("Deleted the following documents: %v\n", res.DeletedCount)
+	logWriter("Deleted the following documents for food photos: " + string(res.DeletedCount) + "\n")
 }
