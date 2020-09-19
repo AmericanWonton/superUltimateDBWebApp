@@ -485,6 +485,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/fileInsert", fileInsert).Methods("POST")               //Insert a file
 	myRouter.HandleFunc("/checkSRC", checkSRC).Methods("POST")                   //Check if directory exists
 	myRouter.HandleFunc("/deletePhotoFromS3", deletePhotoFromS3).Methods("POST") //Delete S3 Photo
+	myRouter.HandleFunc("/fileUpdate", fileUpdate).Methods("POST")               //Update S3 Photo
 	//Validation Stuff
 	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
 	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames

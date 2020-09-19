@@ -393,6 +393,18 @@
                 <input type="text" id="condimentType" name="condimentType" placeholder="condiments" minlength=1 maxlength=48>
                 <input type="number" id="calories" name="calories" placeholder="calories" minlength=1 maxlength=8>
                 <input type="text" id="foodName" name="foodName" placeholder="foodName" minlength=1 maxlength=48>
+                <div id="photo_updater">
+                    <p>Update Photo: </p>
+                    <form id="photo-update-form" enctype="multipart/form-data" method="POST" onload=""
+                    action="http://localhost:80/fileUpdate">
+                        <input id="photo-update-input" type="file" name="photo-update-input">
+                        <input id="hiddenFoodID" type="hidden" name="hiddenFoodID">
+                        <input id="hiddenUserID" type="hidden" name="hiddenUserID">
+                        <input id="hiddenCurrentSRC" type="hidden" name="hiddenCurrentSRC">
+                        <input id="hiddenPhotoID" type="hidden" name="hiddenPhotoID">
+                        <input id="hiddenFoodType" type="hidden" name="hiddenFoodType">
+                    </form>
+                <div>
                 <button id="food_UpdateBtn">
                     Update Food
                 </button>

@@ -147,6 +147,15 @@ function foodChanger(whichFood, whichChoice, hamburgObj, hotdogObj){
         }
     });
     xhr.send(jsonString);
+
+    /* CHECK TO SEE IF THERE'S A PHOTO SUBMITTED TO CHANGE */
+    var photoSubmission = fileUploadCheck();
+    if (photoSubmission == true){
+        //Begin process of submitting submitted photo for an update
+        photoUpdate(foodUpdate);
+    } else {
+
+    }
 }
 
 function foodDeleter(whichFood, whichChoice, whichUserID){
