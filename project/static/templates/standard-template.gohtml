@@ -92,8 +92,8 @@
 {{define "signup-form"}}
     <div id="divform">
         <form id="signup-form"
-        action="https://formspree.io/meqgqoal"
-        method="POST"
+        action=""
+        method=""
         onload="">
             <input type="text" id="username" name="username" placeholder="username" minlength=1 maxlength=20 required><br>
             <p id="form-input-info">Username taken or not entered!</p>
@@ -111,6 +111,11 @@
                 <option value="IT">IT</option>
             </select>
             <input id="submit_button" type="submit">
+            <div id="informFormDiv" hidden>
+                <p id="informFormP">
+
+                </p>
+            </div>
         </form>
     </div>
 {{end}}
@@ -133,105 +138,6 @@
         var form = document.getElementById("signup-form");
         var button = document.getElementById("submit_button");
 
-        function ajax(method, url, data, success, error) {
-            var xhr = new XMLHttpRequest();
-            xhr.open(method, url);
-            xhr.setRequestHeader("Accept", "application/json");
-            xhr.onreadystatechange = function() {
-            if (xhr.readyState !== XMLHttpRequest.DONE) return;
-            if (xhr.status === 200) {
-                success(xhr.response, xhr.responseType);
-            } else {
-                error(xhr.status, xhr.response, xhr.responseType);
-            }
-            };
-            xhr.send(data);
-        }
-
-        window.addEventListener("DOMContentLoaded", function() {
-            
-            function success() {
-                //button.style = "display: none ";
-                //status.innerHTML = "Thanks!";
-                var successMSG = {
-                    Message: "",
-                    SuccessNum: 3
-                };
-                var newUser = {
-                    UserName: "",
-                    Password: "", //This was formally a []byte but we are changing our code to fit the database better
-                    First:    "",
-                    Last:     "",
-                    Role:     "",
-                    UserID:   0
-                };
-                newUser.UserName = userName.value;
-                newUser.Password = password.value;
-                newUser.First = fName.value;
-                newUser.Last = lName.value;
-                newUser.Role = role.value;
-                console.log("DEBUG: " + role.value);
-                var jsonString = JSON.stringify(newUser);
-                if (role.value == "user"){
-                    //Create User
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('POST', '/signUpUserUpdated', true);
-                    xhr.setRequestHeader("Content-Type", "application/json");
-                    xhr.addEventListener('readystatechange', function(){
-                        if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
-                            var item = xhr.responseText;
-                            var successMSG = JSON.parse(item);
-                            if (successMSG.SuccessNum == 0){
-                                console.log("DEBUG: Successful User submission, going to main page.")
-                            } else {
-                                console.log("DEBUG: Unsuccessful User submission, going to main page.")
-                            }
-                        }
-                    });
-                    xhr.send(jsonString);
-                    console.log("Redirecting to a window")
-                    window.location.replace("http://localhost:80");
-                } else if (role.value == "admin") {
-                    alert("Standby future admin, we will be approving your login shortly!" +
-                    "\n" + "If you want to partially mess around with data, consider signing up as IT!\n" +
-                    "Please email jbkeller@gmail.com if you have any questions.");
-                } else if (role.value == "IT") {
-                    //Create User
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('POST', '/signUpUserUpdated', true);
-                    xhr.setRequestHeader("Content-Type", "application/json");
-                    xhr.addEventListener('readystatechange', function(){
-                        if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
-                            var item = xhr.responseText;
-                            var successMSG = JSON.parse(item);
-                            if (successMSG.SuccessNum == 0){
-                                console.log("DEBUG: Successful IT submission, going to main page.")
-                            } else {
-                                console.log("DEBUG: Unsuccessful IT submission, going to main page.")
-                            }
-                        }
-                    });
-                    xhr.send(jsonString);
-                    console.log("Redirecting to a window")
-                    window.location.replace("http://localhost:80");
-                } else {
-                    alert("Whoops, got the wrong value for our role part of the form.");
-                }
-            }
-
-            function error() {
-                alert("Error sending email form");
-                form.reset();
-            }
-
-            // handle the form submission event
-            button.addEventListener("click", function(ev) {
-                ev.preventDefault();
-                var data = new FormData(form);
-                ajax(form.method, form.action, data, success, error);
-            });
-        });
-        
         /* Query the database on page load */
         window.addEventListener('DOMContentLoaded', function(){
             //Hide all error messages, 
@@ -328,6 +234,80 @@
                 lNameErr.textContent = '';
                 document.querySelector('#submit_button').disabled = false;
             }
+        });
+
+        /* Send Email to User when fields are filled out */
+        button.addEventListener("click", function(){
+                var successMSG = {
+                    Message: "",
+                    SuccessNum: 3
+                };
+                var newUser = {
+                    UserName: "",
+                    Password: "", //This was formally a []byte but we are changing our code to fit the database better
+                    First:    "",
+                    Last:     "",
+                    Role:     "",
+                    UserID:   0
+                };
+                newUser.UserName = userName.value;
+                newUser.Password = password.value;
+                newUser.First = fName.value;
+                newUser.Last = lName.value;
+                newUser.Role = role.value;
+                var userData = {
+                    TheUser: newUser,
+                    Email: email.value
+                };
+                var jsonString = JSON.stringify(userData);
+                if (role.value == "user"){
+                    //Create User
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/signUpUserUpdated', true);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.addEventListener('readystatechange', function(){
+                        if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                            var item = xhr.responseText;
+                            var successMSG = JSON.parse(item);
+                            if (successMSG.SuccessNum == 0){
+                                console.log("DEBUG: Successful User submission, going to main page.");
+                                window.location.replace("http://localhost:80");
+                            } else {
+                                console.log("DEBUG: Unsuccessful User submission: " + successMSG.Message);
+                                document.getElementById("informFormP").innerHTML = successMSG.Message;
+                                document.getElementById("informFormDiv").style.display = "block";
+                            }
+                        }
+                    });
+                    xhr.send(jsonString);
+                } else if (role.value == "admin") {
+                    alert("Standby future admin, we will be approving your login shortly!" +
+                    "\n" + "If you want to partially mess around with data, consider signing up as IT!\n" +
+                    "Please email jbkeller@gmail.com if you have any questions.");
+                } else if (role.value == "IT") {
+                    //Create User
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/signUpUserUpdated', true);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.addEventListener('readystatechange', function(){
+                        if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                            var item = xhr.responseText;
+                            var successMSG = JSON.parse(item);
+                            if (successMSG.SuccessNum == 0){
+                                console.log("DEBUG: Successful IT submission, going to main page.")
+                                window.location.replace("http://localhost:80");
+                            } else {
+                                console.log("DEBUG: Unsuccessful IT submission: " + successMSG.Message);
+                                document.getElementById("informFormP").innerHTML = successMSG.Message;
+                                document.getElementById("informFormDiv").style.display = "block";
+                            }
+                        }
+                    });
+                    xhr.send(jsonString);
+                } else {
+                    alert("Whoops, got the wrong value for our role part of the form.");
+                }
+        
         });
     </script>
 {{end}}

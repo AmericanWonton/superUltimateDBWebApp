@@ -18,12 +18,17 @@ import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
+	"gopkg.in/gomail.v2"
 
 	_ "github.com/go-mysql/errors"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/gorilla/mux"
 )
+
+/* INFORMATION FOR OUR EMAIL VARIABLES */
+var senderAddress string
+var senderPWord string
 
 //Here's our User struct
 type User struct {
@@ -330,10 +335,10 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 	fmt.Printf("Signup Endpoint Hit\n")
 }
 
+//Begins Sending Email to User and creates a User for database entry
 func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 	// process Ajax ping
 	if req.Method == http.MethodPost {
-		fmt.Println("DEBUG: We got the Ajax and are inserting the User.")
 		//Collect JSON from Postman or wherever
 		//Get the byte slice from the request body ajax
 		bs, err := ioutil.ReadAll(req.Body)
@@ -341,96 +346,150 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 			fmt.Println(err)
 		}
 
-		//Marshal it into our type
-		var postedUser User
-		json.Unmarshal(bs, &postedUser)
+		//Declare DataType from Ajax
+		type UserData struct {
+			TheUser User   `json:"TheUser"`
+			Email   string `json:"Email"`
+		}
+
+		//Marshal the user data into our type
+		var dataPosted UserData
+		json.Unmarshal(bs, &dataPosted)
+		//Set the User info
+		var postedUser User = dataPosted.TheUser
 		// get form values
 		username := postedUser.UserName
 		password := postedUser.Password
 		firstname := postedUser.First
 		lastname := postedUser.Last
 		role := postedUser.Role
-		// create session
-		uuidWithHyphen := uuid.New().String()
-		newCookie := &http.Cookie{
-			Name:  "session",
-			Value: uuidWithHyphen,
-		}
-		newCookie.MaxAge = sessionLength
-		http.SetCookie(w, newCookie)
-		dbSessions[newCookie.Value] = theSession{username, time.Now()}
-		// store user in dbUsers
-		//Make User and USERID
-		theID := randomIDCreation()
+		email := dataPosted.Email
+		/* ATTEMPT TO SEND EMAIL...IF IT FAILS, DO NOT CREATE USER */
+		goodEmailSend := signUpUserEmail(email, role, firstname, lastname)
+		if goodEmailSend == true {
+			// create session
+			uuidWithHyphen := uuid.New().String()
+			newCookie := &http.Cookie{
+				Name:  "session",
+				Value: uuidWithHyphen,
+			}
+			newCookie.MaxAge = sessionLength
+			http.SetCookie(w, newCookie)
+			dbSessions[newCookie.Value] = theSession{username, time.Now()}
+			// store user in dbUsers
+			//Make User and USERID
+			theID := randomIDCreation()
 
-		fmt.Println("DEBUG: Adding User data to SQL database")
-		//Add User to the SQL Database
-		bsString := []byte(password)                  //Encode Password
-		encodedString := hex.EncodeToString(bsString) //Encode Password Pt2
-		theTimeNow := time.Now()
-		var insertedUser User = User{
-			UserName:    username,
-			Password:    encodedString,
-			First:       firstname,
-			Last:        lastname,
-			Role:        role,
-			UserID:      theID,
-			DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
-			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
-		}
-		jsonValue, _ := json.Marshal(insertedUser)
-		response, err := http.Post("http://localhost:80/insertUser", "application/json", bytes.NewBuffer(jsonValue))
-		if err != nil {
-			fmt.Printf("The HTTP request failed with error %s\n", err)
+			fmt.Println("DEBUG: Adding User data to SQL database")
+			//Add User to the SQL Database
+			bsString := []byte(password)                  //Encode Password
+			encodedString := hex.EncodeToString(bsString) //Encode Password Pt2
+			theTimeNow := time.Now()
+			var insertedUser User = User{
+				UserName:    username,
+				Password:    encodedString,
+				First:       firstname,
+				Last:        lastname,
+				Role:        role,
+				UserID:      theID,
+				DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
+				DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+			}
+			jsonValue, _ := json.Marshal(insertedUser)
+			response, err := http.Post("http://localhost:80/insertUser", "application/json", bytes.NewBuffer(jsonValue))
+			if err != nil {
+				fmt.Printf("The HTTP request failed with error %s\n", err)
+			} else {
+				data, _ := ioutil.ReadAll(response.Body)
+				fmt.Println(string(data))
+			}
+
+			//Add User to MongoDB
+			fmt.Printf("DEBUG: Adding User to MongoDB\n")
+			var insertionUser AUser = AUser{
+				UserName:    username,
+				Password:    encodedString,
+				First:       firstname,
+				Last:        lastname,
+				Role:        role,
+				UserID:      theID,
+				DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
+				DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+				Hotdogs:     MongoHotDogs{},
+				Hamburgers:  MongoHamburgers{},
+			}
+			insertionUsers := TheUsers{
+				Users: []AUser{insertionUser},
+			}
+			jsonValue2, _ := json.Marshal(insertionUsers)
+			response2, err := http.Post("http://localhost:80/insertUsers", "application/json", bytes.NewBuffer(jsonValue2))
+			if err != nil {
+				fmt.Printf("The HTTP request failed with error %s\n", err)
+			} else {
+				data, _ := ioutil.ReadAll(response2.Body)
+				fmt.Println(string(data))
+			}
+			//DEBUG, don't know if we need below
+			var theUser = User{username, encodedString, firstname, lastname, role, theID, insertionUser.DateCreated,
+				insertionUser.DateUpdated}
+			dbUsers[username] = theUser
+			//Alert Ajax with success
+			type successMSG struct {
+				Message    string `json:"Message"`
+				SuccessNum int    `json:"SuccessNum"`
+			}
+			msgSuccess := successMSG{
+				Message:    "Added the new account!",
+				SuccessNum: 0,
+			}
+			theJSONMessage, err := json.Marshal(msgSuccess)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Fprint(w, string(theJSONMessage))
 		} else {
-			data, _ := ioutil.ReadAll(response.Body)
-			fmt.Println(string(data))
+			//Alert Ajax with failure
+			type successMSG struct {
+				Message    string `json:"Message"`
+				SuccessNum int    `json:"SuccessNum"`
+			}
+			msgSuccess := successMSG{
+				Message:    "Failed to send email and create User.",
+				SuccessNum: 1,
+			}
+			theJSONMessage, err := json.Marshal(msgSuccess)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Fprint(w, string(theJSONMessage))
 		}
-
-		//Add User to MongoDB
-		fmt.Printf("DEBUG: Adding User to MongoDB\n")
-		var insertionUser AUser = AUser{
-			UserName:    username,
-			Password:    encodedString,
-			First:       firstname,
-			Last:        lastname,
-			Role:        role,
-			UserID:      theID,
-			DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
-			DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
-			Hotdogs:     MongoHotDogs{},
-			Hamburgers:  MongoHamburgers{},
-		}
-		insertionUsers := TheUsers{
-			Users: []AUser{insertionUser},
-		}
-		jsonValue2, _ := json.Marshal(insertionUsers)
-		response2, err := http.Post("http://localhost:80/insertUsers", "application/json", bytes.NewBuffer(jsonValue2))
-		if err != nil {
-			fmt.Printf("The HTTP request failed with error %s\n", err)
-		} else {
-			data, _ := ioutil.ReadAll(response2.Body)
-			fmt.Println(string(data))
-		}
-
-		//DEBUG, don't know if we need below
-		var theUser = User{username, encodedString, firstname, lastname, role, theID, insertionUser.DateCreated,
-			insertionUser.DateUpdated}
-		dbUsers[username] = theUser
-		type successMSG struct {
-			Message    string `json:"Message"`
-			SuccessNum int    `json:"SuccessNum"`
-		}
-		msgSuccess := successMSG{
-			Message:    "Added the new account!",
-			SuccessNum: 0,
-		}
-		theJSONMessage, err := json.Marshal(msgSuccess)
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Fprint(w, string(theJSONMessage))
 	}
+}
+
+//Attempts to send an email to User
+func signUpUserEmail(theEmail string, theRole string, fName string, lName string) bool {
+	goodEmailSend := true
+	theMessage := "Hello " + fName + " " + lName + ", thank you for visiting my site!\n" +
+		"Please enjoy the new " + theRole + " role you created. Depending on that role, you might " +
+		"be limited to certain features. Be respectable and have fun!"
+	theSubject := "Welcome to SuperDBTester3000"
+
+	mailer := gomail.NewMessage()
+	mailer.SetHeader("From", senderAddress)
+	mailer.SetHeader("To", theEmail)
+	mailer.SetAddressHeader("Cc", senderAddress, "Joe")
+	mailer.SetHeader("Subject", theSubject)
+	mailer.SetBody("text/html", theMessage)
+	//m.Attach("furries.jpg")
+
+	c := gomail.NewDialer("smtp.gmail.com", 587, senderAddress, senderPWord)
+	// Send to me and User
+	if err := c.DialAndSend(mailer); err != nil {
+		fmt.Printf("We got an error dialing and sending: %v\n", err.Error())
+		goodEmailSend = false
+	}
+
+	return goodEmailSend
 }
 
 //mainPage
