@@ -1,4 +1,7 @@
 awsManagement.go
 project/awsManagement.go
 project/security/*.txt
+project/security/*.csv
+project/security/*.pem
 notes.txt
+security
