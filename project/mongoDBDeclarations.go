@@ -21,10 +21,11 @@ import (
 )
 
 var theContext context.Context
+var mongoURI string //Connection string loaded
 
 func connectDB() *mongo.Client {
 	//Setup Mongo connection to Atlas Cluster
-	theClient, err := mongo.NewClient(options.Client().ApplyURI("mongodb://bigjohnny:figleafs@superdbcluster-shard-00-00.kswud.mongodb.net:27017,superdbcluster-shard-00-01.kswud.mongodb.net:27017,superdbcluster-shard-00-02.kswud.mongodb.net:27017/superdbtest1?ssl=true&replicaSet=atlas-pvjlol-shard-0&authSource=admin&retryWrites=true&w=majority"))
+	theClient, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
 	if err != nil {
 		fmt.Printf("Errored getting mongo client: %v\n", err)
 		log.Fatal(err)

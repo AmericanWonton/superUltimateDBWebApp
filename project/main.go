@@ -562,7 +562,7 @@ func main() {
 	//logWriter("Deployed superUltimateDBWebApp app.")
 	//open SQL connection
 	db, err = sql.Open("mysql",
-		"joek1:fartghookthestrong69@tcp(food-database.cd8ujtto1hfj.us-east-2.rds.amazonaws.com)/food-database-schema?charset=utf8")
+		dbConnectString)
 	check(err)
 	defer db.Close()
 

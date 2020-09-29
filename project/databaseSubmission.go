@@ -15,6 +15,8 @@ import (
 const successMessage string = "Successful Insert"
 const failureMessage string = "Unsuccessful Insert"
 
+var dbConnectString string
+
 //POST hotdog, Mainpage
 func insertHotDog(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Inserting hotdog record.")
