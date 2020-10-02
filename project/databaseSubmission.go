@@ -482,6 +482,7 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 
 	//Determine if this is a hotdog or hamburger update
 	if thefoodUpdate.FoodType == "hotdog" {
+		fmt.Printf("DEBUG: Updating Hotdog for SQL\n")
 		var updatedHotdog Hotdog = thefoodUpdate.TheHotDog
 		/* CHECK TO SEE IF THE FIELDS ARE OKAY */
 		canPost := true
@@ -496,14 +497,14 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 		}
 		if canPost == true {
 			sqlStatement = "UPDATE hot_dogs SET TYPE=?, CONDIMENT=?, CALORIES=?," +
-				"NAME=?, PHOTO_ID=?, PHOTO_SRC=?, DATE_UPDATED=? WHERE FOOD_ID=?"
+				"NAME=?, USER_ID=?, PHOTO_ID=?, PHOTO_SRC=?, DATE_UPDATED=? WHERE FOOD_ID=?"
 
 			stmt, err := db.Prepare(sqlStatement)
 			check(err)
 			theTimeNow := time.Now()
 			r, err := stmt.Exec(updatedHotdog.HotDogType, updatedHotdog.Condiment,
-				updatedHotdog.Calories, updatedHotdog.Name, updatedHotdog.PhotoID,
-				updatedHotdog.PhotoSrc, updatedHotdog.UserID,
+				updatedHotdog.Calories, updatedHotdog.Name, updatedHotdog.UserID,
+				updatedHotdog.PhotoID, updatedHotdog.PhotoSrc,
 				theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID)
 			check(err)
 
@@ -524,6 +525,7 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 			fmt.Fprintln(w, 4)
 		}
 	} else if thefoodUpdate.FoodType == "hamburger" {
+		fmt.Printf("DEBUG: Updating Hamburger for SQL\n")
 		var updatedHamburger Hamburger = thefoodUpdate.TheHamburger
 		/* CHECK TO SEE IF THE FIELDS ARE OKAY */
 		canPost := true
@@ -538,13 +540,14 @@ func updateFood(w http.ResponseWriter, req *http.Request) {
 		}
 		if canPost == true {
 			sqlStatement = "UPDATE hamburgers SET TYPE=?, CONDIMENT=?, CALORIES=?," +
-				"NAME=?, PHOTO_ID=?, PHOTO_SRC=?, DATE_UPDATED=? WHERE FOOD_ID=?"
+				"NAME=?, USER_ID=?, PHOTO_ID=?, PHOTO_SRC=?, DATE_UPDATED=? WHERE FOOD_ID=?"
 
 			stmt, err := db.Prepare(sqlStatement)
 			check(err)
 			theTimeNow := time.Now()
 			r, err := stmt.Exec(updatedHamburger.BurgerType, updatedHamburger.Condiment,
-				updatedHamburger.Calories, updatedHamburger.Name, updatedHamburger.PhotoID,
+				updatedHamburger.Calories, updatedHamburger.Name, updatedHamburger.UserID,
+				updatedHamburger.PhotoID,
 				updatedHamburger.PhotoSrc,
 				theTimeNow.Format("2006-01-02 15:04:05"), updatedHamburger.FoodID)
 			check(err)

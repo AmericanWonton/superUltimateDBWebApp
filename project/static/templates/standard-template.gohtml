@@ -92,8 +92,9 @@
 {{define "signup-form"}}
     <div id="divform">
         <form id="signup-form"
+        name="signup-form"
         action=""
-        method=""
+        method="GET"
         onload="">
             <input type="text" id="username" name="username" placeholder="username" minlength=1 maxlength=20 required><br>
             <p id="form-input-info">Username taken or not entered!</p>
@@ -110,7 +111,7 @@
                 <option value="admin">admin</option>
                 <option value="IT">IT</option>
             </select>
-            <input id="submit_button" type="submit">
+            <input id="submit_button" name="submit_button" type="button" value="SUBMIT">
             <div id="informFormDiv" hidden>
                 <p id="informFormP">
 
@@ -259,6 +260,7 @@
                     TheUser: newUser,
                     Email: email.value
                 };
+                console.log("DEBUG: About to evaluate which role to send email to");
                 var jsonString = JSON.stringify(userData);
                 if (role.value == "user"){
                     //Create User
@@ -271,7 +273,7 @@
                             var successMSG = JSON.parse(item);
                             if (successMSG.SuccessNum == 0){
                                 console.log("DEBUG: Successful User submission, going to main page.");
-                                window.location.replace("http://localhost:80");
+                                window.location = "http://localhost:80";
                             } else {
                                 console.log("DEBUG: Unsuccessful User submission: " + successMSG.Message);
                                 document.getElementById("informFormP").innerHTML = successMSG.Message;
@@ -295,7 +297,7 @@
                             var successMSG = JSON.parse(item);
                             if (successMSG.SuccessNum == 0){
                                 console.log("DEBUG: Successful IT submission, going to main page.")
-                                window.location.replace("http://localhost:80");
+                                window.location = "http://localhost:80";
                             } else {
                                 console.log("DEBUG: Unsuccessful IT submission: " + successMSG.Message);
                                 document.getElementById("informFormP").innerHTML = successMSG.Message;
@@ -354,65 +356,69 @@
         
         <br><br>
         <p class="actionInstructionText">Okay User, what data would you like to read/make?</p>
-        <br>
+        <br> 
         {{/* See food section...maybe update it too */}}
-        <button id="actionInstructionButton">
-            SEE MY FOOD
-        </button>
-        <button id="actionInstructionButton2">
-            Hide food
-        </button>
-        <div id="foodSeer">
-            <div id="foodUpdater">
-                <select name="foodChoice" id="foodChoice">
-                    <option value="hotdog">hotdog</option>
-                    <option value="hamburger">hamburger</option>
-                </select>
-                <input type="number" id="foodID" name="foodID" placeholder="foodID Number" minlength=1 maxlength=20>
-                <input type="text" id="foodType" name="foodType" placeholder="foodType" minlength=1 maxlength=48>
-                <input type="text" id="condimentType" name="condimentType" placeholder="condiments" minlength=1 maxlength=48>
-                <input type="number" id="calories" name="calories" placeholder="calories" minlength=1 maxlength=8>
-                <input type="text" id="foodName" name="foodName" placeholder="foodName" minlength=1 maxlength=48>
-                <div id="photo_updater">
-                    <p>Update Photo: </p>
-                    <form id="photo-update-form" enctype="multipart/form-data" method="POST" onload=""
-                    action="http://localhost:80/fileUpdate">
-                        <input id="photo-update-input" type="file" name="photo-update-input">
-                        <input id="hiddenFoodID" type="hidden" name="hiddenFoodID">
-                        <input id="hiddenUserID" type="hidden" name="hiddenUserID">
-                        <input id="hiddenCurrentSRC" type="hidden" name="hiddenCurrentSRC">
-                        <input id="hiddenPhotoID" type="hidden" name="hiddenPhotoID">
-                        <input id="hiddenFoodType" type="hidden" name="hiddenFoodType">
-                    </form>
-                <div>
-                <button id="food_UpdateBtn">
-                    Update Food
-                </button>
-                <button id="food_deleteBtn">
-                    Delete food
-                </button>
-            </div>
-            <div id="hamSeer">
+        <div id="foodSeeSectionDiv">
+            <button id="actionInstructionButton">
+                SEE MY FOOD
+            </button>
+            <button id="actionInstructionButton2">
+                Hide food
+            </button>
+            <div id="foodSeer">
+                <div id="foodUpdater">
+                    <select name="foodChoice" id="foodChoice">
+                        <option value="hotdog">hotdog</option>
+                        <option value="hamburger">hamburger</option>
+                    </select>
+                    <input type="number" id="foodID" name="foodID" placeholder="foodID Number" minlength=1 maxlength=20>
+                    <input type="text" id="foodType" name="foodType" placeholder="foodType" minlength=1 maxlength=48>
+                    <input type="text" id="condimentType" name="condimentType" placeholder="condiments" minlength=1 maxlength=48>
+                    <input type="number" id="calories" name="calories" placeholder="calories" minlength=1 maxlength=8>
+                    <input type="text" id="foodName" name="foodName" placeholder="foodName" minlength=1 maxlength=48>
+                    <div id="photo_updater">
+                        <p>Update Photo: </p>
+                        <form id="photo-update-form" enctype="multipart/form-data" method="POST" onload=""
+                        action="http://localhost:80/fileUpdate">
+                            <input id="photo-update-input" type="file" name="photo-update-input">
+                            <input id="hiddenFoodID" type="hidden" name="hiddenFoodID">
+                            <input id="hiddenUserID" type="hidden" name="hiddenUserID">
+                            <input id="hiddenCurrentSRC" type="hidden" name="hiddenCurrentSRC">
+                            <input id="hiddenPhotoID" type="hidden" name="hiddenPhotoID">
+                            <input id="hiddenFoodType" type="hidden" name="hiddenFoodType">
+                        </form>
+                    <div>
+                    <button id="food_UpdateBtn">
+                        Update Food
+                    </button>
+                    <button id="food_deleteBtn">
+                        Delete food
+                    </button>
+                </div>
+                <div id="hamSeer">
 
-            </div>
-            <div id="hdogSeer">
+                </div>
+                <div id="hdogSeer">
 
+                </div>
             </div>
         </div>
         {{/* Make food section */}}
-        <p class="actionInstructionText">MAKE FOOD</p>
-        <br>
-        <button id="actionChoice" onclick="revealFoodForm(0)">
-            MAKE HOTDOG
-        </button>
-        <br>
-        <button id="actionChoice" onclick="revealFoodForm(1)">
-            MAKE HAMBURGER
-        </button>
-        <div id="foodFormDiv">
-            
+        <div id="foodMakeSectionDiv">
+            <p class="actionInstructionText">MAKE FOOD</p>
+            <br>
+            <button id="actionChoice" onclick="revealFoodForm(0)">
+                MAKE HOTDOG
+            </button>
+            <br>
+            <button id="actionChoice" onclick="revealFoodForm(1)">
+                MAKE HAMBURGER
+            </button>
+            <div id="foodFormDiv">
+                
+            </div>
+            <br>
         </div>
-        <br>  
     </div>
     {{/* Javascript event Buttons */}}
     <script type="text/javascript">
