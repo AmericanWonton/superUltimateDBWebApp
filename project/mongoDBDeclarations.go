@@ -1028,7 +1028,7 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 		for curPics.Next(theContext) {
 			// create a value into which the single document can be decoded
 			var aPic UserPhoto
-			err := curHam.Decode(&aPic)
+			err := curPics.Decode(&aPic)
 			if err != nil {
 				fmt.Printf("Error decoding pictures in MongoDB for this User, %v: %v\n", theUser.UserID, err.Error())
 				logWriter("Error decoding pictures in MongoDB: " + err.Error())
@@ -1125,7 +1125,7 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 		for curPics.Next(theContext) {
 			// create a value into which the single document can be decoded
 			var aPic UserPhoto
-			err := curHam.Decode(&aPic)
+			err := curPics.Decode(&aPic)
 			if err != nil {
 				fmt.Printf("Error decoding pictures in MongoDB for this User, %v: %v\n", theUser.UserID, err.Error())
 				logWriter("Error decoding pictures in MongoDB: " + err.Error())

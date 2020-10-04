@@ -223,7 +223,7 @@
 #udcFieldInfoTxtDiv {
     /* Flex-box formatting */
     display: flex;
-    flex-flow: wrap;
+    /*flex-flow: wrap; */
     justify-content: center;
     align-content: center;
     align-items: center;
@@ -253,8 +253,8 @@
 }
 
 #udfcFeildInfoPic{
-    width: 3vw;
-    height: 3vh;
+    width: 15vw;
+    height: 15vh;
 }
 
 #udcfText {

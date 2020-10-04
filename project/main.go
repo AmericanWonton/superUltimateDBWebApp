@@ -10,6 +10,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"net/smtp"
 	"strings"
 	"sync"
 	"text/template"
@@ -18,7 +19,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
-	"gopkg.in/gomail.v2"
 
 	_ "github.com/go-mysql/errors"
 	_ "github.com/go-sql-driver/mysql"
@@ -482,20 +482,19 @@ func signUpUserEmail(theEmail string, theRole string, fName string, lName string
 		"be limited to certain features. Be respectable and have fun!"
 	theSubject := "Welcome to SuperDBTester3000"
 
-	mailer := gomail.NewMessage()
-	mailer.SetHeader("From", senderAddress)
-	mailer.SetHeader("To", theEmail)
-	mailer.SetAddressHeader("Cc", senderAddress, "Joe")
-	mailer.SetHeader("Subject", theSubject)
-	mailer.SetBody("text/html", theMessage)
-	//m.Attach("furries.jpg")
-
-	c := gomail.NewDialer("smtp.gmail.com", 587, senderAddress, senderPWord)
-	// Send to me and User
-	if err := c.DialAndSend(mailer); err != nil {
-		fmt.Printf("We got an error dialing and sending: %v\n", err.Error())
-		goodEmailSend = false
+	toEmail := theEmail
+	fromEmail := senderAddress
+	password := senderPWord
+	subjectBody := "Subject: " + theSubject + "\n\n" + theMessage
+	status := smtp.SendMail("smtp.gmail.com:587", smtp.PlainAuth("", fromEmail, password, "smtp.gmail.com"), fromEmail, []string{toEmail}, []byte(subjectBody))
+	if status != nil {
+		errMSG := "Error sending mail from SMTP Server: " + status.Error()
+		logWriter(errMSG)
+		fmt.Println(errMSG)
 	}
+	goodMSG := "Email sent successfully to " + toEmail + "!"
+	logWriter(goodMSG)
+	fmt.Println(goodMSG)
 
 	return goodEmailSend
 }
