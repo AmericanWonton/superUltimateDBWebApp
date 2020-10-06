@@ -10,7 +10,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"net/smtp"
 	"strings"
 	"sync"
 	"text/template"
@@ -229,6 +228,7 @@ func init() {
 	template1 = template.Must(template.ParseGlob("./static/templates/*"))
 	//AmazonCredentialRead
 	getCreds()
+	OAuthGmailService() //Initialize Gmail Services
 }
 
 // Handle Errors
@@ -472,31 +472,6 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 			fmt.Fprint(w, string(theJSONMessage))
 		}
 	}
-}
-
-//Attempts to send an email to User
-func signUpUserEmail(theEmail string, theRole string, fName string, lName string) bool {
-	goodEmailSend := true
-	theMessage := "Hello " + fName + " " + lName + ", thank you for visiting my site!\n" +
-		"Please enjoy the new " + theRole + " role you created. Depending on that role, you might " +
-		"be limited to certain features. Be respectable and have fun!"
-	theSubject := "Welcome to SuperDBTester3000"
-
-	toEmail := theEmail
-	fromEmail := senderAddress
-	password := senderPWord
-	subjectBody := "Subject: " + theSubject + "\n\n" + theMessage
-	status := smtp.SendMail("smtp.gmail.com:587", smtp.PlainAuth("", fromEmail, password, "smtp.gmail.com"), fromEmail, []string{toEmail}, []byte(subjectBody))
-	if status != nil {
-		errMSG := "Error sending mail from SMTP Server: " + status.Error()
-		logWriter(errMSG)
-		fmt.Println(errMSG)
-	}
-	goodMSG := "Email sent successfully to " + toEmail + "!"
-	logWriter(goodMSG)
-	fmt.Println(goodMSG)
-
-	return goodEmailSend
 }
 
 //mainPage
