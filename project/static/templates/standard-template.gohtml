@@ -272,8 +272,9 @@
                             var item = xhr.responseText;
                             var successMSG = JSON.parse(item);
                             if (successMSG.SuccessNum == 0){
+                                var redirectStr = successMSG.RedirectURL
                                 console.log("DEBUG: Successful User submission, going to main page.");
-                                window.location = "http://localhost:80";
+                                window.location = redirectStr; //Can be used with localhost
                             } else {
                                 console.log("DEBUG: Unsuccessful User submission: " + successMSG.Message);
                                 document.getElementById("informFormP").innerHTML = successMSG.Message;
@@ -296,8 +297,9 @@
                             var item = xhr.responseText;
                             var successMSG = JSON.parse(item);
                             if (successMSG.SuccessNum == 0){
+                                var redirectStr = successMSG.RedirectURL
                                 console.log("DEBUG: Successful IT submission, going to main page.")
-                                window.location = "http://localhost:80";
+                                window.location = redirectStr; //Can be used with localhost
                             } else {
                                 console.log("DEBUG: Unsuccessful IT submission: " + successMSG.Message);
                                 document.getElementById("informFormP").innerHTML = successMSG.Message;

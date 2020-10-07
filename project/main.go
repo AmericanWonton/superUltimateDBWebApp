@@ -437,23 +437,26 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 			//Alert Ajax with success
 
 			type successMSG struct {
-				Message    string `json:"Message"`
-				SuccessNum int    `json:"SuccessNum"`
+				Message     string `json:"Message"`
+				SuccessNum  int    `json:"SuccessNum"`
+				RedirectURL string `json:"RedirectURL"`
 			}
 			msgSuccess := successMSG{
-				Message:    "Added the new account!",
-				SuccessNum: 0,
+				Message:     "Added the new account!",
+				SuccessNum:  0,
+				RedirectURL: "http://3.137.207.149:80",
 			}
+
 			theJSONMessage, err := json.Marshal(msgSuccess)
 			if err != nil {
 				fmt.Println(err)
 			}
+
 			fmt.Printf("DEBUG: Writing back successful User response.\n")
 			fmt.Fprint(w, string(theJSONMessage))
 
 			/* EVERY CHECK FOR CREATING A USER IS SUCCESSFUL. REDIRECT TO THE HOMEPAGE */
 			fmt.Printf("DEBUG: SHOULD BE REDIRECTING NOW...\n")
-			//http.Redirect(w, req, "http://localhost:80", http.StatusSeeOther)
 		} else {
 			fmt.Printf("DEBUG: YOU FAILED TO CREATE USER\n")
 			//Alert Ajax with failure
