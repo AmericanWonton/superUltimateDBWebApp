@@ -296,7 +296,6 @@ func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 				}
 				fmt.Fprintf(w, string(dataJSON))
 			} else {
-
 				foundUser.Hamburgers.Hamburgers = append(foundUser.Hamburgers.Hamburgers, mongoHamburgerInsert)
 				successfulUserInsert := updateUser(foundUser) //Update this User with the new Hotdog Array
 				if successfulUserInsert == true {

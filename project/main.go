@@ -25,6 +25,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//Information for serving files/testing
+var serverAddress string
+
 /* INFORMATION FOR OUR EMAIL VARIABLES */
 var senderAddress string
 var senderPWord string
@@ -397,7 +400,7 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 				DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 			}
 			jsonValue, _ := json.Marshal(insertedUser)
-			response, err := http.Post("http://localhost:80/insertUser", "application/json", bytes.NewBuffer(jsonValue))
+			response, err := http.Post("http://"+serverAddress+"/insertUser", "application/json", bytes.NewBuffer(jsonValue))
 			if err != nil {
 				fmt.Printf("The HTTP request failed with error %s\n", err)
 			} else {
@@ -423,7 +426,7 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 				Users: []AUser{insertionUser},
 			}
 			jsonValue2, _ := json.Marshal(insertionUsers)
-			response2, err := http.Post("http://localhost:80/insertUsers", "application/json", bytes.NewBuffer(jsonValue2))
+			response2, err := http.Post("http://"+serverAddress+"/insertUsers", "application/json", bytes.NewBuffer(jsonValue2))
 			if err != nil {
 				fmt.Printf("The HTTP request failed with error %s\n", err)
 			} else {
@@ -444,7 +447,7 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 			msgSuccess := successMSG{
 				Message:     "Added the new account!",
 				SuccessNum:  0,
-				RedirectURL: "http://3.137.207.149:80",
+				RedirectURL: "http://" + serverAddress,
 			}
 
 			theJSONMessage, err := json.Marshal(msgSuccess)
@@ -538,6 +541,9 @@ func handleRequests() {
 	//Serve our static files
 	myRouter.Handle("/", http.FileServer(http.Dir("./static")))
 	myRouter.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+	//Serve the Amazon files
+	myRouter.Handle("/", http.FileServer(http.Dir("./amazonimages")))
+	myRouter.PathPrefix("/amazonimages/").Handler(http.StripPrefix("/amazonimages/", http.FileServer(http.Dir("./amazonimages"))))
 	log.Fatal(http.ListenAndServe(":80", myRouter))
 }
 

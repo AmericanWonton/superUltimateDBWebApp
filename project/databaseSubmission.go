@@ -802,7 +802,7 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 				&theHotDog.PhotoID, &theHotDog.PhotoSrc, &theHotDog.DateCreated, &theHotDog.DateUpdated)
 			check(err)
 			theHotDog.PhotoID = photoid
-			newLink := filepath.Join("static", "images", link)
+			newLink := filepath.Join("amazonimages", "pictures", link)
 			theLink := urlFixer(newLink)
 			theHotDog.PhotoSrc = theLink
 			theHotDog.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
@@ -816,7 +816,7 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 			TheHotDog:    theHotDog,
 		}
 		jsonValue, _ := json.Marshal(hotDogUpdate)
-		response, err := http.Post("http://localhost:80/updateFood", "application/json", bytes.NewBuffer(jsonValue))
+		response, err := http.Post("http://"+serverAddress+"/updateFood", "application/json", bytes.NewBuffer(jsonValue))
 		if err != nil {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
 			successfulInsert = false
@@ -859,7 +859,7 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 				&theHamb.PhotoID, &theHamb.PhotoSrc, &theHamb.DateCreated, &theHamb.DateUpdated)
 			check(err)
 			theHamb.PhotoID = photoid
-			newLink := filepath.Join("static", "images", link)
+			newLink := filepath.Join("amazonimages", "pictures", link)
 			theLink := urlFixer(newLink)
 			theHamb.PhotoSrc = theLink
 			theHamb.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
@@ -873,7 +873,7 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 			TheHotDog:    Hotdog{},
 		}
 		jsonValue, _ := json.Marshal(hamUpdate)
-		response, err := http.Post("http://localhost:80/updateFood", "application/json", bytes.NewBuffer(jsonValue))
+		response, err := http.Post("http://"+serverAddress+"/updateFood", "application/json", bytes.NewBuffer(jsonValue))
 		if err != nil {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
 			successfulInsert = false

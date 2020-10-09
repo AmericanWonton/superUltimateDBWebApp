@@ -1037,12 +1037,12 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 			if strings.Contains(aPic.FoodType, "HOTDOG") {
 				fmt.Printf("DEBUG: Adding a hotdog to the returned pic list.\n")
 				returnedHDogPics = append(returnedHDogPics, aPic)
-				filePath := filepath.Join("static", "images", aPic.Link)
+				filePath := filepath.Join("amazonimages", "pictures", aPic.Link)
 				returnedHDogLink = append(returnedHDogLink, filePath)
 			} else if strings.Contains(aPic.FoodType, "HAMBURGER") {
 				fmt.Printf("DEBUG: Adding a hamburger to the returned pic list.\n")
 				returnedHamPics = append(returnedHamPics, aPic)
-				filePath := filepath.Join("static", "images", aPic.Link)
+				filePath := filepath.Join("amazonimages", "pictures", aPic.Link)
 				returnedHamLink = append(returnedHamLink, filePath)
 			} else {
 				fmt.Printf("Error assigning picture to hamburger/hotdogs. FoodType is: %v\n", aPic.FoodType)
@@ -1134,12 +1134,12 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 			if strings.Contains(aPic.FoodType, "HOTDOG") {
 				fmt.Printf("DEBUG: Adding a hotdog to the returned pic list.\n")
 				returnedHDogPics = append(returnedHDogPics, aPic)
-				filePath := filepath.Join("static", "images", aPic.Link)
+				filePath := filepath.Join("amazonimages", "pictures", aPic.Link)
 				returnedHDogLink = append(returnedHDogLink, filePath)
 			} else if strings.Contains(aPic.FoodType, "HAMBURGER") {
 				fmt.Printf("DEBUG: Adding a hamburger to the returned pic list.\n")
 				returnedHamPics = append(returnedHamPics, aPic)
-				filePath := filepath.Join("static", "images", aPic.Link)
+				filePath := filepath.Join("amazonimages", "pictures", aPic.Link)
 				returnedHamLink = append(returnedHamLink, filePath)
 			} else {
 				fmt.Printf("Error assigning picture to hamburger/hotdogs. FoodType is: %v\n", aPic.FoodType)
@@ -1213,6 +1213,7 @@ func sortFoodArray(foodArray []string) string {
 }
 
 /********* AMAZON QUERIES **********/
+
 //Insert Photo into DB
 func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fileType string, size int64,
 	photoHash string, link string, foodType string, dateCreated string, dateUpdated string) bool {
@@ -1279,7 +1280,7 @@ func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fil
 				TheHamburger Hamburger `json:"TheHamburger"`
 				TheHotDog    Hotdog    `json:"TheHotDog"`
 			}
-			newLink := filepath.Join("static", "images", link)
+			newLink := filepath.Join("amazonimages", link)
 			fixedLink := urlFixer(newLink)
 			aHotDog := Hotdog{
 				HotDogType:  aHotDogMongo.HotDogType,
@@ -1300,7 +1301,7 @@ func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fil
 				TheHotDog:    aHotDog,
 			}
 			jsonValue, _ := json.Marshal(hDogUpdate)
-			response, err := http.Post("http://localhost:80/foodUpdateMongo",
+			response, err := http.Post("http://"+serverAddress+"/foodUpdateMongo",
 				"application/json", bytes.NewBuffer(jsonValue))
 			if err != nil {
 				fmt.Printf("The HTTP request failed with error %s\n", err)
@@ -1369,7 +1370,7 @@ func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fil
 				TheHamburger Hamburger `json:"TheHamburger"`
 				TheHotDog    Hotdog    `json:"TheHotDog"`
 			}
-			newLink := filepath.Join("static", "images", link)
+			newLink := filepath.Join("amazonimages", link)
 			fixedLink := urlFixer(newLink)
 			aHam := Hamburger{
 				BurgerType:  aHamMongo.BurgerType,
@@ -1390,7 +1391,7 @@ func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fil
 				TheHotDog:    Hotdog{},
 			}
 			jsonValue, _ := json.Marshal(hamUpdate)
-			response, err := http.Post("http://localhost:80/foodUpdateMongo",
+			response, err := http.Post("http://"+serverAddress+"/foodUpdateMongo",
 				"application/json", bytes.NewBuffer(jsonValue))
 			if err != nil {
 				fmt.Printf("The HTTP request failed with error %s\n", err)
