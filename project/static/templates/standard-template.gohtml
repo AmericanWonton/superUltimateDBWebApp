@@ -2174,7 +2174,30 @@
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
-                                
+                                //Create Photo Section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "Hotdog Photo";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udfcPic = document.createElement("img");
+                                udfcPic.setAttribute("id", "udfcFeildInfoPic");
+                                var photoThere = srcChecker(aHamburger, dataOBJ.TheHotDogs[i], 1); //Check to see if photo exists
+                                if (photoThere == true){
+                                    console.log("We found the source: " + dataOBJ.TheHotDogs[i].PhotoSrc); //DEBUG
+                                    udfcPic.src = String(dataOBJ.TheHotDogs[i].PhotoSrc);
+                                    udfcPic.setAttribute("alt", "Food Pic: " + dataOBJ.TheHotDogs[i].PhotoSrc);
+                                } else {
+                                    console.log("Source not found: " + dataOBJ.TheHotDogs[i].PhotoSrc);
+                                    udfcPic.setAttribute("src", "static/images/png/Photo-Unavailable.png");
+                                    udfcPic.setAttribute("alt", "Food Pic Not Found.");
+                                }
+                                udcFieldInfoTxtDiv.appendChild(udfcPic); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
                                 //Create DateCreated info section
                                 var udcFieldInfoTxtDiv = document.createElement("div");

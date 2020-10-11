@@ -188,7 +188,6 @@ func logWriter(logMessage string) {
 
 		log.Println(logMessage)
 	*/
-	fmt.Printf("DEBUG: Writing the following message in logwriter\n\n%v\n", logMessage)
 }
 
 /* FUNCMAP DEFINITION */

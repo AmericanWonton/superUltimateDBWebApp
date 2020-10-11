@@ -1034,15 +1034,15 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 				logWriter("Error decoding pictures in MongoDB: " + err.Error())
 			}
 			//Determine if this is a hotdog or hamburger pic then add the appropriate links
-			if strings.Contains(aPic.FoodType, "HOTDOG") {
+			if strings.Contains(strings.ToUpper(aPic.FoodType), "HOTDOG") {
 				fmt.Printf("DEBUG: Adding a hotdog to the returned pic list.\n")
 				returnedHDogPics = append(returnedHDogPics, aPic)
-				filePath := filepath.Join("amazonimages", "pictures", aPic.Link)
+				filePath := filepath.Join(aPic.Link)
 				returnedHDogLink = append(returnedHDogLink, filePath)
-			} else if strings.Contains(aPic.FoodType, "HAMBURGER") {
+			} else if strings.Contains(strings.ToUpper(aPic.FoodType), "HAMBURGER") {
 				fmt.Printf("DEBUG: Adding a hamburger to the returned pic list.\n")
 				returnedHamPics = append(returnedHamPics, aPic)
-				filePath := filepath.Join("amazonimages", "pictures", aPic.Link)
+				filePath := filepath.Join(aPic.Link)
 				returnedHamLink = append(returnedHamLink, filePath)
 			} else {
 				fmt.Printf("Error assigning picture to hamburger/hotdogs. FoodType is: %v\n", aPic.FoodType)
@@ -1131,15 +1131,15 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 				logWriter("Error decoding pictures in MongoDB: " + err.Error())
 			}
 			//Determine if this is a hotdog or hamburger pic then add the appropriate links
-			if strings.Contains(aPic.FoodType, "HOTDOG") {
+			if strings.Contains(strings.ToUpper(aPic.FoodType), "HOTDOG") {
 				fmt.Printf("DEBUG: Adding a hotdog to the returned pic list.\n")
 				returnedHDogPics = append(returnedHDogPics, aPic)
-				filePath := filepath.Join("amazonimages", "pictures", aPic.Link)
+				filePath := filepath.Join("amazonimages", aPic.Link)
 				returnedHDogLink = append(returnedHDogLink, filePath)
-			} else if strings.Contains(aPic.FoodType, "HAMBURGER") {
+			} else if strings.Contains(strings.ToUpper(aPic.FoodType), "HAMBURGER") {
 				fmt.Printf("DEBUG: Adding a hamburger to the returned pic list.\n")
 				returnedHamPics = append(returnedHamPics, aPic)
-				filePath := filepath.Join("amazonimages", "pictures", aPic.Link)
+				filePath := filepath.Join("amazonimages", aPic.Link)
 				returnedHamLink = append(returnedHamLink, filePath)
 			} else {
 				fmt.Printf("Error assigning picture to hamburger/hotdogs. FoodType is: %v\n", aPic.FoodType)
