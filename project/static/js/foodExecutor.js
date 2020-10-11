@@ -65,10 +65,7 @@ function revealFoodForm(foodChoice) {
         hiddenFoodNum.setAttribute("name", "hiddenFoodNum");
         /* Add input to the above form for document selection */
         documentForm.appendChild(docButtonInput);
-
-        var submitButton = document.createElement("button");
-        submitButton.setAttribute("id", "submitButton");
-        submitButton.innerHTML = "SUBMIT";
+        //documentForm.appendChild(hiddenFoodNum); Don't append unless food API is successful
         var submitButton = document.createElement("button");
         submitButton.setAttribute("id", "submitButton");
         submitButton.innerHTML = "SUBMIT";
@@ -171,9 +168,9 @@ function revealFoodForm(foodChoice) {
         theDiv.appendChild(condimentInstruction);
         theDiv.appendChild(hDogType);
         theDiv.appendChild(condimentType);
-        theDiv.appendChild(documentForm);
         theDiv.appendChild(caloriesType);
         theDiv.appendChild(nameType);
+        theDiv.appendChild(documentForm);
         theDiv.appendChild(submitButton);
         //Dispaly the form to click on
         theDiv.style.display = "block";
@@ -378,6 +375,32 @@ function revealFoodForm(foodChoice) {
         userIDInput.setAttribute("maxlength", 8);
         userIDInput.setAttribute("name", "userIDInput");
         userIDInput.setAttribute("placeholder", "userID");
+        /* Create Picture Form */
+        var documentForm = document.createElement("form");
+        documentForm.setAttribute("id", "submit-picture-form");
+        documentForm.setAttribute("enctype", "multipart/form-data");
+        documentForm.setAttribute("action", "http://localhost:80/fileInsert");
+        documentForm.setAttribute("method", "POST");
+        documentForm.setAttribute("onload", "");
+        var docButtonInput = document.createElement("input");
+        docButtonInput.setAttribute("id", "docButtonInput");
+        docButtonInput.setAttribute("name", "newFile");
+        docButtonInput.setAttribute("type", "file");
+        var hiddenUserNum = document.createElement("input");
+        hiddenUserNum.setAttribute("type", "hidden");
+        hiddenUserNum.setAttribute("id", "hiddenUserNum");
+        hiddenUserNum.setAttribute("name", "hiddenUserNum");
+        var hiddenFoodType = document.createElement("input");
+        hiddenFoodType.setAttribute("type", "hidden");
+        hiddenFoodType.setAttribute("id", "hiddenFoodType");
+        hiddenFoodType.setAttribute("name", "hiddenFoodType");
+        var hiddenFoodNum = document.createElement("input");
+        hiddenFoodNum.setAttribute("type", "hidden");
+        hiddenFoodNum.setAttribute("id", "hiddenFoodNum");
+        hiddenFoodNum.setAttribute("name", "hiddenFoodNum");
+        /* Add input to the above form for document selection */
+        documentForm.appendChild(docButtonInput);
+        //documentForm.appendChild(hiddenFoodNum); Don't append unless food API is successful
         var submitButton = document.createElement("button");
         submitButton.setAttribute("id", "submitButton");
         submitButton.innerHTML = "SUBMIT";
@@ -438,9 +461,15 @@ function revealFoodForm(foodChoice) {
                         caloriesType.value = "";
                         nameType.value = "";
                         userIDInput.value = "";
-                        alert("Hotdog submitted successfully!")
+                        hiddenFoodType.setAttribute("value", "HOTDOG");
+                        hiddenFoodNum.setAttribute("value", Number(dataReturned.ReturnedHotDog.FoodID));
+                        hiddenUserNum.setAttribute("value", Number(dataReturned.ReturnedHotDog.UserID));
+                        documentForm.appendChild(hiddenFoodType);
+                        documentForm.appendChild(hiddenUserNum);
+                        documentForm.appendChild(hiddenFoodNum);
+                        pictureSubmit(documentForm);
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
+                        alert("Hotdog submitted successfully!")
                     } else if (dataReturned.SuccessBool === false){
                         var foulLanguage = dataReturned.SuccessMsg.includes("foul language");
                         if (foulLanguage == true){
@@ -481,6 +510,7 @@ function revealFoodForm(foodChoice) {
         theDiv.appendChild(caloriesType);
         theDiv.appendChild(nameType);
         theDiv.appendChild(userIDInput);
+        theDiv.appendChild(documentForm);
         theDiv.appendChild(submitButton);
         //Dispaly the form to click on
         theDiv.style.display = "block";
@@ -521,6 +551,32 @@ function revealFoodForm(foodChoice) {
         userIDInput.setAttribute("maxlength", 8);
         userIDInput.setAttribute("name", "userIDInput");
         userIDInput.setAttribute("placeholder", "userID");
+        /* Create Picture Form */
+        var documentForm = document.createElement("form");
+        documentForm.setAttribute("id", "submit-picture-form");
+        documentForm.setAttribute("enctype", "multipart/form-data");
+        documentForm.setAttribute("action", "http://localhost:80/fileInsert");
+        documentForm.setAttribute("method", "POST");
+        documentForm.setAttribute("onload", "");
+        var docButtonInput = document.createElement("input");
+        docButtonInput.setAttribute("id", "docButtonInput");
+        docButtonInput.setAttribute("name", "newFile");
+        docButtonInput.setAttribute("type", "file");
+        var hiddenUserNum = document.createElement("input");
+        hiddenUserNum.setAttribute("type", "hidden");
+        hiddenUserNum.setAttribute("id", "hiddenUserNum");
+        hiddenUserNum.setAttribute("name", "hiddenUserNum");
+        var hiddenFoodType = document.createElement("input");
+        hiddenFoodType.setAttribute("type", "hidden");
+        hiddenFoodType.setAttribute("id", "hiddenFoodType");
+        hiddenFoodType.setAttribute("name", "hiddenFoodType");
+        var hiddenFoodNum = document.createElement("input");
+        hiddenFoodNum.setAttribute("type", "hidden");
+        hiddenFoodNum.setAttribute("id", "hiddenFoodNum");
+        hiddenFoodNum.setAttribute("name", "hiddenFoodNum");
+        /* Add input to the above form for document selection */
+        documentForm.appendChild(docButtonInput);
+        //documentForm.appendChild(hiddenFoodNum); Don't append unless food API is successful
         var submitButton = document.createElement("button");
         submitButton.setAttribute("id", "submitButton");
         submitButton.innerHTML = "SUBMIT";
@@ -581,9 +637,16 @@ function revealFoodForm(foodChoice) {
                         caloriesType.value = "";
                         nameType.value = "";
                         userIDInput.value = "";
-                        alert("Hamburger submitted successfully!")
+                        //Add Photo
+                        hiddenFoodType.setAttribute("value", "HAMBURGER");
+                        hiddenFoodNum.setAttribute("value", Number(dataReturned.ReturnedHamburger.FoodID));
+                        hiddenUserNum.setAttribute("value", Number(dataReturned.ReturnedHamburger.UserID));
+                        documentForm.appendChild(hiddenFoodType);
+                        documentForm.appendChild(hiddenUserNum);
+                        documentForm.appendChild(hiddenFoodNum);
+                        pictureSubmit(documentForm);
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
+                        alert("Hamburger submitted successfully!");
                     } else if (dataReturned.SuccessBool === false){
                         var foulLanguage = dataReturned.SuccessMsg.includes("foul language");
                         if (foulLanguage == true){
@@ -624,6 +687,7 @@ function revealFoodForm(foodChoice) {
         theDiv.appendChild(caloriesType);
         theDiv.appendChild(nameType);
         theDiv.appendChild(userIDInput);
+        theDiv.appendChild(documentForm);
         theDiv.appendChild(submitButton);
         //Dispaly the form to click on
         theDiv.style.display = "block";

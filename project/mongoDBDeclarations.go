@@ -1221,7 +1221,7 @@ func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fil
 	fmt.Printf("DEBUG: Inserting photos into Mongo.\n")
 	theTimeNow := time.Now()
 
-	if strings.Contains(foodType, "HOTDOG") {
+	if strings.Contains(strings.ToUpper(foodType), "HOTDOG") {
 		fmt.Printf("Inserting Hotdog Photo into MongoDB\n")
 		photoInsertion := UserPhoto{
 			UserID:      userid,
@@ -1311,7 +1311,7 @@ func mongoInsertPhoto(userid int, foodid int, photoid int, photoName string, fil
 				fmt.Println(string(data))
 			}
 		}
-	} else if strings.Contains(foodType, "HAMBURGER") {
+	} else if strings.Contains(strings.ToUpper(foodType), "HAMBURGER") {
 		fmt.Printf("Inserting Hamburger Photo into MongoDB\n")
 		photoInsertion := UserPhoto{
 			UserID:      userid,

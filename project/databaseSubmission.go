@@ -767,7 +767,7 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 	fmt.Printf("DEBUG: Inserting photos into SQL.\n")
 	theTimeNow := time.Now()
 	//Which Type of food?
-	if strings.Contains(foodType, "HOTDOG") {
+	if strings.Contains(strings.ToUpper(foodType), "HOTDOG") {
 		fmt.Printf("Inserting Hotdog Photo\n")
 		theStatement := "INSERT INTO user_photos" +
 			"(USER_ID, FOOD_ID, PHOTO_ID, PHOTO_NAME, FILE_TYPE, SIZE, PHOTO_HASH, LINK, FOOD_TYPE, DATE_CREATED, DATE_UPDATED) " +
@@ -802,7 +802,7 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 				&theHotDog.PhotoID, &theHotDog.PhotoSrc, &theHotDog.DateCreated, &theHotDog.DateUpdated)
 			check(err)
 			theHotDog.PhotoID = photoid
-			newLink := filepath.Join("amazonimages", "pictures", link)
+			newLink := filepath.Join("amazonimages", link)
 			theLink := urlFixer(newLink)
 			theHotDog.PhotoSrc = theLink
 			theHotDog.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
@@ -824,7 +824,7 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 			data, _ := ioutil.ReadAll(response.Body)
 			fmt.Println(string(data))
 		}
-	} else if strings.Contains(foodType, "HAMBURGER") {
+	} else if strings.Contains(strings.ToUpper(foodType), "HAMBURGER") {
 		fmt.Printf("Inserting Hamburger Photo into SQL\n")
 		theStatement := "INSERT INTO user_photos " +
 			"(USER_ID, FOOD_ID, PHOTO_ID, PHOTO_NAME, FILE_TYPE, SIZE, PHOTO_HASH, LINK, FOOD_TYPE, DATE_CREATED, DATE_UPDATED) " +
@@ -847,7 +847,7 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 			TheHamburger Hamburger `json:"TheHamburger"`
 			TheHotDog    Hotdog    `json:"TheHotDog"`
 		}
-		//Get Hotdog from FoodID
+		//Get Hamburger from FoodID
 		var theHamb Hamburger
 		theStmt := "SELECT TYPE, CONDIMENT, CALORIES, NAME, USER_ID, FOOD_ID, " +
 			"PHOTO_ID, PHOTO_SRC, DATE_CREATED, DATE_UPDATED FROM hamburgers WHERE FOOD_ID = ?"
@@ -859,11 +859,11 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 				&theHamb.PhotoID, &theHamb.PhotoSrc, &theHamb.DateCreated, &theHamb.DateUpdated)
 			check(err)
 			theHamb.PhotoID = photoid
-			newLink := filepath.Join("amazonimages", "pictures", link)
+			newLink := filepath.Join("amazonimages", link)
 			theLink := urlFixer(newLink)
 			theHamb.PhotoSrc = theLink
 			theHamb.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
-			fmt.Printf("DEBUG: Here is our hotdog: %v\n", theHamb)
+			fmt.Printf("DEBUG: Here is our hamburger: %v\n", theHamb)
 		}
 		rows.Close()
 		hamUpdate := foodUpdate{

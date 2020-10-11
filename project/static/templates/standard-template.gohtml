@@ -381,7 +381,7 @@
                     <div id="photo_updater">
                         <p>Update Photo: </p>
                         <form id="photo-update-form" enctype="multipart/form-data" method="POST" onload=""
-                        action="http://localhost:80/fileUpdate">
+                        action="http://localhost:80/fileUpdate" name="photo-update-form">
                             <input id="photo-update-input" type="file" name="photo-update-input">
                             <input id="hiddenFoodID" type="hidden" name="hiddenFoodID">
                             <input id="hiddenUserID" type="hidden" name="hiddenUserID">
@@ -1023,6 +1023,18 @@
                 <input type="text" id="condimentType" name="condimentType" placeholder="condiments" minlength=1 maxlength=48>
                 <input type="number" id="calories" name="calories" placeholder="calories" minlength=1 maxlength=8>
                 <input type="text" id="foodName" name="foodName" placeholder="foodName" minlength=1 maxlength=48>
+                <div id="photo_updater">
+                    <p>Update Photo: </p>
+                    <form id="photo-update-form" enctype="multipart/form-data" method="POST" onload=""
+                    action="http://localhost:80/fileUpdate" name="photo-update-form">
+                        <input id="photo-update-input" type="file" name="photo-update-input">
+                        <input id="hiddenFoodID" type="hidden" name="hiddenFoodID">
+                        <input id="hiddenUserID" type="hidden" name="hiddenUserID">
+                        <input id="hiddenCurrentSRC" type="hidden" name="hiddenCurrentSRC">
+                        <input id="hiddenPhotoID" type="hidden" name="hiddenPhotoID">
+                        <input id="hiddenFoodType" type="hidden" name="hiddenFoodType">
+                    </form>
+                <div>
                 <button id="food_UpdateBtn">
                     Update Food
                 </button>
@@ -1038,19 +1050,21 @@
             </div>
         </div>
         {{/* Make food section */}}
-        <p class="actionInstructionText">MAKE FOOD</p>
-        <br>
-        <button id="actionChoice" onclick="revealFoodForm(2)">
-            MAKE HOTDOG
-        </button>
-        <br>
-        <button id="actionChoice" onclick="revealFoodForm(3)">
-            MAKE HAMBURGER
-        </button>
-        <div id="foodFormDiv">
-            
-        </div>
-        <br>  
+        <div id="foodMakeSectionDiv">
+            <p class="actionInstructionText">MAKE FOOD</p>
+            <br>
+            <button id="actionChoice" onclick="revealFoodForm(2)">
+                MAKE HOTDOG
+            </button>
+            <br>
+            <button id="actionChoice" onclick="revealFoodForm(3)">
+                MAKE HAMBURGER
+            </button>
+            <div id="foodFormDiv">
+                
+            </div>
+            <br>
+        </div> 
     </div>
     <script>
         //On clicked, get all data food data for this User
@@ -1115,6 +1129,9 @@
                                 aHamburger.Name = dataOBJ.TheHamburgers[x].Name;
                                 aHamburger.FoodID = dataOBJ.TheHamburgers[x].FoodID;
                                 aHamburger.UserID = dataOBJ.TheHamburgers[x].UserID;
+                                aHamburger.PhotoID = dataOBJ.TheHamburgers[x].PhotoID;
+                                aHamburger.PhotoSrc = dataOBJ.TheHamburgers[x].PhotoSrc;
+                                console.log("Here is the src in this hamburger: " + dataOBJ.TheHamburgers[x].PhotoSrc); //DEBUG
                                 aHamburger.DateCreated = dataOBJ.TheHamburgers[x].DateCreated;
                                 aHamburger.DateUpdated = dataOBJ.TheHamburgers[x].DateUpdated;
                                 hamburgArray.push(aHamburger); //Add the Hamburger to the Hamburger array
@@ -1142,6 +1159,8 @@
                                 aHotDog.Name = dataOBJ.TheHotDogs[y].Name;
                                 aHotDog.FoodID = dataOBJ.TheHotDogs[y].FoodID;
                                 aHotDog.UserID = dataOBJ.TheHotDogs[y].UserID;
+                                aHotDog.PhotoID = dataOBJ.TheHotDogs[y].PhotoID;
+                                aHotDog.PhotoSrc = dataOBJ.TheHotDogs[y].PhotoSrc;
                                 aHotDog.DateCreated = dataOBJ.TheHotDogs[y].DateCreated;
                                 aHotDog.DateUpdated = dataOBJ.TheHotDogs[y].DateUpdated;
                                 hotdogsArray.push(aHotDog); //Add the hotdog to the hotdog array
@@ -1295,6 +1314,31 @@
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
+                                //Create Photo Section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "Hamburger Photo";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udfcPic = document.createElement("img");
+                                udfcPic.setAttribute("id", "udfcFeildInfoPic");
+                                var photoThere = srcChecker(dataOBJ.TheHamburgers[y], aHotDog, 0); //Check to see if photo exists
+                                if (photoThere == true){
+                                    console.log("We found the source: " + dataOBJ.TheHamburgers[y].PhotoSrc); //DEBUG
+                                    udfcPic.src = String(dataOBJ.TheHamburgers[y].PhotoSrc);
+                                    udfcPic.setAttribute("alt", "Food Pic: " + dataOBJ.TheHamburgers[y].PhotoSrc);
+                                } else {
+                                    console.log("Source not found: " + dataOBJ.TheHamburgers[y].PhotoSrc);
+                                    udfcPic.setAttribute("src", "static/images/png/Photo-Unavailable.png");
+                                    udfcPic.setAttribute("alt", "Food Pic Not Found.");
+                                }
+                                udcFieldInfoTxtDiv.appendChild(udfcPic); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
                                 //Create DateUpdated Info Section
                                 var udcFieldInfoTxtDiv = document.createElement("div");
                                 udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
@@ -1446,6 +1490,31 @@
                                 udcfText.setAttribute("id", "udcfText");
                                 udcfText.innerHTML = dataOBJ.TheHotDogs[i].UserID;
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create Photo Section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "Hamburger Photo";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udfcPic = document.createElement("img");
+                                udfcPic.setAttribute("id", "udfcFeildInfoPic");
+                                var photoThere = srcChecker(aHamburger, dataOBJ.TheHotDogs[i], 1); //Check to see if photo exists
+                                if (photoThere == true){
+                                    console.log("We found the source: " + dataOBJ.TheHotDogs[i].PhotoSrc); //DEBUG
+                                    udfcPic.src = String(dataOBJ.TheHotDogs[i].PhotoSrc);
+                                    udfcPic.setAttribute("alt", "Food Pic: " + dataOBJ.TheHotDogs[i].PhotoSrc);
+                                } else {
+                                    console.log("Source not found: " + dataOBJ.TheHotDogs[i].PhotoSrc);
+                                    udfcPic.setAttribute("src", "static/images/png/Photo-Unavailable.png");
+                                    udfcPic.setAttribute("alt", "Food Pic Not Found.");
+                                }
+                                udcFieldInfoTxtDiv.appendChild(udfcPic); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
                                 //Create DateCreated info section
@@ -1611,57 +1680,73 @@
         <p class="actionInstructionText">Okay IT person, what data would you like to read/make?</p>
         <br>
         {{/* See food section...maybe update it too */}}
-        <p>
-            Enter a userID to find see all their food. If nothing is entered, find food for all Users.
-        </p>
-        <br>
-        <button id="actionInstructionButton">
-            SEE FOOD
-        </button>
-        <button id="actionInstructionButton2">
-            HIDE FOOD
-        </button>
-        <input type="number" id="userID" name="userID" placeholder="userID" maxlength=8>
-        <div id="foodSeer">
-            <div id="foodUpdater">
-                <select name="foodChoice" id="foodChoice">
-                    <option value="hotdog">hotdog</option>
-                    <option value="hamburger">hamburger</option>
-                </select>
-                <input type="number" id="foodID" name="foodID" placeholder="foodNumber" minlength=1 maxlength=20>
-                <input type="number" id="theUserID" name="theUserID" placeholder="user ID" minlength=1 maxlength=20>
-                <input type="text" id="foodType" name="foodType" placeholder="foodType" minlength=1 maxlength=48>
-                <input type="text" id="condimentType" name="condimentType" placeholder="condiments" minlength=1 maxlength=48>
-                <input type="number" id="calories" name="calories" placeholder="calories" minlength=1 maxlength=8>
-                <input type="text" id="foodName" name="foodName" placeholder="foodName" minlength=1 maxlength=48>
-                <button id="food_UpdateBtn">
-                    Update Food
-                </button>
-                <button id="food_deleteBtn">
-                    Delete food
-                </button>
-            </div>
-            <div id="hamSeer">
+        <div id="foodSeeSectionDiv">
+            <p class="actionInstructionText">
+                Enter a userID to find see all their food. If nothing is entered, find food for all Users.
+            </p>
+            <br>
+            <button id="actionInstructionButton">
+                SEE FOOD
+            </button>
+            <button id="actionInstructionButton2">
+                HIDE FOOD
+            </button>
+            <input type="number" id="userID" name="userID" placeholder="userID" maxlength=8>
+            <div id="foodSeer">
+                <div id="foodUpdater">
+                    <select name="foodChoice" id="foodChoice">
+                        <option value="hotdog">hotdog</option>
+                        <option value="hamburger">hamburger</option>
+                    </select>
+                    <input type="number" id="foodID" name="foodID" placeholder="foodNumber" minlength=1 maxlength=20>
+                    <input type="number" id="theUserID" name="theUserID" placeholder="user ID" minlength=1 maxlength=20>
+                    <input type="text" id="foodType" name="foodType" placeholder="foodType" minlength=1 maxlength=48>
+                    <input type="text" id="condimentType" name="condimentType" placeholder="condiments" minlength=1 maxlength=48>
+                    <input type="number" id="calories" name="calories" placeholder="calories" minlength=1 maxlength=8>
+                    <input type="text" id="foodName" name="foodName" placeholder="foodName" minlength=1 maxlength=48>
+                    <div id="photo_updater">
+                        <p>Update Photo: </p>
+                        <form id="photo-update-form" enctype="multipart/form-data" method="POST" onload=""
+                        action="http://localhost:80/fileUpdate" name="photo-update-form">
+                            <input id="photo-update-input" type="file" name="photo-update-input">
+                            <input id="hiddenFoodID" type="hidden" name="hiddenFoodID">
+                            <input id="hiddenUserID" type="hidden" name="hiddenUserID">
+                            <input id="hiddenCurrentSRC" type="hidden" name="hiddenCurrentSRC">
+                            <input id="hiddenPhotoID" type="hidden" name="hiddenPhotoID">
+                            <input id="hiddenFoodType" type="hidden" name="hiddenFoodType">
+                        </form>
+                    <div>
+                    <button id="food_UpdateBtn">
+                        Update Food
+                    </button>
+                    <button id="food_deleteBtn">
+                        Delete food
+                    </button>
+                </div>
+                <div id="hamSeer">
 
-            </div>
-            <div id="hdogSeer">
+                </div>
+                <div id="hdogSeer">
 
+                </div>
             </div>
         </div>
         {{/* Make food section */}}
-        <p class="actionInstructionText">MAKE FOOD</p>
-        <br>
-        <button id="actionChoice" onclick="revealFoodForm(2)">
-            MAKE HOTDOG
-        </button>
-        <br>
-        <button id="actionChoice" onclick="revealFoodForm(3)">
-            MAKE HAMBURGER
-        </button>
-        <div id="foodFormDiv">
-            
-        </div>
-        <br>  
+        <div id="foodMakeSectionDiv">
+            <p class="actionInstructionText">MAKE FOOD</p>
+            <br>
+            <button id="actionChoice" onclick="revealFoodForm(2)">
+                MAKE HOTDOG
+            </button>
+            <br>
+            <button id="actionChoice" onclick="revealFoodForm(3)">
+                MAKE HAMBURGER
+            </button>
+            <div id="foodFormDiv">
+                
+            </div>
+            <br>
+        </div>  
     </div>
     <script>
         //On clicked, get all data food data for this User
@@ -1726,6 +1811,9 @@
                                 aHamburger.Name = dataOBJ.TheHamburgers[x].Name;
                                 aHamburger.FoodID = dataOBJ.TheHamburgers[x].FoodID;
                                 aHamburger.UserID = dataOBJ.TheHamburgers[x].UserID;
+                                aHamburger.PhotoID = dataOBJ.TheHamburgers[x].PhotoID;
+                                aHamburger.PhotoSrc = dataOBJ.TheHamburgers[x].PhotoSrc;
+                                console.log("Here is the src in this hamburger: " + dataOBJ.TheHamburgers[x].PhotoSrc); //DEBUG
                                 aHamburger.DateCreated = dataOBJ.TheHamburgers[x].DateCreated;
                                 aHamburger.DateUpdated = dataOBJ.TheHamburgers[x].DateUpdated;
                                 hamburgArray.push(aHamburger); //Add the Hamburger to the Hamburger array
@@ -1753,6 +1841,8 @@
                                 aHotDog.Name = dataOBJ.TheHotDogs[y].Name;
                                 aHotDog.FoodID = dataOBJ.TheHotDogs[y].FoodID;
                                 aHotDog.UserID = dataOBJ.TheHotDogs[y].UserID;
+                                aHotDog.PhotoID = dataOBJ.TheHotDogs[y].PhotoID;
+                                aHotDog.PhotoSrc = dataOBJ.TheHotDogs[y].PhotoSrc;
                                 aHotDog.DateCreated = dataOBJ.TheHotDogs[y].DateCreated;
                                 aHotDog.DateUpdated = dataOBJ.TheHotDogs[y].DateUpdated;
                                 hotdogsArray.push(aHotDog); //Add the hotdog to the hotdog array
@@ -1888,6 +1978,31 @@
                                 udcfText.setAttribute("id", "udcfText");
                                 udcfText.innerHTML = dataOBJ.TheHamburgers[y].UserID;
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                //Create Photo Section
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udcfText = document.createElement("p");
+                                udcfText.setAttribute("id", "udcfText");
+                                udcfText.innerHTML = "Hamburger Photo";
+                                udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
+                                udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+                                var udcFieldInfoTxtDiv = document.createElement("div");
+                                udcFieldInfoTxtDiv.setAttribute("id", "udcFieldInfoTxtDiv");
+                                var udfcPic = document.createElement("img");
+                                udfcPic.setAttribute("id", "udfcFeildInfoPic");
+                                var photoThere = srcChecker(dataOBJ.TheHamburgers[y], aHotDog, 0); //Check to see if photo exists
+                                if (photoThere == true){
+                                    console.log("We found the source: " + dataOBJ.TheHamburgers[y].PhotoSrc); //DEBUG
+                                    udfcPic.src = String(dataOBJ.TheHamburgers[y].PhotoSrc);
+                                    udfcPic.setAttribute("alt", "Food Pic: " + dataOBJ.TheHamburgers[y].PhotoSrc);
+                                } else {
+                                    console.log("Source not found: " + dataOBJ.TheHamburgers[y].PhotoSrc);
+                                    udfcPic.setAttribute("src", "static/images/png/Photo-Unavailable.png");
+                                    udfcPic.setAttribute("alt", "Food Pic Not Found.");
+                                }
+                                udcFieldInfoTxtDiv.appendChild(udfcPic); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
 
                                 //Create DateCreated Info Section
@@ -2058,6 +2173,8 @@
                                 udcfText.innerHTML = dataOBJ.TheHotDogs[i].UserID;
                                 udcFieldInfoTxtDiv.appendChild(udcfText); //Append text to Div
                                 udContainerDiv.appendChild(udcFieldInfoTxtDiv); //Append infoDiv to container
+
+                                
 
                                 //Create DateCreated info section
                                 var udcFieldInfoTxtDiv = document.createElement("div");
