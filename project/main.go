@@ -10,6 +10,8 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"text/template"
@@ -143,6 +145,7 @@ type ViewData struct {
 	User     User   `json:"User"`
 	UserName string `json:"UserName"`
 	Role     string `json:"Role"`
+	Port     string `json:"Port"`
 }
 
 //Here's our session struct
@@ -173,21 +176,20 @@ var template1 *template.Template
 
 func logWriter(logMessage string) {
 	//Logging info
-	/*
-		fmt.Println("Writing log files.")
-		logFile, err := os.OpenFile("/tmp/superdblogs/superDBAppLog.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
-		defer logFile.Close()
+	wd, _ := os.Getwd()
+	logDir := filepath.Join(wd, "logging", "superDBAppLog.txt")
+	logFile, err := os.OpenFile(logDir, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
-		if err != nil {
-			//log.Fatalln("Failed opening file")
-			fmt.Println("Failed opening file")
-		}
+	defer logFile.Close()
 
-		log.SetOutput(logFile)
+	if err != nil {
+		fmt.Println("Failed opening log file")
+	}
 
-		log.Println(logMessage)
-	*/
+	log.SetOutput(logFile)
+
+	log.Println(logMessage)
 }
 
 /* FUNCMAP DEFINITION */
@@ -233,7 +235,7 @@ func init() {
 	OAuthGmailService() //Initialize Gmail Services
 }
 
-// Handle Errors
+// Handle Errors passing templates
 func HandleError(w http.ResponseWriter, err error) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -484,11 +486,17 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 	//if User is already logged in, bring them to the mainPage!
 	aUser := getUser(w, req) //Get the User, if they exist
 	aUserRole := aUser.Role
-	vd := ViewData{aUser, aUser.UserName, aUserRole}
+	thePort := os.Getenv("PORT")
+	if thePort == "" {
+		thePort = "80"
+		fmt.Printf("DEBUG: Defaulting to this port %v\n", thePort)
+	}
+	vd := ViewData{aUser, aUser.UserName, aUserRole, thePort}
 	if !alreadyLoggedIn(w, req) {
 		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
 	}
+	fmt.Printf("DEBUG: The port is: %v\n", os.Getenv("PORT"))
 	err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 	HandleError(w, err1)
 }

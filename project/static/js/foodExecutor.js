@@ -1,7 +1,13 @@
 var userID;
+var thePort;
 function getUserID(passedID){
     userID = passedID;
     console.log("We've set userID to " + userID);
+}
+
+function getPort(passedPort){
+    thePort = "http://localhost:" + passedPort;
+    console.log("DEBUG: The port is: " + thePort)
 }
 
 function revealFoodForm(foodChoice) {
@@ -44,7 +50,7 @@ function revealFoodForm(foodChoice) {
         var documentForm = document.createElement("form");
         documentForm.setAttribute("id", "submit-picture-form");
         documentForm.setAttribute("enctype", "multipart/form-data");
-        documentForm.setAttribute("action", "http://localhost:80/fileInsert");
+        documentForm.setAttribute("action", thePort + "/fileInsert");
         documentForm.setAttribute("method", "POST");
         documentForm.setAttribute("onload", "");
         var docButtonInput = document.createElement("input");
@@ -210,7 +216,7 @@ function revealFoodForm(foodChoice) {
         var documentForm = document.createElement("form");
         documentForm.setAttribute("id", "submit-picture-form");
         documentForm.setAttribute("enctype", "multipart/form-data");
-        documentForm.setAttribute("action", "http://localhost:80/fileInsert");
+        documentForm.setAttribute("action", thePort + "/fileInsert");
         documentForm.setAttribute("method", "POST");
         documentForm.setAttribute("onload", "");
         var docButtonInput = document.createElement("input");
@@ -379,7 +385,7 @@ function revealFoodForm(foodChoice) {
         var documentForm = document.createElement("form");
         documentForm.setAttribute("id", "submit-picture-form");
         documentForm.setAttribute("enctype", "multipart/form-data");
-        documentForm.setAttribute("action", "http://localhost:80/fileInsert");
+        documentForm.setAttribute("action", thePort + "/fileInsert");
         documentForm.setAttribute("method", "POST");
         documentForm.setAttribute("onload", "");
         var docButtonInput = document.createElement("input");
@@ -469,7 +475,7 @@ function revealFoodForm(foodChoice) {
                         documentForm.appendChild(hiddenFoodNum);
                         pictureSubmit(documentForm);
                         theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        alert("Hotdog submitted successfully!")
+                        //alert("Hotdog submitted successfully!");
                     } else if (dataReturned.SuccessBool === false){
                         var foulLanguage = dataReturned.SuccessMsg.includes("foul language");
                         if (foulLanguage == true){
@@ -555,7 +561,7 @@ function revealFoodForm(foodChoice) {
         var documentForm = document.createElement("form");
         documentForm.setAttribute("id", "submit-picture-form");
         documentForm.setAttribute("enctype", "multipart/form-data");
-        documentForm.setAttribute("action", "http://localhost:80/fileInsert");
+        documentForm.setAttribute("action", thePort + "/fileInsert");
         documentForm.setAttribute("method", "POST");
         documentForm.setAttribute("onload", "");
         var docButtonInput = document.createElement("input");

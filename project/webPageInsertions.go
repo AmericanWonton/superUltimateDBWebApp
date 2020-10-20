@@ -136,6 +136,14 @@ func hotDogInsertWebPage(w http.ResponseWriter, req *http.Request) {
 				successfulUserInsert := updateUser(foundUser) //Update this User with the new Hotdog Array
 				if successfulUserInsert == true {
 					fmt.Printf("This User's hotdogs was updated successfully: %v\n", foundUser.UserID)
+					//Set data for photo insertion
+					awsuserID = postedHotDog.UserID
+					awsfoodID = postedHotDog.FoodID
+					awsphotoName = postedHotDog.Name
+					awsfoodType = "HOTDOG"
+					awsdateUpdated = postedHotDog.DateCreated
+					awsdateCreated = postedHotDog.DateUpdated
+					//Marshal return data
 					theReturnData := returnData{
 						SuccessMsg:     successMessage,
 						ReturnedHotDog: mongoHotDogInsert,
@@ -312,7 +320,7 @@ func hamburgerInsertWebPage(w http.ResponseWriter, req *http.Request) {
 					}
 					//UPDATE GLOBAL DATA FOR FILE UPLOAD
 					awsuserID = postedHamburger.UserID
-					awsuserID = postedHamburger.FoodID
+					awsfoodID = postedHamburger.FoodID
 					awsphotoName = postedHamburger.Name
 					awsfoodType = "HAMBURGER"
 					awsdateUpdated = postedHamburger.DateCreated

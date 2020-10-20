@@ -13,5 +13,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o main ./...
 FROM alpine:latest AS production
 #Copy the contents of the builder stage into this app directory
 COPY --from=builder /app .
+#Expose port 80:80
+EXPOSE 80
 #Run the executable,(which is whatever name you gave it in the previous step)
 CMD ["./main"]

@@ -381,7 +381,7 @@
                     <div id="photo_updater">
                         <p>Update Photo: </p>
                         <form id="photo-update-form" enctype="multipart/form-data" method="POST" onload=""
-                        action="http://localhost:80/fileUpdate" name="photo-update-form">
+                        action="http://3.137.207.149/fileUpdate" name="photo-update-form">
                             <input id="photo-update-input" type="file" name="photo-update-input">
                             <input id="hiddenFoodID" type="hidden" name="hiddenFoodID">
                             <input id="hiddenUserID" type="hidden" name="hiddenUserID">
@@ -1026,7 +1026,7 @@
                 <div id="photo_updater">
                     <p>Update Photo: </p>
                     <form id="photo-update-form" enctype="multipart/form-data" method="POST" onload=""
-                    action="http://localhost:80/fileUpdate" name="photo-update-form">
+                    action="http://3.137.207.149/fileUpdate" name="photo-update-form">
                         <input id="photo-update-input" type="file" name="photo-update-input">
                         <input id="hiddenFoodID" type="hidden" name="hiddenFoodID">
                         <input id="hiddenUserID" type="hidden" name="hiddenUserID">
@@ -1707,7 +1707,7 @@
                     <div id="photo_updater">
                         <p>Update Photo: </p>
                         <form id="photo-update-form" enctype="multipart/form-data" method="POST" onload=""
-                        action="http://localhost:80/fileUpdate" name="photo-update-form">
+                        action="http://3.137.207.149/fileUpdate" name="photo-update-form">
                             <input id="photo-update-input" type="file" name="photo-update-input">
                             <input id="hiddenFoodID" type="hidden" name="hiddenFoodID">
                             <input id="hiddenUserID" type="hidden" name="hiddenUserID">
@@ -2426,6 +2426,11 @@
 {{define "foodExecutor"}}
     <script type="text/javascript">
         getUserID({{.}});
+    </script>
+{{end}}
+{{define "portExecutor"}}
+    <script>
+        getPort({{.}});
     </script>
 {{end}}
 {{/* Food Seer */}}

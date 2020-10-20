@@ -25,7 +25,7 @@ func OAuthGmailService() {
 		ClientID:     theClientID,
 		ClientSecret: theClientSecret,
 		Endpoint:     google.Endpoint,
-		RedirectURL:  "http://localhost",
+		RedirectURL:  "http://" + serverAddress,
 	}
 
 	token := oauth2.Token{

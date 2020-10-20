@@ -6,3 +6,5 @@ project/security/*.pem
 notes.txt
 amazonimages
 security
+logging
+superDBAppLog.txt

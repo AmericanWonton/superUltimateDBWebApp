@@ -5,7 +5,7 @@ gomod-exp:
 	export GO111MODULE=on
 
 gobuild:
-	go build
+	GOOS=linux GOARCH=amd64 go build -o superdbbinary
 dockerbuild:
 	docker build -t suberdb .
 dockerbuildandpush:

@@ -27,20 +27,26 @@
             {{if eq $theRole "user"}}
                 <p>Hey, you're logged in, {{$theRole}}! Now you can do stuff...</p>
                 {{$theID := .User.UserID}}
+                {{$thePort := .Port}}
                 {{template "user-action"}}
                 {{template "foodExecutor" $theID}}
+                {{template "portExecutor" $thePort}}
                 {{template "foodSeer" $theID}}
             {{else if eq $theRole "admin"}}
                 <p>Hey, you're logged in {{$theRole}}! Now you can admin stuff!</p>
                 {{$theID := .User.UserID}}
+                {{$thePort := .Port}}
                 {{template "admin-action"}}
                 {{template "foodExecutor" $theID}}
+                {{template "portExecutor" $thePort}}
                 {{template "foodSeer" $theID}}
             {{else if eq $theRole "IT"}}
                 <p>Hey, you're logged in {{.User.Role}}! Now you can do IT stuff!</p>
                 {{$theID := .User.UserID}}
+                {{$thePort := .Port}}
                 {{template "IT-action"}}
                 {{template "foodExecutor" $theID}}
+                {{template "portExecutor" $thePort}}
                 {{template "foodSeer" $theID}}
             {{else}}
                 <p>Whoops! Error here! Go back!</p>
