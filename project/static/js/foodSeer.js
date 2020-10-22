@@ -91,24 +91,24 @@ function foodChanger(whichFood, whichChoice, hamburgObj, hotdogObj){
                 //Hotdog Update
                 console.log(item);
                 console.log("Hotdog Updated!")
-                location.reload(true);
+                location.reload();
             } else if (item == 2) {
                 //Hamburger Update
                 console.log(item);
                 console.log("Hamburger Updated");
-                location.reload(true);
+                location.reload();
             } else if (item == 3) {
                 console.log(item);
                 alert("No food item updated; something went cooky :(");
-                location.reload(true);
+                location.reload();
             } else if (item == 4){
                 console.log(item);
                 alert("The food contained derogatory terms. Please update food again.");
-                location.reload(true);
+                location.reload();
             } else {
                 alert("No food item updated; something went cooky :( ");
                 console.log("Unexpected output at foodUpdater function.");
-                location.reload(true);
+                location.reload();
             }
         }
     });
@@ -125,24 +125,24 @@ function foodChanger(whichFood, whichChoice, hamburgObj, hotdogObj){
                 //Hotdog Update
                 console.log(item);
                 console.log("Hotdog updated");
-                location.reload(true);
+                location.reload();
             } else if (item == 2) {
                 //Hamburger Update
                 console.log(item);
                 console.log("Hamburger Updated");
-                location.reload(true);
+                location.reload();
             } else if (item == 3) {
                 console.log(item);
                 alert("No food item updated; something went cooky :( ");
-                location.reload(true);
+                location.reload();
             } else if (item ==4){
                 console.log(item);
                 alert("The food contained derogatory terms. Please update food again.");
-                location.reload(true);
+                location.reload();
             } else {
                 alert("No food item updated; something went cooky :( ");
                 console.log("Unexpected output at foodUpdater function.");
-                location.reload(true);
+                location.reload();
             }
         }
     });
@@ -177,19 +177,12 @@ function foodDeleter(whichFood, whichChoice, whichUserID){
             var item = xhr.responseText;
             if (item == 1){
                 console.log(item);
-                alert("Hotdog pic successfully deleted");
-                location.reload(true);
             }else if (item == 2){
                 console.log(item);
-                alert("Hamburger pic Deleted");
-                location.reload(true);
             } else if (item == 3) {
                 console.log(item);
-                alert("Trouble deleting food pic item");
-                location.reload(true);
             } else {
                 console.log("Unexpected output at foodDeletion function: " + item);
-                location.reload(true);
             }
         }
     });
@@ -203,19 +196,12 @@ function foodDeleter(whichFood, whichChoice, whichUserID){
             var item = xhr.responseText;
             if (item == 1){
                 console.log(item);
-                alert("Hotdog successfully deleted");
-                location.reload(true);
             }else if (item == 2){
                 console.log(item);
-                alert("Hamburger Deleted");
-                location.reload(true);
             } else if (item == 3) {
                 console.log(item);
-                alert("Trouble deleting food item");
-                location.reload(true);
             } else {
                 console.log("Unexpected output at foodDeletion function: " + item);
-                location.reload(true);
             }
         }
     });
@@ -229,34 +215,44 @@ function foodDeleter(whichFood, whichChoice, whichUserID){
             var item = xhr.responseText;
             if (item == 1){
                 console.log(item);
-                alert("Hotdog successfully deleted in Mongo");
-                location.reload(true);
             }else if (item == 2){
                 console.log(item);
-                alert("Hamburger Deleted in Mongo");
-                location.reload(true);
             } else if (item == 3) {
                 console.log(item);
-                alert("Trouble deleting food item in Mongo");
-                location.reload(true);
             } else {
                 console.log("Unexpected output at foodDeletion function for Mongo: " + item);
-                location.reload(true);
             }
         }
     });
     xhr.send(jsonString);
+
+    //Reload location once finished making API calls
+    location.reload();
 }
 
 function srcChecker(theHamburger, theHotdog, whichFood){
     var srcThere = true;
-    var photoChekcer = {
-        TheHamb: theHamburger,
-        TheHot: theHotdog,
+    //Determine if we're sending the hotdog's foodSrc or the Hamburger's
+    var theSrc = "";
+    if (whichFood === 0){
+        //Send Hamburger Data
+        theSrc = String(theHamburger.PhotoSrc);
+        console.log("Here is our photo src: " + theSrc);
+    } else if (whichFood === 1){
+        //Send Hotdog Data
+        theSrc = String(theHotdog.PhotoSrc);
+        console.log("Here is our photo src: " + theSrc);
+    } else {
+        console.log("Error, unidentified 'whichFood' returned: " + whichFood);
+    }
+
+    var photoChecker = {
+        TheSrc: theSrc,
         TheFood: whichFood
     };
+    
 
-    var jsonString = JSON.stringify(photoChekcer);
+    var jsonString = JSON.stringify(photoChecker);
     console.log("Checking to see if photo exists"); //DEBUG
     //Call Ajax to check the fileRecord
     var xhr = new XMLHttpRequest();

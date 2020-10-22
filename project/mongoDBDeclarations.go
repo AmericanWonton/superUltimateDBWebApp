@@ -1134,12 +1134,12 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 			if strings.Contains(strings.ToUpper(aPic.FoodType), "HOTDOG") {
 				fmt.Printf("DEBUG: Adding a hotdog to the returned pic list.\n")
 				returnedHDogPics = append(returnedHDogPics, aPic)
-				filePath := filepath.Join("amazonimages", aPic.Link)
+				filePath := filepath.Join(aPic.Link)
 				returnedHDogLink = append(returnedHDogLink, filePath)
 			} else if strings.Contains(strings.ToUpper(aPic.FoodType), "HAMBURGER") {
 				fmt.Printf("DEBUG: Adding a hamburger to the returned pic list.\n")
 				returnedHamPics = append(returnedHamPics, aPic)
-				filePath := filepath.Join("amazonimages", aPic.Link)
+				filePath := filepath.Join(aPic.Link)
 				returnedHamLink = append(returnedHamLink, filePath)
 			} else {
 				fmt.Printf("Error assigning picture to hamburger/hotdogs. FoodType is: %v\n", aPic.FoodType)

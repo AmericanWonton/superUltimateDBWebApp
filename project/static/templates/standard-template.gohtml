@@ -274,7 +274,7 @@
                             if (successMSG.SuccessNum == 0){
                                 var redirectStr = successMSG.RedirectURL
                                 console.log("DEBUG: Successful User submission, going to main page.");
-                                window.location = redirectStr; //Can be used with localhost
+                                location.reload();
                             } else {
                                 console.log("DEBUG: Unsuccessful User submission: " + successMSG.Message);
                                 document.getElementById("informFormP").innerHTML = successMSG.Message;
@@ -299,7 +299,7 @@
                             if (successMSG.SuccessNum == 0){
                                 var redirectStr = successMSG.RedirectURL
                                 console.log("DEBUG: Successful IT submission, going to main page.")
-                                window.location = redirectStr; //Can be used with localhost
+                                location.reload();
                             } else {
                                 console.log("DEBUG: Unsuccessful IT submission: " + successMSG.Message);
                                 document.getElementById("informFormP").innerHTML = successMSG.Message;
@@ -906,7 +906,6 @@
                     //bad selection
                     console.log("User inputted a wrong selection: " + foodID.value);
                     alert("Please enter a foodID listed below.");
-                    //location.reload(true);
                 } else {    
                     //Good Selection
                     var foodNumber = Number(foodID.value);
@@ -927,7 +926,7 @@
                 console.log("Error, User selected nothing in the foodchoice" +
                 " field or wrong value got put in place.");
                 alert("Please select hamburger or hotdog food to delete.");
-                location.reload(true);
+                location.reload();
             }
         });
         //Update food upon the correct selection
@@ -949,7 +948,7 @@
                     //bad selection
                     console.log("User inputted a wrong selection: " + foodIDNumber);
                     alert("Please enter a foodID listed below.");
-                    location.reload(true);
+                    location.reload();
                 } else {    
                     //Good Selection
                     aHotDog.HotDogType = foodType.value;

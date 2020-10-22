@@ -496,7 +496,7 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
 	}
-	fmt.Printf("DEBUG: The port is: %v\n", os.Getenv("PORT"))
+	fmt.Printf("DEBUG: The port is: %v\n", thePort)
 	err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 	HandleError(w, err1)
 }
