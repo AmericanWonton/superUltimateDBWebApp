@@ -263,3 +263,183 @@
     padding: .5em;
     font-size: 1rem;
 }
+
+/* Header Layouts */
+.header_selectDiv{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+
+    /* styling */
+    padding: 1em;
+    /* debug */
+    border: 2px solid black;
+}
+
+.theContactDiv{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 35%;
+    /* styling */
+    margin: 1em;
+    padding: 1em;
+    background-color: lightblue;
+    /* debug */
+    border: 2px solid rgb(5, 23, 185);
+}
+
+.theContactDiv:hover{
+    border: 6px solid rgb(5, 23, 185);
+}
+
+.contactP{
+    /* styling */
+    margin: .5em;
+    padding: .5em;
+    font-size: 1rem;
+}
+
+.theDocumentationDiv{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 35%;
+    /* styling */
+    margin: 1em;
+    padding: 1em;
+    background-color: lightgreen;
+    /* debug */
+    border: 2px solid rgb(5, 23, 185);
+}
+
+.theDocumentationDiv:hover{
+    border: 6px solid rgb(5, 23, 185);
+}
+
+.documentationP{
+    /* styling */
+    margin: .5em;
+    padding: .5em;
+    font-size: 1rem;
+}
+
+.header_ContactDiv{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+
+    /* styling */
+    background-color: royalblue;
+    padding: 1em;
+    /* debug */
+    border: 2px solid black;
+}
+
+.contactH1{
+    /* Styling */
+    font-size: 4rem;
+    color: black;
+}
+
+/* Body Sections */
+.contentDiv{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+
+    /* styling */
+    background-color: darkgoldenrod;
+    padding: 1em;
+    /* debug */
+    border: 2px solid greenyellow;
+}
+
+.informativeDiv{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+    /* styling */
+    margin: .5em;
+    padding: 1em;
+}
+
+.informativeP{
+    font-size: 2rem;
+    color: black;
+}
+
+.meContactFormDiv{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+    /* styling */
+    margin: .5em;
+    padding: 1em;
+}
+
+.meContactForm{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.fieldInformDiv{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 40%;
+}
+
+.fieldDescribeP {
+    font-size: .5rem;
+    color: black;
+}
+
+.fieldValueDiv{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 40%;
+}
+
+.inputreg{
+    font-size: .5rem;
+    color: grey;
+}

@@ -12,10 +12,12 @@
         {{/* Here are our Media Query and stylesheets */}}
         {{template "media-queries"}}
         {{/* Here is our Javascript or additional code needed */}}
+        <script src="static/js/foodExecutor.js"></script>
+        <script src="static/js/user.js"></script>
     </head>
     <body>
         {{/* Here is our header */}}
-        
+        {{template "index_header"}}
         {{/* If the User session exists, (as in, we aren't passing in a 'nil' user),
         then display it here. */}}
         {{if .UserName}}

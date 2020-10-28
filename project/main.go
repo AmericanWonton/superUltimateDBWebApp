@@ -501,6 +501,32 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 	HandleError(w, err1)
 }
 
+//Handles the documentation page
+func documentation(w http.ResponseWriter, req *http.Request) {
+	thePort := os.Getenv("PORT")
+	if thePort == "" {
+		thePort = "80"
+		fmt.Printf("DEBUG: Defaulting to this port %v\n", thePort)
+	}
+
+	fmt.Printf("DEBUG: The port is: %v\n", thePort)
+	err1 := template1.ExecuteTemplate(w, "documentation.gohtml", nil)
+	HandleError(w, err1)
+}
+
+//Handles the documentation page
+func contact(w http.ResponseWriter, req *http.Request) {
+	thePort := os.Getenv("PORT")
+	if thePort == "" {
+		thePort = "80"
+		fmt.Printf("DEBUG: Defaulting to this port %v\n", thePort)
+	}
+
+	fmt.Printf("DEBUG: The port is: %v\n", thePort)
+	err1 := template1.ExecuteTemplate(w, "contact.gohtml", nil)
+	HandleError(w, err1)
+}
+
 //Handles all requests coming in
 func handleRequests() {
 	fmt.Printf("DEBUG: Handling Requests...\n")
@@ -511,6 +537,8 @@ func handleRequests() {
 	myRouter.HandleFunc("/signup", signUp)
 	myRouter.HandleFunc("/mainPage", mainPage)
 	myRouter.HandleFunc("/signUpUserUpdated", signUpUserUpdated)
+	myRouter.HandleFunc("/documentation", documentation)
+	myRouter.HandleFunc("/contact", contact)
 	//SQL Database Stuff
 	myRouter.HandleFunc("/deleteFood", deleteFood).Methods("POST")
 	myRouter.HandleFunc("/updateFood", updateFood).Methods("POST")           //Update a certain food item

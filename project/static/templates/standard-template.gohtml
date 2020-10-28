@@ -58,6 +58,28 @@
         </div>
     </header>
 {{end}}
+{{define "index_header"}}
+    <header>
+        <div class="header_selectDiv">
+            {{/******** Define both clickable links to other pages ********/}}
+            <div class="theContactDiv" onclick="navigateHeader(1)">
+                <p class="contactP">Contact the Dev</p>
+            </div>
+            <div class="theDocumentationDiv" onclick="navigateHeader(2)">
+                <p class="documentationP">Documentation</p>
+            </div>
+        </div>
+    </div>
+{{end}}
+{{define "contact_dev_header"}}
+    <header>
+        <div class="header_ContactDiv">
+            <h1 class="contactH1">
+                Contact the Dev
+            </h1>
+        </div>
+    </header>
+{{end}}
 {{/******** END OF HEADER SECTION ********/}}
 
 {{/******** BEGINNING OF BODY SECTION *********/}}
@@ -85,6 +107,47 @@
         <h2 class="signin-ask-text">
             Sign-In!
         </h2>
+    </div>
+{{end}}
+{{define "contact_section"}}
+    <div class="contentDiv">
+        <div class="informativeDiv">
+            <p class="informativeP">
+                Have a question for me? Want to know how I built some of this? Want some of this
+                built for YOU? Reach out and let me know what's on your mind!
+            </p>
+        </div>
+        <div class="meContactFormDiv">
+            <div class="meContactForm">
+                {{/* Name Field */}}
+                <div class="fieldInformDiv">
+                    <p class="fieldDescribeP">
+                        Name:
+                    </p>
+                </div>
+                <div class="fieldValueDiv">
+                    <input type="text" class="inputreg" id="YourNameInput" name="YourNameInput" placeholder="Your Name">
+                </div>
+                {{/* Email */}}
+                <div class="fieldInformDiv">
+                    <p class="fieldDescribeP">
+                        Email:
+                    </p>
+                </div>
+                <div class="fieldValueDiv">
+                    <input type="text" class="inputreg" id="YourEmailInput" name="YourEmailInput" placeholder="Your Email">
+                </div>
+                {{/* Email */}}
+                <div class="fieldInformDiv">
+                    <p class="fieldDescribeP">
+                        Message 2 Me:
+                    </p>
+                </div>
+                <div class="fieldValueDiv">
+                    <input type="text" class="inputreg" id="YourEmailInput" name="YourEmailInput" placeholder="Your Email">
+                </div>
+            </div>
+        </div>
     </div>
 {{end}}
 
