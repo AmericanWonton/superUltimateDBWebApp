@@ -19,6 +19,12 @@ var theClientSecret string
 var theAccessToken string
 var theRefreshToken string
 
+type UserJSON struct {
+	TheName    string `json:"TheName"`
+	TheEmail   string `json:"TheEmail"`
+	TheMessage string `json:"TheMessage"`
+}
+
 //Initialized at begininning of program
 func OAuthGmailService() {
 	config := oauth2.Config{
@@ -63,6 +69,33 @@ func signUpUserEmail(theEmail string, theRole string, fName string, lName string
 	var message gmail.Message
 
 	emailTo := "To: " + theEmail + "\r\n"
+	subject := "Subject: " + theSubject + "\n"
+	mime := "MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n"
+	msg := []byte(emailTo + subject + mime + "\n" + theMessage)
+
+	message.Raw = base64.URLEncoding.EncodeToString(msg)
+
+	// Send the message
+	_, err := GmailService.Users.Messages.Send("me", &message).Do()
+	if err != nil {
+		errMsg := "Error sending this message to the User: " + err.Error()
+		fmt.Println(errMsg)
+		logWriter(errMsg)
+		goodEmailSend = false
+	}
+
+	return goodEmailSend
+}
+
+func emailToMe(theEmail UserJSON) bool {
+	goodEmailSend := true
+	theMessage := theEmail.TheName + " has a message for you for SuperDBWebApp.\n" +
+		theEmail.TheMessage + "\nYou can contact him here: " + theEmail.TheEmail
+	theSubject := "SuperDBTester3000 questions"
+
+	var message gmail.Message
+
+	emailTo := "To: " + senderAddress + "\r\n"
 	subject := "Subject: " + theSubject + "\n"
 	mime := "MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n"
 	msg := []byte(emailTo + subject + mime + "\n" + theMessage)

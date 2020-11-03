@@ -515,16 +515,71 @@ func documentation(w http.ResponseWriter, req *http.Request) {
 }
 
 //Handles the documentation page
-func contact(w http.ResponseWriter, req *http.Request) {
+func contact(w http.ResponseWriter, r *http.Request) {
 	thePort := os.Getenv("PORT")
 	if thePort == "" {
 		thePort = "80"
 		fmt.Printf("DEBUG: Defaulting to this port %v\n", thePort)
 	}
 
-	fmt.Printf("DEBUG: The port is: %v\n", thePort)
-	err1 := template1.ExecuteTemplate(w, "contact.gohtml", nil)
-	HandleError(w, err1)
+	if r.Method == http.MethodPost {
+		//Handle the email Ajax sent to us
+		fmt.Printf("DEBUG: AN EMAIL IS BEING SENT TO ME.\n")
+		//Collect JSON from Postman or wherever
+		//Get the byte slice from the request body ajax
+		bs, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			fmt.Println(err)
+		}
+		//Marshal the user data into our type
+		var dataPosted UserJSON
+		json.Unmarshal(bs, &dataPosted)
+
+		successEmail := emailToMe(dataPosted)
+
+		if successEmail == true {
+			//Send successful response back
+			type successMSG struct {
+				Message     string `json:"Message"`
+				SuccessNum  int    `json:"SuccessNum"`
+				RedirectURL string `json:"RedirectURL"`
+			}
+			msgSuccess := successMSG{
+				Message:     "Added the new account!",
+				SuccessNum:  0,
+				RedirectURL: "http://" + serverAddress,
+			}
+			theJSONMessage, err := json.Marshal(msgSuccess)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			fmt.Fprint(w, string(theJSONMessage))
+		} else {
+			type successMSG struct {
+				Message     string `json:"Message"`
+				SuccessNum  int    `json:"SuccessNum"`
+				RedirectURL string `json:"RedirectURL"`
+			}
+			msgSuccess := successMSG{
+				Message:     "Added the new account!",
+				SuccessNum:  1,
+				RedirectURL: "http://" + serverAddress,
+			}
+
+			theJSONMessage, err := json.Marshal(msgSuccess)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			fmt.Fprint(w, string(theJSONMessage))
+		}
+
+	} else {
+		//Serve the template normally
+		err1 := template1.ExecuteTemplate(w, "contact.gohtml", nil)
+		HandleError(w, err1)
+	}
 }
 
 //Handles all requests coming in
