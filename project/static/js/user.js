@@ -1,3 +1,5 @@
+var openSignInWindow = false;
+
 //Used to control which link to send our user to
 function navigateHeader(whichLink) {
     switch (whichLink) {
@@ -78,6 +80,35 @@ window.addEventListener('DOMContentLoaded', function(){
                 }
             });
             xhr.send(jsonString);
+        });
+    }
+});
+
+//Listen for User to click the Sign In button
+window.addEventListener('DOMContentLoaded', function(){
+    var signUp = document.getElementById("signin-ask-text");
+    if (signUp === null){
+        //Do nothing, this isn't on this page
+    } else {
+        //Declare the variables on the window
+        var divForm = document.getElementById("divform");
+        divForm.style = "display: none";
+        //Listen for the button click
+        signUp.addEventListener("click", function(){
+            
+            if (openSignInWindow === false){
+                divForm.style = "display: flex";
+                divForm.style = "flex-flow: wrap";
+                divForm.style = "align-content: center";
+                divForm.style = "justify-content: center";
+                divForm.style = "width: 100%";
+                divForm.style = "padding: 1rem";
+                openSignInWindow = true;
+            } else {
+                divForm.style = "display: none";
+                openSignInWindow = false;
+            }
+            console.log("openSignIn is: " + openSignInWindow);
         });
     }
 });

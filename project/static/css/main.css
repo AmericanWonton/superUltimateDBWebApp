@@ -1,7 +1,7 @@
 /* SYTLING FOR THE FORMS */
 .divform {
     /* Flexbox styling */
-    display: flex;
+    display: none;
     flex-flow: wrap;
     align-content: center;
     justify-content: center;
@@ -9,11 +9,22 @@
     /* styling */
     padding: 1rem;
     /* debug styling */
-    border: 2px dashed rgb(211, 207, 153);
+    border: 2px dashed rgb(0, 0, 0);
+}
+
+.signInAlignmentDiv{
+    /* Flexbox styling */
+    display: flex;
+    flex-flow: wrap;
+    align-content: center;
+    justify-content: center;
+    width: 100%;
+    /* debug styling */
+    border: 1px solid blue;
 }
 
 #sign-in-form {
-
+    align-self: center;
 }
 
 .labelDiv {
@@ -22,11 +33,15 @@
     flex-flow: wrap;
     justify-content: flex-end;
     align-content: center;
-    width: 45%;
+    width: 40%;
+    margin-right: 1em;
+    /* DEBUG */
+    border: 3px dashed red;
 }
 
 .labelPText {
     /* styling */
+    align-self: center;
     font-size: 1rem;
     padding-right: 1rem;
     font-family: 'Odibee Sans', sans-serif;
@@ -39,7 +54,27 @@
     flex-flow: wrap;
     align-content: center;
     justify-content: flex-start;
-    width: 45%;
+    width: 40%;
+    margin-left: 1em;
+    /* Debug */
+    border: 2px solid green;
+}
+
+.fieldSection{
+    /* flexbox styling */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    /* DEBUG */
+}
+
+#my-form-button{
+    align-self: center;
+    /* styling */
+    width: 7vw;
+    height: 7vh;
 }
 
 #inputTextMobileUN{
@@ -47,6 +82,7 @@
     font-size: 1rem;
     font-family: 'Nunito', sans-serif;
 }
+
 
 #inputTextMobilePW{
     /* font styling */
@@ -68,18 +104,37 @@
 
 /* Index Page Layout */
 .signup-ask-div {
+    /* flexbox styling */
+    display: flex;
+    flex-flow: wrap;
+    align-content: center;
+    justify-content: center;
     padding: 1em;
 }
 .signup-ask-text {
+    align-self: center;
     font-size: 2rem;
 }
 
 .signin-ask-div {
+    /* flexbox styling */
+    display: flex;
+    flex-flow: wrap;
+    align-content: center;
+    justify-content: center;
     padding: 1em;
 }
 
 .signin-ask-text {
+    color: blue;
+    align-self: center;
     font-size: 2rem;
+}
+
+.signin-ask-text:hover {
+    align-self: center;
+    font-size: 2rem;
+    color: purple;
 }
 
 /* MainPage Layout */
@@ -470,7 +525,6 @@
     width: 100%;
     margin-top: 2em;
     /* Debug */
-    border: 2px solid black;
 }
 
 .submitB{

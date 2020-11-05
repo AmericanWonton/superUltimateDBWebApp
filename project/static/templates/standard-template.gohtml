@@ -104,7 +104,7 @@
 {{end}}
 {{define "signin"}}
     <div class="signin-ask-div">
-        <h2 class="signin-ask-text">
+        <h2 class="signin-ask-text" id="signin-ask-text">
             Sign-In!
         </h2>
     </div>
@@ -395,29 +395,31 @@
     <div id="divform">
         <form id="sign-in-form"
         method="POST">
-            {{/* USERNAME */}}
-            <div class="labelDiv">
-                <p class="labelPText">
-                    USERNAME:
-                </p>
-            </div>
-            <div class="inputDiv">
-                <input type="text" name="username" placeholder="username" id="inputTextMobileUN" required/>
-                <p class="form-field-err" id="username-err"></p>
-            </div>
-            {{/* PASSWORD */}}
-            <div class="labelDiv">
-                <p class="labelPText">
-                    PASSWORD:
-                </p>
-            </div>
-            <div class="inputDiv">
-                <input type="password" name="password" placeholder="password" id="inputTextMobilePW" required/>
-                <p class="form-field-err" id="password-err"></p>
-            </div>
-            {{/* SUBMIT BUTTON */}}
-            <div class="fieldSection">
-                <button id="my-form-button">Submit</button>
+            <div class="signInAlignmentDiv">
+                {{/* USERNAME */}}
+                <div class="labelDiv">
+                    <p class="labelPText">
+                        USERNAME:
+                    </p>
+                </div>
+                <div class="inputDiv">
+                    <input type="text" name="username" placeholder="username" id="inputTextMobileUN" required/>
+                    <p class="form-field-err" id="username-err"></p>
+                </div>
+                {{/* PASSWORD */}}
+                <div class="labelDiv">
+                    <p class="labelPText">
+                        PASSWORD:
+                    </p>
+                </div>
+                <div class="inputDiv">
+                    <input type="password" name="password" placeholder="password" id="inputTextMobilePW" required/>
+                    <p class="form-field-err" id="password-err"></p>
+                </div>
+                {{/* SUBMIT BUTTON */}}
+                <div class="fieldSection">
+                    <button id="my-form-button">Submit</button>
+                </div>
             </div>
         </form>
     </div>
