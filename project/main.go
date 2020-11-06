@@ -179,7 +179,7 @@ func logWriter(logMessage string) {
 
 	wd, _ := os.Getwd()
 	logDir := filepath.Join(wd, "logging", "superDBAppLog.txt")
-	logFile, err := os.OpenFile(logDir, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile(logDir, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0777)
 
 	defer logFile.Close()
 
@@ -482,9 +482,9 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 }
 
 //mainPage
-func mainPage(w http.ResponseWriter, req *http.Request) {
+func mainPage(w http.ResponseWriter, r *http.Request) {
 	//if User is already logged in, bring them to the mainPage!
-	aUser := getUser(w, req) //Get the User, if they exist
+	aUser := getUser(w, r) //Get the User, if they exist
 	aUserRole := aUser.Role
 	thePort := os.Getenv("PORT")
 	if thePort == "" {
@@ -492,11 +492,34 @@ func mainPage(w http.ResponseWriter, req *http.Request) {
 		fmt.Printf("DEBUG: Defaulting to this port %v\n", thePort)
 	}
 	vd := ViewData{aUser, aUser.UserName, aUserRole, thePort}
-	if !alreadyLoggedIn(w, req) {
-		http.Redirect(w, req, "/", http.StatusSeeOther)
+	if !alreadyLoggedIn(w, r) {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
-	fmt.Printf("DEBUG: The port is: %v\n", thePort)
+	//See if there is a submission for new food or updates/deletes
+	if r.Method == http.MethodPost {
+		fmt.Printf("We posted in main.\n")
+		//Get form stuff
+		maxSize := int64(1024000) // allow only 1MB of file size
+		err := r.ParseMultipartForm(maxSize)
+		if err != nil {
+			fmt.Printf("Image too large. Max Size: %v\n", maxSize)
+			log.Println(err)
+			return
+		}
+
+		file, fileHeader, err := r.FormFile("theTestFile") //Insert name of file element here
+		if err != nil {
+			fmt.Printf("Could not get uploaded file. Error getting file submission: %v\n", err.Error())
+			log.Println(err)
+			return
+		}
+		defer file.Close()
+		fmt.Printf("Here's Fileheader: %v\n", fileHeader)
+		theText := r.FormValue("DEBUGfakeInput")
+		hiddenValue := r.FormValue("DEBUGHIDDIENINPUT")
+		fmt.Printf("Here is the Text: %v\nHere is the hiddenText: %v\n", theText, hiddenValue)
+	}
 	err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 	HandleError(w, err1)
 }

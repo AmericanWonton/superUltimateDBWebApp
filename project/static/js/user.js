@@ -112,3 +112,9 @@ window.addEventListener('DOMContentLoaded', function(){
         });
     }
 });
+
+//Testing stuff
+function testFormSubmit(){
+    var theForm = document.getElementById('DEBUGpostForm');
+    theForm.submit();
+}

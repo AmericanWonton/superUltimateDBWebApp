@@ -3,6 +3,8 @@ FROM golang:alpine AS builder
 
 # Add Maintainer Info
 LABEL maintainer="Joseph Keller <jbkeller@gmail.com>"
+#Used to make a bash profile we can enter this container with
+RUN apk add --no-cache bash
 #MakeDirectory
 RUN mkdir /app
 ADD . /app

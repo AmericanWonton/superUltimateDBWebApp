@@ -1820,7 +1820,18 @@
                 
             </div>
             <br>
-        </div>  
+        </div>
+        {{/* DEBUG posting section */}}  
+        <div id="DEBUGpostDiv">
+            <form id="DEBUGpostForm" enctype="multipart/form-data" method="POST" action="/mainPage">
+                <input type="text" id="DEBUGfakeInput" name="DEBUGfakeInput">
+                <input type="file" id="theTestFile" name="theTestFile">
+                <input type="hidden" id="DEBUGHIDDIENINPUT" name="DEBUGHIDDIENINPUT" value="bigOof">
+                <button id="theSubmitButton" name="theSubmitButton" onclick="testFormSubmit()">
+                    Submit stuff!
+                </button>
+            </form>
+        </div>
     </div>
     <script>
         //On clicked, get all data food data for this User
