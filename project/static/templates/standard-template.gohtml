@@ -444,27 +444,31 @@
             </button>
             <div id="foodSeer">
                 <div id="foodUpdater">
-                    <select name="foodChoice" id="foodChoice">
-                        <option value="hotdog">hotdog</option>
-                        <option value="hamburger">hamburger</option>
-                    </select>
-                    <input type="number" id="foodID" name="foodID" placeholder="foodID Number" minlength=1 maxlength=20>
-                    <input type="text" id="foodType" name="foodType" placeholder="foodType" minlength=1 maxlength=48>
-                    <input type="text" id="condimentType" name="condimentType" placeholder="condiments" minlength=1 maxlength=48>
-                    <input type="number" id="calories" name="calories" placeholder="calories" minlength=1 maxlength=8>
-                    <input type="text" id="foodName" name="foodName" placeholder="foodName" minlength=1 maxlength=48>
-                    <div id="photo_updater">
-                        <p>Update Photo: </p>
-                        <form id="photo-update-form" enctype="multipart/form-data" method="POST" onload=""
-                        action="http://3.137.207.149/fileUpdate" name="photo-update-form">
-                            <input id="photo-update-input" type="file" name="photo-update-input">
-                            <input id="hiddenFoodID" type="hidden" name="hiddenFoodID">
-                            <input id="hiddenUserID" type="hidden" name="hiddenUserID">
-                            <input id="hiddenCurrentSRC" type="hidden" name="hiddenCurrentSRC">
-                            <input id="hiddenPhotoID" type="hidden" name="hiddenPhotoID">
-                            <input id="hiddenFoodType" type="hidden" name="hiddenFoodType">
-                        </form>
-                    <div>
+                    <form id="update-picture-form" name="update-picture-form"
+                    enctype="multipart/form-data" method="POST" action="/mainPage" onload="">
+                        <div class="formitems">
+                            <select name="foodChoice" id="foodChoice">
+                                <option value="hotdog">hotdog</option>
+                                <option value="hamburger">hamburger</option>
+                            </select>
+                            <input type="number" id="foodID" name="foodID" placeholder="foodID Number" minlength=1 maxlength=20>
+                            <input type="text" id="foodType" name="foodType" placeholder="foodType" minlength=1 maxlength=48>
+                            <input type="text" id="condimentType" name="condimentType" placeholder="condiments" minlength=1 maxlength=48>
+                            <input type="number" id="calories" name="calories" placeholder="calories" minlength=1 maxlength=8>
+                            <input type="text" id="foodName" name="foodName" placeholder="foodName" minlength=1 maxlength=48>
+                            <div id="photo_updater">
+                                <p>Update Photo:</p>
+                                <input id="photo-update-input" type="file" name="newFile">
+                                <input id="hiddenFoodID" type="hidden" name="hiddenFoodID">
+                                <input id="hiddenUserID" type="hidden" name="hiddenUserID">
+                                <input id="hiddenCurrentSRC" type="hidden" name="hiddenCurrentSRC">
+                                <input id="hiddenPhotoID" type="hidden" name="hiddenPhotoID">
+                                <input id="hiddenFoodType" type="hidden" name="hiddenFoodType">
+                            <div>
+                        </div>
+                        <input type="hidden" id="hiddenFoodAction" name="hiddenFoodAction" value="food_update">
+                    </form>
+                    
                     <button id="food_UpdateBtn">
                         Update Food
                     </button>
@@ -1007,6 +1011,9 @@
         //Update food upon the correct selection
         foodUpdateBtn.addEventListener("click", function(){
             //Declare input variable names to work with
+            var theUpdateForm = document.getElementById("update-picture-form");
+
+
             var foodChoice = document.getElementById("foodChoice");
             var foodID = document.getElementById("foodID");
             var foodIDNumber = Number(foodID.value);
@@ -1021,11 +1028,13 @@
                 //See if the foodID field was assigned correctly
                 if (foodIDNumber < 0){
                     //bad selection
-                    console.log("User inputted a wrong selection: " + foodIDNumber);
                     alert("Please enter a foodID listed below.");
                     location.reload();
                 } else {    
                     //Good Selection
+                    theUpdateForm.submit();
+
+
                     aHotDog.HotDogType = foodType.value;
                     aHotDog.Condiment = condimentType.value;
                     aHotDog.Calories = caloriesNumber;
@@ -1750,6 +1759,7 @@
     {{/* Divs for javascript refference*/}}
     <div class="actionDiv">
         <img src="static/images/jpg/IT-GUY.jpg"  class="actionimg" alt="IT Person">
+        <img src="amazonimages/pictures/testfolder/bunnytest.jpg" class="actionimg" alt="testbunny">
         <br><br>
         <p class="actionInstructionText">Okay IT person, what data would you like to read/make?</p>
         <br>
@@ -1825,8 +1835,9 @@
         <div id="DEBUGpostDiv">
             <form id="DEBUGpostForm" enctype="multipart/form-data" method="POST" action="/mainPage">
                 <input type="text" id="DEBUGfakeInput" name="DEBUGfakeInput">
-                <input type="file" id="theTestFile" name="theTestFile">
+                <input type="file" id="theTestFile" name="newFile">
                 <input type="hidden" id="DEBUGHIDDIENINPUT" name="DEBUGHIDDIENINPUT" value="bigOof">
+                <input type="hidden" id="hiddenFoodActiontest" name="hiddenFoodAction" value="test">
                 <button id="theSubmitButton" name="theSubmitButton" onclick="testFormSubmit()">
                     Submit stuff!
                 </button>

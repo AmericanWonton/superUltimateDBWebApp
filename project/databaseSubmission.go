@@ -836,9 +836,8 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 			theTimeNow.Format("2006-01-02 15:04:05"))
 		check(err)
 
-		n, err := r.RowsAffected()
-		check(err)
-		fmt.Printf("%v rows effected.\n", n)
+		_, err2 := r.RowsAffected()
+		check(err2)
 		stmt.Close() //Close the SQL
 		/********* UPDATE SQL WITH PHOTO INFORMATION ************/
 		type foodUpdate struct {

@@ -6,12 +6,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"text/template"
@@ -508,17 +510,228 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		file, fileHeader, err := r.FormFile("theTestFile") //Insert name of file element here
+		file, fileHeader, err := r.FormFile("newFile") //Insert name of file element here
 		if err != nil {
 			fmt.Printf("Could not get uploaded file. Error getting file submission: %v\n", err.Error())
 			log.Println(err)
 			return
 		}
 		defer file.Close()
-		fmt.Printf("Here's Fileheader: %v\n", fileHeader)
-		theText := r.FormValue("DEBUGfakeInput")
-		hiddenValue := r.FormValue("DEBUGHIDDIENINPUT")
-		fmt.Printf("Here is the Text: %v\nHere is the hiddenText: %v\n", theText, hiddenValue)
+		fmt.Printf("Here's Fileheader: %v\n", fileHeader.Filename)
+		//Determine what kind of form post this is
+		theAction := r.FormValue("hiddenFoodAction")
+		if strings.Contains(strings.ToLower(theAction), strings.ToLower("food_submit")) {
+			//Decide if this is hamburger or hotdog submission
+			hiddenFoodType := r.FormValue("hiddenFoodType")
+			if strings.Contains(strings.ToUpper(hiddenFoodType), "HAMBURGER") {
+				foodType := r.FormValue("hamburgType")
+				condimentType := r.FormValue("condimentType")
+				caloriesType := r.FormValue("caloriesType")
+				theCalories, _ := strconv.Atoi(caloriesType)
+				nameType := r.FormValue("nameType")
+				userIDInput := r.FormValue("userIDInput")
+				theUserID, _ := strconv.Atoi(userIDInput)
+				hiddenUserNum := r.FormValue("hiddenUserNum")
+				hiddenFoodNum := r.FormValue("hiddenFoodNum")
+				fmt.Printf("Heres hiddenUser: %v\n Here's HiddenFood: %v\n", hiddenUserNum, hiddenFoodNum)
+
+				//Create Food to send
+				theTimeNow := time.Now()
+				//curDir, _ := os.Getwd()
+				photoDir := filepath.Join("amazonimages", "pictures", userIDInput, strings.ToUpper(hiddenFoodType),
+					fileHeader.Filename)
+				finalURL := urlFixer(photoDir)
+				sendHamburger := Hamburger{
+					BurgerType:  foodType,
+					Condiment:   condimentType,
+					Calories:    theCalories,
+					Name:        nameType,
+					UserID:      theUserID,
+					FoodID:      randomIDCreation(),
+					PhotoID:     randomIDCreation(),
+					PhotoSrc:    finalURL,
+					DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
+					DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+				}
+				sendHotdog := Hotdog{}
+				fmt.Printf("DEBUG, here's our hdog: %v\n and Ham: %v\n", sendHamburger, sendHotdog)
+				//InsertFood to dbs and activate AWS variables
+				goodInsert := simpleFoodInsert("HAMBURGER", sendHotdog, sendHamburger)
+				if goodInsert == true {
+					//Put file in directory AND send to Amazon
+					goodFileInsert, hexName := fileInsert(w, r)
+					if goodFileInsert == true {
+						//Add the photo details to the database
+						fmt.Printf("DEBUG: Uploading file to SQL database.\n")
+						//Upload photo details to DB
+						extension := filepath.Ext(fileHeader.Filename)
+						fileURL := filepath.Join("pictures", userIDInput, awsfoodType, hexName+extension)
+						insertedPhoto := insertUserPhotos(awsuserID, awsfoodID, sendHamburger.PhotoID,
+							fileHeader.Filename, extension, fileHeader.Size,
+							hexName, fileURL, awsfoodType, "", "")
+						if insertedPhoto == true {
+							succMsg := "Inserted photo information into SQL DB"
+							logWriter(succMsg)
+							fmt.Println("DEBUG: Inserted photo information into SQL DB.") //Inform User
+							//INSERT INTO MONGO
+							mongoInsertion := mongoInsertPhoto(awsuserID, awsfoodID, sendHamburger.PhotoID,
+								fileHeader.Filename, extension, fileHeader.Size,
+								hexName, fileURL, awsfoodType, "", "")
+							if mongoInsertion == true {
+								succMsgTwo := "Photo information successfully submitted into MongoDB"
+								logWriter(succMsgTwo)
+								fmt.Println(succMsgTwo)
+								http.Redirect(w, r, "/mainPage", 302) //DEBUG: Maybe should add conditions to redirect?
+							} else {
+								errMsg := "Issue inserting photo into MongoDB"
+								logWriter(errMsg)
+								fmt.Println("DEBUG: Issue inserting photo into MongoDB")
+								http.Redirect(w, r, "/mainPage", 302) //DEBUG: Maybe should add conditions to redirect?
+							}
+						} else {
+							errMsg := "Issue inserting photo information into SQL DB; insertedPhoto is false"
+							logWriter(errMsg)
+							fmt.Println(errMsg)
+						}
+					} else {
+
+					}
+				} else {
+					errMsg := "Error, goodInsert is false"
+					logWriter(errMsg)
+					fmt.Println(errMsg)
+				}
+			} else if strings.Contains(strings.ToUpper(hiddenFoodType), "HOTDOG") {
+				foodType := r.FormValue("hDogType")
+				condimentType := r.FormValue("condimentType")
+				caloriesType := r.FormValue("caloriesType")
+				theCalories, _ := strconv.Atoi(caloriesType)
+				nameType := r.FormValue("nameType")
+				userIDInput := r.FormValue("userIDInput")
+				theUserID, _ := strconv.Atoi(userIDInput)
+				hiddenUserNum := r.FormValue("hiddenUserNum")
+				hiddenFoodNum := r.FormValue("hiddenFoodNum")
+				fmt.Printf("DEBUG: Heres hiddenUser: %v\n Here's HiddenFood: %v\n", hiddenUserNum, hiddenFoodNum)
+
+				//Create Food to send
+				theTimeNow := time.Now()
+				//curDir, _ := os.Getwd()
+				photoDir := filepath.Join("amazonimages", "pictures", userIDInput, strings.ToUpper(hiddenFoodType),
+					fileHeader.Filename)
+				finalURL := urlFixer(photoDir)
+				sendHamburger := Hamburger{}
+				sendHotdog := Hotdog{
+					HotDogType:  foodType,
+					Condiment:   condimentType,
+					Calories:    theCalories,
+					Name:        nameType,
+					UserID:      theUserID,
+					FoodID:      randomIDCreation(),
+					PhotoID:     randomIDCreation(),
+					PhotoSrc:    finalURL,
+					DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
+					DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+				}
+				fmt.Printf("DEBUG, here's our hdog: %v\n and Ham: %v\n", sendHamburger, sendHotdog)
+				//InsertFood to dbs and activate AWS variables
+				goodInsert := simpleFoodInsert("HOTDOG", sendHotdog, sendHamburger)
+				if goodInsert == true {
+					//Put file in directory AND send to Amazon
+					goodFileInsert, hexName := fileInsert(w, r)
+					if goodFileInsert == true {
+						//Add the photo details to the database
+						fmt.Printf("DEBUG: Uploading file to SQL database.\n")
+						//Upload photo details to DB
+						extension := filepath.Ext(fileHeader.Filename)
+						fileURL := filepath.Join("pictures", userIDInput, awsfoodType, hexName+extension)
+						insertedPhoto := insertUserPhotos(awsuserID, awsfoodID, sendHamburger.PhotoID,
+							fileHeader.Filename, extension, fileHeader.Size,
+							hexName, fileURL, awsfoodType, "", "")
+						if insertedPhoto == true {
+							succMsg := "Inserted photo information into SQL DB"
+							logWriter(succMsg)
+							fmt.Println("DEBUG: Inserted photo information into SQL DB.") //Inform User
+							//INSERT INTO MONGO
+							mongoInsertion := mongoInsertPhoto(awsuserID, awsfoodID, sendHamburger.PhotoID,
+								fileHeader.Filename, extension, fileHeader.Size,
+								hexName, fileURL, awsfoodType, "", "")
+							if mongoInsertion == true {
+								succMsgTwo := "Photo information successfully submitted into MongoDB"
+								logWriter(succMsgTwo)
+								fmt.Println(succMsgTwo)
+								http.Redirect(w, r, "/mainPage", 302) //DEBUG: Maybe should add conditions to redirect?
+							} else {
+								errMsg := "Issue inserting photo into MongoDB"
+								logWriter(errMsg)
+								fmt.Println("DEBUG: Issue inserting photo into MongoDB")
+								http.Redirect(w, r, "/mainPage", 302) //DEBUG: Maybe should add conditions to redirect?
+							}
+						} else {
+							errMsg := "Issue inserting photo information into SQL DB; insertedPhoto is false"
+							logWriter(errMsg)
+							fmt.Println(errMsg)
+						}
+					} else {
+
+					}
+				} else {
+					errMsg := "Error, goodInsert is false"
+					logWriter(errMsg)
+					fmt.Println(errMsg)
+				}
+			} else {
+				fmt.Printf("DEBUG: Error, incorrect hiddenFoodType: %v\n", hiddenFoodType)
+			}
+		} else if strings.Contains(strings.ToLower(theAction), strings.ToLower("food_update")) {
+
+		} else if strings.Contains(strings.ToLower(theAction), strings.ToLower("test")) {
+			//DEBUG This is for testing:
+			theText := r.FormValue("DEBUGfakeInput")
+			hiddenValue := r.FormValue("DEBUGHIDDIENINPUT")
+			fmt.Printf("Here is the Text: %v\nHere is the hiddenText: %v\n", theText, hiddenValue)
+			//DEBUG Insert this in our images folder
+			theDir, _ := os.Getwd()
+			thePath := filepath.Join(theDir, "amazonimages", "pictures", "testfolder")
+			os.MkdirAll(thePath, 777)
+
+			//Write file on server
+			theFileName := fileHeader.Filename
+			f, err := os.OpenFile(theFileName, os.O_WRONLY|os.O_CREATE, 0777)
+
+			if err != nil {
+				fmt.Printf("Error opening this file to store on server: %v\n", err.Error())
+			}
+			io.Copy(f, file)
+			f.Close()
+			file.Close()
+			//Move file to folder
+			thePath2 := filepath.Join(theDir, "amazonimages", "pictures", "testfolder", theFileName)
+			readFile, err := os.Open(theFileName)
+			if err != nil {
+				fmt.Printf("Error opening this file: %v\n", err.Error())
+			}
+			writeToFile, err := os.Create(thePath2)
+			if err != nil {
+				fmt.Printf("DEBUG: Error creating writeToFile: \n%v\n", err.Error())
+			}
+			//Move file Contents to folder
+			n, err := io.Copy(writeToFile, readFile)
+			if err != nil {
+				fmt.Printf("Error copying the contents of the one image to the other.\n%v\n", err.Error())
+			}
+			fmt.Printf("DEBUG: move the contents of n: %v\n", n)
+			readFile.Close()    //Close File
+			writeToFile.Close() //Close File
+			//Delete created file
+			removeErr := os.Remove(theFileName)
+			if removeErr != nil {
+				fmt.Printf("Error removing the file: %v\n", removeErr.Error())
+			}
+		} else {
+			errMsg := "Error, incorrect theAction: " + theAction
+			logWriter(errMsg)
+			fmt.Println(errMsg)
+		}
 	}
 	err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 	HandleError(w, err1)
@@ -642,7 +855,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/hotDogInsertWebPage", hotDogInsertWebPage).Methods("POST")       //Post Hotdogs
 	myRouter.HandleFunc("/hamburgerInsertWebPage", hamburgerInsertWebPage).Methods("POST") //Post Hamburgers
 	//File Handling Stuff
-	myRouter.HandleFunc("/fileInsert", fileInsert).Methods("POST")               //Insert a file
+	//myRouter.HandleFunc("/fileInsert", fileInsert).Methods("POST")               //Insert a file
 	myRouter.HandleFunc("/checkSRC", checkSRC).Methods("POST")                   //Check if directory exists
 	myRouter.HandleFunc("/deletePhotoFromS3", deletePhotoFromS3).Methods("POST") //Delete S3 Photo
 	myRouter.HandleFunc("/fileUpdate", fileUpdate).Methods("POST")               //Update S3 Photo

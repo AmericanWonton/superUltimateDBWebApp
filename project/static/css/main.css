@@ -229,6 +229,18 @@
     border: 1px solid magenta;
 }
 
+.formitems{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+    /* debug */
+    border: 1px dashed blue;
+}
+
 #hdogSeer {
     /* Flex-box formatting */
     display: flex;

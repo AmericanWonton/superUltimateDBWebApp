@@ -11,28 +11,34 @@ function getPort(passedPort){
 }
 
 function revealFoodForm(foodChoice) {
-    console.log(foodChoice);
     var theDiv = document.getElementById("foodFormDiv"); //Get the div
     theDiv.innerHTML = ""; //Remove any child elements if any remain
     /* For Hotdog selection */
     if (foodChoice == 0) {
-        console.log("Mkay, you clicked hotdog.")
-        //Create the form elements and append them to the form
-        /* Let's start with form instruction first */
+        //Inform User
         var condimentInstruction = document.createElement("p");
         condimentInstruction.setAttribute("id", "condimentInstruction");
         condimentInstruction.innerHTML = "To give this hotdog multiple condiments, give a space between each condiment.";
+        //Create the form elements and append them to the form
+        /* Create Food Form */
+        var documentForm = document.createElement("form");
+        documentForm.setAttribute("id", "submit-picture-form");
+        documentForm.setAttribute("name", "submit-picture-form");
+        documentForm.setAttribute("enctype", "multipart/form-data");
+        documentForm.setAttribute("action", "/mainPage");
+        documentForm.setAttribute("method", "POST");
+        documentForm.setAttribute("onload", "");
         var hDogType = document.createElement("input");
         hDogType.setAttribute("type", "text");
-        hDogType.setAttribute("id", "hotDogType");
-        hDogType.setAttribute("maxlength", 48);
+        hDogType.setAttribute("id", "hDogType");
         hDogType.setAttribute("name", "hDogType");
-        hDogType.setAttribute("placeholder", "HotDog Type");
+        hDogType.setAttribute("maxlength", 48);
+        hDogType.setAttribute("placeholder", "Hotdog Type");
         var condimentType = document.createElement("input");
         condimentType.setAttribute("id", "condimentType");
+        condimentType.setAttribute("name", "condimentType");
         condimentType.setAttribute("type", "text");
         condimentType.setAttribute("maxlength", 48);
-        condimentType.setAttribute("name", "condimentType");
         condimentType.setAttribute("placeholder", "Condiment");
         var caloriesType = document.createElement("input");
         caloriesType.setAttribute("type", "number");
@@ -45,14 +51,12 @@ function revealFoodForm(foodChoice) {
         nameType.setAttribute("type", "text");
         nameType.setAttribute("maxlength", 48);
         nameType.setAttribute("name", "nameType");
-        nameType.setAttribute("placeholder", "HotDog Name");
-        /* Create Picture Form */
-        var documentForm = document.createElement("form");
-        documentForm.setAttribute("id", "submit-picture-form");
-        documentForm.setAttribute("enctype", "multipart/form-data");
-        documentForm.setAttribute("action", thePort + "/fileInsert");
-        documentForm.setAttribute("method", "POST");
-        documentForm.setAttribute("onload", "");
+        nameType.setAttribute("placeholder", "Hotdog Name");
+        var userIDInput = document.createElement("input");
+        userIDInput.setAttribute("id", "userIDInput");
+        userIDInput.setAttribute("type", "hidden");
+        userIDInput.setAttribute("name", "userIDInput");
+        userIDInput.setAttribute("value", userID);
         var docButtonInput = document.createElement("input");
         docButtonInput.setAttribute("id", "docButtonInput");
         docButtonInput.setAttribute("name", "newFile");
@@ -69,17 +73,28 @@ function revealFoodForm(foodChoice) {
         hiddenFoodNum.setAttribute("type", "hidden");
         hiddenFoodNum.setAttribute("id", "hiddenFoodNum");
         hiddenFoodNum.setAttribute("name", "hiddenFoodNum");
-        /* Add input to the above form for document selection */
-        documentForm.appendChild(docButtonInput);
-        //documentForm.appendChild(hiddenFoodNum); Don't append unless food API is successful
+        var hiddenFoodAction = document.createElement("input");
+        hiddenFoodAction.setAttribute("type", "hidden");
+        hiddenFoodAction.setAttribute("id", "hiddenFoodAction");
+        hiddenFoodAction.setAttribute("name", "hiddenFoodAction");
         var submitButton = document.createElement("button");
         submitButton.setAttribute("id", "submitButton");
+        submitButton.setAttribute("name", "submitButton");
         submitButton.innerHTML = "SUBMIT";
+        /* Add input to the above form for document selection */
+        documentForm.appendChild(hDogType);
+        documentForm.appendChild(condimentType);
+        documentForm.appendChild(caloriesType);
+        documentForm.appendChild(nameType);
+        documentForm.appendChild(userIDInput);
+        documentForm.appendChild(docButtonInput);
+        documentForm.appendChild(hiddenUserNum);
+        documentForm.appendChild(hiddenFoodType);
+        documentForm.appendChild(hiddenFoodNum);
+        documentForm.appendChild(hiddenFoodAction);
+        documentForm.appendChild(submitButton);
         
         submitButton.addEventListener("click", function(){
-            console.log("Submit button clicked, submitting hotdog data.");
-            //Ajax functionality for submitting forms
-            console.log("DEBUG: We're submitting the form.");
             //Field correction if fields aren't filled out
             if (hDogType.value == ""){
                 hDogType.value ="NONE";
@@ -93,112 +108,47 @@ function revealFoodForm(foodChoice) {
             if (nameType.value == ""){
                 nameType.value = "NONE";
             }
+            if (userIDInput.value.length == 0) {
+                userIDInput.setAttribute("value", userID); 
+            }
+            //Give appropriate values for form to send
+            hiddenFoodAction.setAttribute("value", "food_submit")
+            hiddenFoodType.setAttribute("value", "HOTDOG");
+            hiddenFoodNum.setAttribute("value", ""); //Not sure if needed now...
+            hiddenUserNum.setAttribute("value", "");
+            //Submit the form!
+            documentForm.submit();
             
-            //JSON String creation
-            var toSend = {
-                HotDogType: "",
-                Condiment: "",
-                Calories: Number(caloriesType.value),
-                Name: "",
-                UserID: userID,
-                FoodID: 0,
-                DateCreated: "",
-                DateUpdated: ""
-            };
-            
-            toSend.HotDogType = hDogType.value;
-            toSend.Condiment = condimentType.value;
-            toSend.Name = nameType.value;
-            toSend.UserID = userID;
-            //Stringify our JSON
-            var jsonString = JSON.stringify(toSend);
-            console.log("DEBUG: Here's our JSON we're sending: " + jsonString);
-            //Send our hotdog to create
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/hotDogInsertWebPage', true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.addEventListener('readystatechange', function(){
-                if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
-                    var item = xhr.responseText;
-                    var dataReturned = JSON.parse(item);
-                    if (dataReturned.SuccessBool === true) {
-                        //Data inserted properly; clear the form fields
-                        hDogType.value = "";
-                        condimentType.value = "";
-                        caloriesType.value = "";
-                        nameType.value = "";
-                        console.log("Hotdog submitted successfully!");
-                        hiddenFoodType.setAttribute("value", "HOTDOG");
-                        hiddenFoodNum.setAttribute("value", Number(dataReturned.ReturnedHotDog.FoodID));
-                        hiddenUserNum.setAttribute("value", Number(dataReturned.ReturnedHotDog.UserID));
-                        documentForm.appendChild(hiddenFoodType);
-                        documentForm.appendChild(hiddenUserNum);
-                        documentForm.appendChild(hiddenFoodNum);
-                        pictureSubmit(documentForm);
-                        theDiv.innerHTML = ""; //Remove any child elements if any remain
-                    } else if (dataReturned.SuccessBool === false){
-                        var foulLanguage = dataReturned.SuccessMsg.includes("foul language");
-                        if (foulLanguage == true){
-                            hDogType.value = "";
-                            condimentType.value = "";
-                            caloriesType.value = "";
-                            nameType.value = "";
-                            console.log("Hotdog contained foul language. Please re-enter.");
-                            //alert("There was an issue submitting your hotdog :(");
-                            theDiv.innerHTML = ""; //Remove any child elements if any remain
-                            //location.reload(true); //Reload Page
-                        } else {
-                            //Data NOT inserted properly
-                            hDogType.value = "";
-                            condimentType.value = "";
-                            caloriesType.value = "";
-                            nameType.value = "";
-                            console.log("There was an issue submitting your hotdog :(");
-                            //alert("There was an issue submitting your hotdog :(");
-                            theDiv.innerHTML = ""; //Remove any child elements if any remain
-                            //location.reload(true); //Reload Page
-                        }
-                    } else {
-                        //No appropriate Response recieved
-                        console.log("Error submitting data for hotDogInsertWebPage, please send again.");
-                        //alert("Error submitting data for insertHotDogMongo, please send again.");
-                        theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        //location.reload(true); //Reload Page
-                    }
-                }
-            });
-            xhr.send(jsonString);
         });
-
-        //Append "Form Data"
-        theDiv.appendChild(condimentInstruction);
-        theDiv.appendChild(hDogType);
-        theDiv.appendChild(condimentType);
-        theDiv.appendChild(caloriesType);
-        theDiv.appendChild(nameType);
         theDiv.appendChild(documentForm);
-        theDiv.appendChild(submitButton);
         //Dispaly the form to click on
         theDiv.style.display = "block";
     } else if (foodChoice == 1) { //For Hamburger Selection
-        console.log("Mkay, you clicked hamburger. New String")
-        //Create the form elements and append them to the form
-        /* Let's start with form instruction first */
+        //Inform User
         var condimentInstruction = document.createElement("p");
         condimentInstruction.setAttribute("id", "condimentInstruction");
         condimentInstruction.innerHTML = "To give this hamburger multiple condiments, give a space between each condiment.";
-
+        //Create the form elements and append them to the form
+        /* Create Food Form */
+        var documentForm = document.createElement("form");
+        documentForm.setAttribute("id", "submit-picture-form");
+        documentForm.setAttribute("name", "submit-picture-form");
+        documentForm.setAttribute("enctype", "multipart/form-data");
+        documentForm.setAttribute("action", "/mainPage");
+        documentForm.setAttribute("method", "POST");
+        documentForm.setAttribute("onload", "");
         var hamburgType = document.createElement("input");
         hamburgType.setAttribute("type", "text");
         hamburgType.setAttribute("id", "hamburgType");
+        hamburgType.setAttribute("name", "hamburgType");
         hamburgType.setAttribute("maxlength", 48);
         hamburgType.setAttribute("name", "hamburgType");
         hamburgType.setAttribute("placeholder", "Hamburger Type");
         var condimentType = document.createElement("input");
         condimentType.setAttribute("id", "condimentType");
+        condimentType.setAttribute("name", "condimentType");
         condimentType.setAttribute("type", "text");
         condimentType.setAttribute("maxlength", 48);
-        condimentType.setAttribute("name", "condimentType");
         condimentType.setAttribute("placeholder", "Condiment");
         var caloriesType = document.createElement("input");
         caloriesType.setAttribute("type", "number");
@@ -212,13 +162,11 @@ function revealFoodForm(foodChoice) {
         nameType.setAttribute("maxlength", 48);
         nameType.setAttribute("name", "nameType");
         nameType.setAttribute("placeholder", "Hamburger Name");
-        /* Create Picture Form */
-        var documentForm = document.createElement("form");
-        documentForm.setAttribute("id", "submit-picture-form");
-        documentForm.setAttribute("enctype", "multipart/form-data");
-        documentForm.setAttribute("action", thePort + "/fileInsert");
-        documentForm.setAttribute("method", "POST");
-        documentForm.setAttribute("onload", "");
+        var userIDInput = document.createElement("input");
+        userIDInput.setAttribute("id", "userIDInput");
+        userIDInput.setAttribute("type", "hidden");
+        userIDInput.setAttribute("name", "userIDInput");
+        userIDInput.setAttribute("value", userID);
         var docButtonInput = document.createElement("input");
         docButtonInput.setAttribute("id", "docButtonInput");
         docButtonInput.setAttribute("name", "newFile");
@@ -235,16 +183,28 @@ function revealFoodForm(foodChoice) {
         hiddenFoodNum.setAttribute("type", "hidden");
         hiddenFoodNum.setAttribute("id", "hiddenFoodNum");
         hiddenFoodNum.setAttribute("name", "hiddenFoodNum");
-        /* Add input to the above form for document selection */
-        documentForm.appendChild(docButtonInput);
-        //documentForm.appendChild(hiddenFoodNum); Don't append unless food API is successful
+        var hiddenFoodAction = document.createElement("input");
+        hiddenFoodAction.setAttribute("type", "hidden");
+        hiddenFoodAction.setAttribute("id", "hiddenFoodAction");
+        hiddenFoodAction.setAttribute("name", "hiddenFoodAction");
         var submitButton = document.createElement("button");
         submitButton.setAttribute("id", "submitButton");
+        submitButton.setAttribute("name", "submitButton");
         submitButton.innerHTML = "SUBMIT";
+        /* Add input to the above form for document selection */
+        documentForm.appendChild(hamburgType);
+        documentForm.appendChild(condimentType);
+        documentForm.appendChild(caloriesType);
+        documentForm.appendChild(nameType);
+        documentForm.appendChild(userIDInput);
+        documentForm.appendChild(docButtonInput);
+        documentForm.appendChild(hiddenUserNum);
+        documentForm.appendChild(hiddenFoodType);
+        documentForm.appendChild(hiddenFoodNum);
+        documentForm.appendChild(hiddenFoodAction);
+        documentForm.appendChild(submitButton);
         
         submitButton.addEventListener("click", function(){
-            console.log("Submit button clicked, submitting hamburger data. New String");
-            //Ajax functionality for submitting forms
             //Field correction if fields aren't filled out
             if (hamburgType.value == ""){
                 hamburgType.value ="NONE";
@@ -258,110 +218,46 @@ function revealFoodForm(foodChoice) {
             if (nameType.value == ""){
                 nameType.value = "NONE";
             }
-
-            //JSON String creation
-            var toSend = {
-                BurgerType: "",
-                Condiment: "",
-                Calories: Number(caloriesType.value),
-                Name: "",
-                UserID: 0,
-                FoodID: 0,
-                DateCreated: "",
-                DateUpdated: ""
-            };
-            
-            toSend.BurgerType = hamburgType.value;
-            toSend.Condiment = condimentType.value;
-            toSend.Name = nameType.value;
-            toSend.UserID = userID;
-
-            var jsonString = JSON.stringify(toSend);
-            console.log(jsonString);
-            //For SQL Database
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/hamburgerInsertWebPage', true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.addEventListener('readystatechange', function(){
-                if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
-                    var item = xhr.responseText;
-                    var dataReturned = JSON.parse(item);
-                    if (dataReturned.SuccessBool === true) {
-                        //Data inserted properly; clear the form fields
-                        hamburgType.value = "";
-                        condimentType.value = "";
-                        caloriesType.value = "";
-                        nameType.value = "";
-                        hiddenFoodType.setAttribute("value", "HAMBURGER");
-                        hiddenFoodNum.setAttribute("value", Number(dataReturned.ReturnedHamburger.FoodID));
-                        hiddenUserNum.setAttribute("value", Number(dataReturned.ReturnedHamburger.UserID));
-                        documentForm.appendChild(hiddenFoodType);
-                        documentForm.appendChild(hiddenUserNum);
-                        documentForm.appendChild(hiddenFoodNum);
-                        pictureSubmit(documentForm);
-                        theDiv.innerHTML = ""; //Remove any child elements if any remain
-                    } else if (dataReturned.SuccessBool === false){
-                        var foulLanguage = dataReturned.SuccessMsg.includes("foul language");
-                        if (foulLanguage == true){
-                            //Data NOT inserted properly
-                            hamburgType.value = "";
-                            condimentType.value = "";
-                            caloriesType.value = "";
-                            nameType.value = "";
-                            alert("Hamburger contained foul language. Please re-enter.");
-                            theDiv.innerHTML = ""; //Remove any child elements if any remain
-                            location.reload(true); //Reload Page
-                        }else{
-                            //Data NOT inserted properly
-                            hamburgType.value = "";
-                            condimentType.value = "";
-                            caloriesType.value = "";
-                            nameType.value = "";
-                            alert("There was an issue submitting your hamburger :(")
-                            theDiv.innerHTML = ""; //Remove any child elements if any remain
-                            location.reload(true); //Reload Page
-                        }
-                    } else {
-                        //No appropriate Response recieved
-                        alert("Error submitting data, please send again.")
-                        theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
-                    }
-                }
-            });
-            xhr.send(jsonString);
-
-            //Send Photo Data for Hamburger
+            if (userIDInput.value.length == 0) {
+                userIDInput.setAttribute("value", userID); 
+            }
+            //Give appropriate values for form to send
+            hiddenFoodAction.setAttribute("value", "food_submit")
+            hiddenFoodType.setAttribute("value", "HAMBURGER");
+            hiddenFoodNum.setAttribute("value", ""); //Not sure if needed now...
+            hiddenUserNum.setAttribute("value", "");
+            //Submit the form!
+            documentForm.submit();
             
         });
-        //Append "Form Data"
-        theDiv.appendChild(condimentInstruction);
-        theDiv.appendChild(hamburgType);
-        theDiv.appendChild(condimentType);
-        theDiv.appendChild(caloriesType);
-        theDiv.appendChild(nameType);
         theDiv.appendChild(documentForm);
-        theDiv.appendChild(submitButton);
         //Dispaly the form to click on
         theDiv.style.display = "block";
     } else if (foodChoice == 2){//For IT/Admin Hotdog Selection
-        console.log("Mkay, you clicked hotdog as an Admin or IT.")
-        //Create the form elements and append them to the form
-        /* Let's start with form instruction first */
+        //Inform User
         var condimentInstruction = document.createElement("p");
         condimentInstruction.setAttribute("id", "condimentInstruction");
         condimentInstruction.innerHTML = "To give this hotdog multiple condiments, give a space between each condiment.";
+        //Create the form elements and append them to the form
+        /* Create Food Form */
+        var documentForm = document.createElement("form");
+        documentForm.setAttribute("id", "submit-picture-form");
+        documentForm.setAttribute("name", "submit-picture-form");
+        documentForm.setAttribute("enctype", "multipart/form-data");
+        documentForm.setAttribute("action", "/mainPage");
+        documentForm.setAttribute("method", "POST");
+        documentForm.setAttribute("onload", "");
         var hDogType = document.createElement("input");
         hDogType.setAttribute("type", "text");
-        hDogType.setAttribute("id", "hotDogType");
-        hDogType.setAttribute("maxlength", 48);
+        hDogType.setAttribute("id", "hDogType");
         hDogType.setAttribute("name", "hDogType");
-        hDogType.setAttribute("placeholder", "HotDog Type");
+        hDogType.setAttribute("maxlength", 48);
+        hDogType.setAttribute("placeholder", "Hotdog Type");
         var condimentType = document.createElement("input");
         condimentType.setAttribute("id", "condimentType");
+        condimentType.setAttribute("name", "condimentType");
         condimentType.setAttribute("type", "text");
         condimentType.setAttribute("maxlength", 48);
-        condimentType.setAttribute("name", "condimentType");
         condimentType.setAttribute("placeholder", "Condiment");
         var caloriesType = document.createElement("input");
         caloriesType.setAttribute("type", "number");
@@ -374,20 +270,13 @@ function revealFoodForm(foodChoice) {
         nameType.setAttribute("type", "text");
         nameType.setAttribute("maxlength", 48);
         nameType.setAttribute("name", "nameType");
-        nameType.setAttribute("placeholder", "HotDog Name");
+        nameType.setAttribute("placeholder", "Hotdog Name");
         var userIDInput = document.createElement("input");
         userIDInput.setAttribute("id", "userIDInput");
         userIDInput.setAttribute("type", "number");
         userIDInput.setAttribute("maxlength", 8);
         userIDInput.setAttribute("name", "userIDInput");
         userIDInput.setAttribute("placeholder", "userID");
-        /* Create Picture Form */
-        var documentForm = document.createElement("form");
-        documentForm.setAttribute("id", "submit-picture-form");
-        documentForm.setAttribute("enctype", "multipart/form-data");
-        documentForm.setAttribute("action", thePort + "/fileInsert");
-        documentForm.setAttribute("method", "POST");
-        documentForm.setAttribute("onload", "");
         var docButtonInput = document.createElement("input");
         docButtonInput.setAttribute("id", "docButtonInput");
         docButtonInput.setAttribute("name", "newFile");
@@ -404,17 +293,28 @@ function revealFoodForm(foodChoice) {
         hiddenFoodNum.setAttribute("type", "hidden");
         hiddenFoodNum.setAttribute("id", "hiddenFoodNum");
         hiddenFoodNum.setAttribute("name", "hiddenFoodNum");
-        /* Add input to the above form for document selection */
-        documentForm.appendChild(docButtonInput);
-        //documentForm.appendChild(hiddenFoodNum); Don't append unless food API is successful
+        var hiddenFoodAction = document.createElement("input");
+        hiddenFoodAction.setAttribute("type", "hidden");
+        hiddenFoodAction.setAttribute("id", "hiddenFoodAction");
+        hiddenFoodAction.setAttribute("name", "hiddenFoodAction");
         var submitButton = document.createElement("button");
         submitButton.setAttribute("id", "submitButton");
+        submitButton.setAttribute("name", "submitButton");
         submitButton.innerHTML = "SUBMIT";
+        /* Add input to the above form for document selection */
+        documentForm.appendChild(hDogType);
+        documentForm.appendChild(condimentType);
+        documentForm.appendChild(caloriesType);
+        documentForm.appendChild(nameType);
+        documentForm.appendChild(userIDInput);
+        documentForm.appendChild(docButtonInput);
+        documentForm.appendChild(hiddenUserNum);
+        documentForm.appendChild(hiddenFoodType);
+        documentForm.appendChild(hiddenFoodNum);
+        documentForm.appendChild(hiddenFoodAction);
+        documentForm.appendChild(submitButton);
         
         submitButton.addEventListener("click", function(){
-            console.log("Submit button clicked, submitting hotdog data.");
-            //Ajax functionality for submitting forms
-            console.log("DEBUG: We're submitting the form.");
             //Field correction if fields aren't filled out
             if (hDogType.value == ""){
                 hDogType.value ="NONE";
@@ -430,114 +330,46 @@ function revealFoodForm(foodChoice) {
             }
             if (userIDInput.value.length == 0) {
                 userIDInput.innerHTML = userID;
-                userIDInput.value = userID;
+                userIDInput.setAttribute("value", userID); 
             }
-
-            //JSON String creation
-            var toSend = {
-                HotDogType: "",
-                Condiment: "",
-                Calories: Number(caloriesType.value),
-                Name: "",
-                UserID: 0,
-                FoodID: 0,
-                DateCreated: "",
-                DateUpdated: ""
-            };
-            var theIDNumber = Number(userIDInput.value);
-            toSend.HotDogType = hDogType.value;
-            toSend.Condiment = condimentType.value;
-            toSend.Name = nameType.value;
-            toSend.UserID = theIDNumber;
-
-            var jsonString = JSON.stringify(toSend);
-            console.log(jsonString);
-            //For SQL Insertion
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/hotDogInsertWebPage', true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.addEventListener('readystatechange', function(){
-                if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
-                    var item = xhr.responseText;
-                    var dataReturned = JSON.parse(item);
-                    if (dataReturned.SuccessBool === true) {
-                        //Data inserted properly; clear the form fields
-                        hDogType.value = "";
-                        condimentType.value = "";
-                        caloriesType.value = "";
-                        nameType.value = "";
-                        userIDInput.value = "";
-                        hiddenFoodType.setAttribute("value", "HOTDOG");
-                        hiddenFoodNum.setAttribute("value", Number(dataReturned.ReturnedHotDog.FoodID));
-                        hiddenUserNum.setAttribute("value", Number(dataReturned.ReturnedHotDog.UserID));
-                        documentForm.appendChild(hiddenFoodType);
-                        documentForm.appendChild(hiddenUserNum);
-                        documentForm.appendChild(hiddenFoodNum);
-                        pictureSubmit(documentForm);
-                        theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        //alert("Hotdog submitted successfully!");
-                    } else if (dataReturned.SuccessBool === false){
-                        var foulLanguage = dataReturned.SuccessMsg.includes("foul language");
-                        if (foulLanguage == true){
-                            //Data NOT inserted properly
-                            hDogType.value = "";
-                            condimentType.value = "";
-                            caloriesType.value = "";
-                            nameType.value = "";
-                            userIDInput.value = "";
-                            alert("Hotdog contained foul language. Please re-enter.");
-                            theDiv.innerHTML = ""; //Remove any child elements if any remain
-                            location.reload(true); //Reload Page
-                        } else {
-                            //Data NOT inserted properly
-                            hDogType.value = "";
-                            condimentType.value = "";
-                            caloriesType.value = "";
-                            nameType.value = "";
-                            userIDInput.value = "";
-                            alert("There was an issue submitting your hotdog :(");
-                            theDiv.innerHTML = ""; //Remove any child elements if any remain
-                            location.reload(true); //Reload Page
-                        }
-                    } else {
-                        //No appropriate Response recieved
-                        alert("Error submitting data, please send again.")
-                        theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
-                    }
-                }
-            });
-            xhr.send(jsonString);
+            //Give appropriate values for form to send
+            hiddenFoodAction.setAttribute("value", "food_submit")
+            hiddenFoodType.setAttribute("value", "HOTDOG");
+            hiddenFoodNum.setAttribute("value", ""); //Not sure if needed now...
+            hiddenUserNum.setAttribute("value", "");
+            //Submit the form!
+            documentForm.submit();
+            
         });
-        //Append "Form Data"
-        theDiv.appendChild(condimentInstruction);
-        theDiv.appendChild(hDogType);
-        theDiv.appendChild(condimentType);
-        theDiv.appendChild(caloriesType);
-        theDiv.appendChild(nameType);
-        theDiv.appendChild(userIDInput);
         theDiv.appendChild(documentForm);
-        theDiv.appendChild(submitButton);
         //Dispaly the form to click on
         theDiv.style.display = "block";
     } else if (foodChoice == 3){//For IT/Admin Hamburger Selection
-        console.log("Mkay, you clicked hamburger.")
-        //Create the form elements and append them to the form
-        /* Let's start with form instruction first */
+        //Inform User
         var condimentInstruction = document.createElement("p");
         condimentInstruction.setAttribute("id", "condimentInstruction");
         condimentInstruction.innerHTML = "To give this hamburger multiple condiments, give a space between each condiment.";
+        //Create the form elements and append them to the form
+        /* Create Food Form */
+        var documentForm = document.createElement("form");
+        documentForm.setAttribute("id", "submit-picture-form");
+        documentForm.setAttribute("name", "submit-picture-form");
+        documentForm.setAttribute("enctype", "multipart/form-data");
+        documentForm.setAttribute("action", "/mainPage");
+        documentForm.setAttribute("method", "POST");
+        documentForm.setAttribute("onload", "");
         var hamburgType = document.createElement("input");
         hamburgType.setAttribute("type", "text");
         hamburgType.setAttribute("id", "hamburgType");
+        hamburgType.setAttribute("name", "hamburgType");
         hamburgType.setAttribute("maxlength", 48);
         hamburgType.setAttribute("name", "hamburgType");
         hamburgType.setAttribute("placeholder", "Hamburger Type");
         var condimentType = document.createElement("input");
         condimentType.setAttribute("id", "condimentType");
+        condimentType.setAttribute("name", "condimentType");
         condimentType.setAttribute("type", "text");
         condimentType.setAttribute("maxlength", 48);
-        condimentType.setAttribute("name", "condimentType");
         condimentType.setAttribute("placeholder", "Condiment");
         var caloriesType = document.createElement("input");
         caloriesType.setAttribute("type", "number");
@@ -557,13 +389,6 @@ function revealFoodForm(foodChoice) {
         userIDInput.setAttribute("maxlength", 8);
         userIDInput.setAttribute("name", "userIDInput");
         userIDInput.setAttribute("placeholder", "userID");
-        /* Create Picture Form */
-        var documentForm = document.createElement("form");
-        documentForm.setAttribute("id", "submit-picture-form");
-        documentForm.setAttribute("enctype", "multipart/form-data");
-        documentForm.setAttribute("action", thePort + "/fileInsert");
-        documentForm.setAttribute("method", "POST");
-        documentForm.setAttribute("onload", "");
         var docButtonInput = document.createElement("input");
         docButtonInput.setAttribute("id", "docButtonInput");
         docButtonInput.setAttribute("name", "newFile");
@@ -580,17 +405,28 @@ function revealFoodForm(foodChoice) {
         hiddenFoodNum.setAttribute("type", "hidden");
         hiddenFoodNum.setAttribute("id", "hiddenFoodNum");
         hiddenFoodNum.setAttribute("name", "hiddenFoodNum");
-        /* Add input to the above form for document selection */
-        documentForm.appendChild(docButtonInput);
-        //documentForm.appendChild(hiddenFoodNum); Don't append unless food API is successful
+        var hiddenFoodAction = document.createElement("input");
+        hiddenFoodAction.setAttribute("type", "hidden");
+        hiddenFoodAction.setAttribute("id", "hiddenFoodAction");
+        hiddenFoodAction.setAttribute("name", "hiddenFoodAction");
         var submitButton = document.createElement("button");
         submitButton.setAttribute("id", "submitButton");
+        submitButton.setAttribute("name", "submitButton");
         submitButton.innerHTML = "SUBMIT";
+        /* Add input to the above form for document selection */
+        documentForm.appendChild(hamburgType);
+        documentForm.appendChild(condimentType);
+        documentForm.appendChild(caloriesType);
+        documentForm.appendChild(nameType);
+        documentForm.appendChild(userIDInput);
+        documentForm.appendChild(docButtonInput);
+        documentForm.appendChild(hiddenUserNum);
+        documentForm.appendChild(hiddenFoodType);
+        documentForm.appendChild(hiddenFoodNum);
+        documentForm.appendChild(hiddenFoodAction);
+        documentForm.appendChild(submitButton);
         
         submitButton.addEventListener("click", function(){
-            console.log("Submit button clicked, submitting hamburger data.");
-            //Ajax functionality for submitting forms
-            console.log("DEBUG: We're submitting the form.");
             //Field correction if fields aren't filled out
             if (hamburgType.value == ""){
                 hamburgType.value ="NONE";
@@ -606,95 +442,18 @@ function revealFoodForm(foodChoice) {
             }
             if (userIDInput.value.length == 0) {
                 userIDInput.innerHTML = userID;
-                userIDInput.value = userID;
+                userIDInput.setAttribute("value", userID); 
             }
-
-            //JSON String creation
-            var toSend = {
-                BurgerType: "",
-                Condiment: "",
-                Calories: Number(caloriesType.value),
-                Name: "",
-                UserID: 0,
-                FoodID: 0,
-                DateCreated: "",
-                DateUpdated: ""
-            };
-            var theIDNumber = Number(userIDInput.value);
-            toSend.BurgerType = hamburgType.value;
-            toSend.Condiment = condimentType.value;
-            toSend.Name = nameType.value;
-            toSend.UserID = theIDNumber;
-
-            var jsonString = JSON.stringify(toSend);
-            console.log(jsonString);
-            //For SQL Database
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/hamburgerInsertWebPage', true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.addEventListener('readystatechange', function(){
-                if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
-                    var item = xhr.responseText;
-                    var dataReturned = JSON.parse(item);
-                    if (dataReturned.SuccessBool === true) {
-                        //Data inserted properly; clear the form fields
-                        hamburgType.value = "";
-                        condimentType.value = "";
-                        caloriesType.value = "";
-                        nameType.value = "";
-                        userIDInput.value = "";
-                        //Add Photo
-                        hiddenFoodType.setAttribute("value", "HAMBURGER");
-                        hiddenFoodNum.setAttribute("value", Number(dataReturned.ReturnedHamburger.FoodID));
-                        hiddenUserNum.setAttribute("value", Number(dataReturned.ReturnedHamburger.UserID));
-                        documentForm.appendChild(hiddenFoodType);
-                        documentForm.appendChild(hiddenUserNum);
-                        documentForm.appendChild(hiddenFoodNum);
-                        pictureSubmit(documentForm);
-                        theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        alert("Hamburger submitted successfully!");
-                    } else if (dataReturned.SuccessBool === false){
-                        var foulLanguage = dataReturned.SuccessMsg.includes("foul language");
-                        if (foulLanguage == true){
-                            //Data NOT inserted properly
-                            hamburgType.value = "";
-                            condimentType.value = "";
-                            caloriesType.value = "";
-                            nameType.value = "";
-                            userIDInput.value = "";
-                            alert("Hamburger contained foul language. Please re-enter.");
-                            theDiv.innerHTML = ""; //Remove any child elements if any remain
-                            location.reload(true); //Reload Page
-                        } else{
-                            //Data NOT inserted properly
-                            hamburgType.value = "";
-                            condimentType.value = "";
-                            caloriesType.value = "";
-                            nameType.value = "";
-                            userIDInput.value = "";
-                            alert("There was an issue submitting your hamburger :(");
-                            theDiv.innerHTML = ""; //Remove any child elements if any remain
-                            location.reload(true); //Reload Page
-                        }
-                    } else {
-                        //No appropriate Response recieved
-                        alert("Error submitting data, please send again.")
-                        theDiv.innerHTML = ""; //Remove any child elements if any remain
-                        location.reload(true); //Reload Page
-                    }
-                }
-            });
-            xhr.send(jsonString);
+            //Give appropriate values for form to send
+            hiddenFoodAction.setAttribute("value", "food_submit")
+            hiddenFoodType.setAttribute("value", "HAMBURGER");
+            hiddenFoodNum.setAttribute("value", ""); //Not sure if needed now...
+            hiddenUserNum.setAttribute("value", "");
+            //Submit the form!
+            documentForm.submit();
+            
         });
-        //Append "Form Data"
-        theDiv.appendChild(condimentInstruction);
-        theDiv.appendChild(hamburgType);
-        theDiv.appendChild(condimentType);
-        theDiv.appendChild(caloriesType);
-        theDiv.appendChild(nameType);
-        theDiv.appendChild(userIDInput);
         theDiv.appendChild(documentForm);
-        theDiv.appendChild(submitButton);
         //Dispaly the form to click on
         theDiv.style.display = "block";
     } else {

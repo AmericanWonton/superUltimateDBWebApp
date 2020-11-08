@@ -87,7 +87,6 @@ func insertUsers(w http.ResponseWriter, req *http.Request) {
 }
 
 func updateUser(updatedUser AUser) bool {
-	fmt.Printf("DEBUG: We're in updateUser. Here's the User to update: %v\n", updatedUser)
 	success := true
 	theTimeNow := time.Now()
 	updatedUser.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
@@ -111,7 +110,7 @@ func updateUser(updatedUser AUser) bool {
 			"hamburgers":  updatedUser.Hamburgers,
 		},
 	}
-	result, err := ic_collection.UpdateOne(
+	_, err := ic_collection.UpdateOne(
 		theContext,
 		theFilter,
 		updatedDocument,
@@ -121,8 +120,6 @@ func updateUser(updatedUser AUser) bool {
 		success = false
 		log.Printf("%v\n", err)
 	}
-	fmt.Printf("Updated %v Documents for Users! Beacuse it matched %v documents! We had the following UserID: %v\n",
-		result.ModifiedCount, result.MatchedCount, updatedUser.UserID)
 	return success
 }
 
@@ -919,6 +916,7 @@ func getFoodIDSHam(userID int) []int {
 	return foodIDS
 }
 
+//Gets all food when the mainpage is loaded
 func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 	//Get the byte slice from the request
 	bs, err := ioutil.ReadAll(req.Body)
@@ -1007,6 +1005,7 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 				logWriter("Error decoding hamburgers in MongoDB for all Users: " + err.Error())
 			}
 			returnedHamburgers = append(returnedHamburgers, aHamburger)
+			fmt.Printf("DEBUG: Here's the returnedHamburgs: %v\n", returnedHamburgers)
 		}
 
 		// Close the cursor once finished
