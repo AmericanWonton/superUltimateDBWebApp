@@ -467,6 +467,7 @@
                             <div>
                         </div>
                         <input type="hidden" id="hiddenFoodAction" name="hiddenFoodAction" value="food_update">
+                        <input type="hidden" id="hiddenHasPhoto" name="hiddenHasPhoto">
                     </form>
                     
                     <button id="food_UpdateBtn">
@@ -1011,17 +1012,18 @@
         //Update food upon the correct selection
         foodUpdateBtn.addEventListener("click", function(){
             //Declare input variable names to work with
-            var theUpdateForm = document.getElementById("update-picture-form");
-
-
-            var foodChoice = document.getElementById("foodChoice");
-            var foodID = document.getElementById("foodID");
-            var foodIDNumber = Number(foodID.value);
-            var foodType = document.getElementById("foodType");
-            var condimentType = document.getElementById("condimentType");
-            var calories = document.getElementById("calories");
-            var caloriesNumber = Number(calories.value);
-            var foodName = document.getElementById("foodName");
+            var hadPhoto = document.getElementById("hiddenHasPhoto"); //HiddenPhotoValue
+            var photoSubmission = fileUploadCheck();
+            if (photoSubmission == true){
+                //Begin process of submitting submitted photo for an update
+                hadPhoto.value = "has_photo";
+            } else {
+                hadPhoto.value = "no_photo";
+            }
+            var theUserID = document.getElementById("hiddenUserID"); //Set the UserID
+            theUserID.value = userID; // NEED TO DO THIS FOR THE USER
+            var theUpdateForm = document.getElementById("update-picture-form"); //Update Form
+            
 
             //Assign fields to pass to food changer
             if (foodChoice.value == "hotdog"){
@@ -1032,16 +1034,8 @@
                     location.reload();
                 } else {    
                     //Good Selection
+                    /* CHECK TO SEE IF THERE'S A PHOTO SUBMITTED TO CHANGE */
                     theUpdateForm.submit();
-
-
-                    aHotDog.HotDogType = foodType.value;
-                    aHotDog.Condiment = condimentType.value;
-                    aHotDog.Calories = caloriesNumber;
-                    aHotDog.Name = foodName.value;
-                    aHotDog.UserID = userID;
-                    aHotDog.FoodID = foodID.value;
-                    foodChanger(foodChoice.value, foodIDNumber, aHamburger, aHotDog);
                 }
             } else if (foodChoice.value == "hamburger"){
                 //See if the foodID field was assigned correctly

@@ -19,6 +19,7 @@ var dbConnectString string
 
 //POST hotdog, Mainpage
 func insertHotDog(w http.ResponseWriter, req *http.Request) {
+
 	fmt.Println("Inserting hotdog record.")
 	//Collect JSON from Postman or wherever
 	//Get the byte slice from the request body ajax
@@ -460,117 +461,174 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, string(dataJSON))
 }
 
-//UPDATE FOOD
-func updateFood(w http.ResponseWriter, req *http.Request) {
-	type foodUpdate struct {
-		FoodType     string    `json:"FoodType"`
-		FoodID       int       `json:"FoodID"`
-		TheHamburger Hamburger `json:"TheHamburger"`
-		TheHotDog    Hotdog    `json:"TheHotDog"`
-	}
-	//Unwrap from JSON
-	bs, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		fmt.Println(err)
-	}
+func sqlUpdateFood(whichFood string, hamburger Hamburger, hotdog Hotdog) bool {
+	goodUpdate := true
 
-	//Marshal it into our type
-	var thefoodUpdate foodUpdate
-	json.Unmarshal(bs, &thefoodUpdate)
-
-	sqlStatement := ""
-
-	//Determine if this is a hotdog or hamburger update
-	if thefoodUpdate.FoodType == "hotdog" {
-		fmt.Printf("DEBUG: Updating Hotdog for SQL\n")
-		var updatedHotdog Hotdog = thefoodUpdate.TheHotDog
-		/* CHECK TO SEE IF THE FIELDS ARE OKAY */
+	//Check to see which food we're updating
+	if strings.Contains(strings.ToUpper(whichFood), "HOTDOG") {
 		canPost := true
-		if containsLanguage(updatedHotdog.HotDogType) {
+		if containsLanguage(hotdog.HotDogType) {
 			canPost = false
-		} else if containsLanguage(updatedHotdog.Condiment) {
+		} else if containsLanguage(hotdog.Condiment) {
 			canPost = false
-		} else if containsLanguage(updatedHotdog.Name) {
+		} else if containsLanguage(hotdog.Name) {
 			canPost = false
 		} else {
 			canPost = true
 		}
 		if canPost == true {
-			sqlStatement = "UPDATE hot_dogs SET TYPE=?, CONDIMENT=?, CALORIES=?," +
-				"NAME=?, USER_ID=?, PHOTO_ID=?, PHOTO_SRC=?, DATE_UPDATED=? WHERE FOOD_ID=?"
-
-			stmt, err := db.Prepare(sqlStatement)
+			//Find food in SQL
+			stmt := "SELECT PHOTO_ID, PHOTO_SRC, DATE_CREATED FROM hot_dogs WHERE FOOD_ID = ?"
+			rows, err := db.Query(stmt, hotdog.FoodID)
 			check(err)
-			theTimeNow := time.Now()
-			r, err := stmt.Exec(updatedHotdog.HotDogType, updatedHotdog.Condiment,
-				updatedHotdog.Calories, updatedHotdog.Name, updatedHotdog.UserID,
-				updatedHotdog.PhotoID, updatedHotdog.PhotoSrc,
-				theTimeNow.Format("2006-01-02 15:04:05"), thefoodUpdate.FoodID)
-			check(err)
+			//Declare Hotdog with return values needed
+			var ourHotdog Hotdog = Hotdog{
+				HotDogType:  hotdog.HotDogType,
+				Condiment:   hotdog.Condiment,
+				Calories:    hotdog.Calories,
+				Name:        hotdog.Name,
+				UserID:      hotdog.UserID,
+				FoodID:      hotdog.FoodID,
+				PhotoID:     0,
+				PhotoSrc:    "",
+				DateCreated: "",
+				DateUpdated: "",
+			}
+			count := 0
 
-			n, err := r.RowsAffected()
-			check(err)
-
-			fmt.Printf("%v\n", n)
-
-			if n < 1 {
-				fmt.Printf("Only %v rows effected, foodUpdate unsuccessful. No foodID found for: %v\n", n,
-					thefoodUpdate.FoodID)
-				fmt.Fprintln(w, 3)
+			for rows.Next() {
+				err = rows.Scan(&ourHotdog.PhotoID, &ourHotdog.PhotoSrc, &ourHotdog.DateCreated)
+				check(err)
+				//Add to count to see if anything was returned for the FoodID
+				count = count + 1
+			}
+			rows.Close()
+			//If nothing was returned, we had no food for the foodID and update will fail
+			if count <= 0 {
+				goodUpdate = false
+				errMsg := "No food found for the foodID to update"
+				logWriter(errMsg)
+				fmt.Println(errMsg)
 			} else {
-				fmt.Fprintln(w, 1)
+				//Food has been updated with correct values, updating the database
+				sqlStatement := "UPDATE hot_dogs SET TYPE=?, CONDIMENT=?, CALORIES=?," +
+					"NAME=?, USER_ID=?, PHOTO_ID=?, PHOTO_SRC=?, DATE_UPDATED=? WHERE FOOD_ID=?"
+
+				stmt, err := db.Prepare(sqlStatement)
+				check(err)
+				theTimeNow := time.Now()
+				r, err := stmt.Exec(ourHotdog.HotDogType, ourHotdog.Condiment,
+					ourHotdog.Calories, ourHotdog.Name, ourHotdog.UserID,
+					hotdog.PhotoID, hotdog.PhotoSrc,
+					theTimeNow.Format("2006-01-02 15:04:05"), ourHotdog.FoodID)
+				check(err)
+
+				n, err := r.RowsAffected()
+				check(err)
+				//Check to see if anything was updated
+				if n < 1 {
+					errMsg := "No food was updated in sqlUpdateFood"
+					logWriter(errMsg)
+					fmt.Println(errMsg)
+					goodUpdate = false
+				} else {
+					succMsg := "Food updated successfully in sqlUpdateFood"
+					logWriter(succMsg)
+					fmt.Println(succMsg)
+				}
 			}
 		} else {
-			fmt.Printf("Language detected in food. Update unsuccessful.\n")
-			fmt.Fprintln(w, 4)
+			goodUpdate = false
+			errMsg := "canPost is false in sqlUpdateFood: "
+			logWriter(errMsg)
+			fmt.Println(errMsg)
 		}
-	} else if thefoodUpdate.FoodType == "hamburger" {
-		fmt.Printf("DEBUG: Updating Hamburger for SQL\n")
-		var updatedHamburger Hamburger = thefoodUpdate.TheHamburger
-		/* CHECK TO SEE IF THE FIELDS ARE OKAY */
+	} else if strings.Contains(strings.ToUpper(whichFood), "HAMBURGER") {
 		canPost := true
-		if containsLanguage(updatedHamburger.BurgerType) {
+		if containsLanguage(hamburger.BurgerType) {
 			canPost = false
-		} else if containsLanguage(updatedHamburger.Condiment) {
+		} else if containsLanguage(hamburger.Condiment) {
 			canPost = false
-		} else if containsLanguage(updatedHamburger.Name) {
+		} else if containsLanguage(hamburger.Name) {
 			canPost = false
 		} else {
 			canPost = true
 		}
 		if canPost == true {
-			sqlStatement = "UPDATE hamburgers SET TYPE=?, CONDIMENT=?, CALORIES=?," +
-				"NAME=?, USER_ID=?, PHOTO_ID=?, PHOTO_SRC=?, DATE_UPDATED=? WHERE FOOD_ID=?"
-
-			stmt, err := db.Prepare(sqlStatement)
+			//Find food in SQL
+			stmt := "SELECT PHOTO_ID, PHOTO_SRC, DATE_CREATED FROM hamburgers WHERE FOOD_ID = ?"
+			rows, err := db.Query(stmt, hamburger.FoodID)
 			check(err)
-			theTimeNow := time.Now()
-			r, err := stmt.Exec(updatedHamburger.BurgerType, updatedHamburger.Condiment,
-				updatedHamburger.Calories, updatedHamburger.Name, updatedHamburger.UserID,
-				updatedHamburger.PhotoID,
-				updatedHamburger.PhotoSrc,
-				theTimeNow.Format("2006-01-02 15:04:05"), updatedHamburger.FoodID)
-			check(err)
+			//Declare Hotdog with return values needed
+			var ourHamburger Hamburger = Hamburger{
+				BurgerType:  hamburger.BurgerType,
+				Condiment:   hamburger.Condiment,
+				Calories:    hamburger.Calories,
+				Name:        hamburger.Name,
+				UserID:      hamburger.UserID,
+				FoodID:      hamburger.FoodID,
+				PhotoID:     0,
+				PhotoSrc:    "",
+				DateCreated: "",
+				DateUpdated: "",
+			}
+			count := 0
 
-			n, err := r.RowsAffected()
-			check(err)
-
-			if n < 1 {
-				fmt.Printf("Only %v rows effected, foodUpdate unsuccessful. No foodID found for: %v\n", n,
-					thefoodUpdate.FoodID)
-				fmt.Fprintln(w, 3)
+			for rows.Next() {
+				err = rows.Scan(&ourHamburger.PhotoID, &ourHamburger.PhotoSrc, &ourHamburger.DateCreated)
+				check(err)
+				//Add to count to see if anything was returned for the FoodID
+				count = count + 1
+			}
+			rows.Close()
+			//If nothing was returned, we had no food for the foodID and update will fail
+			if count <= 0 {
+				goodUpdate = false
+				errMsg := "No food found for the foodID to update"
+				logWriter(errMsg)
+				fmt.Println(errMsg)
 			} else {
-				fmt.Printf("%v\n", n)
-				fmt.Fprintln(w, 2)
+				//Food has been updated with correct values, updating the database
+				sqlStatement := "UPDATE hamburgers SET TYPE=?, CONDIMENT=?, CALORIES=?," +
+					"NAME=?, USER_ID=?, PHOTO_ID=?, PHOTO_SRC=?, DATE_UPDATED=? WHERE FOOD_ID=?"
+
+				stmt, err := db.Prepare(sqlStatement)
+				check(err)
+				theTimeNow := time.Now()
+				r, err := stmt.Exec(ourHamburger.BurgerType, ourHamburger.Condiment,
+					ourHamburger.Calories, ourHamburger.Name, ourHamburger.UserID,
+					hamburger.PhotoID, hamburger.PhotoSrc,
+					theTimeNow.Format("2006-01-02 15:04:05"), ourHamburger.FoodID)
+				check(err)
+
+				n, err := r.RowsAffected()
+				check(err)
+				//Check to see if anything was updated
+				if n < 1 {
+					errMsg := "No food was updated in sqlUpdateFood"
+					logWriter(errMsg)
+					fmt.Println(errMsg)
+					goodUpdate = false
+				} else {
+					succMsg := "Food updated successfully in sqlUpdateFood"
+					logWriter(succMsg)
+					fmt.Println(succMsg)
+				}
 			}
 		} else {
-			fmt.Printf("Language detected in food. Update unsuccessful.\n")
-			fmt.Fprintln(w, 4)
+			goodUpdate = false
+			errMsg := "canPost is false in sqlUpdateFood: "
+			logWriter(errMsg)
+			fmt.Println(errMsg)
 		}
 	} else {
-		fmt.Printf("No good value sent through JSON to update food: %v\n", thefoodUpdate.FoodID)
-		fmt.Fprintln(w, 3)
+		goodUpdate = false
+		errMsg := "Incorrect whichFood variable entered in sqlUpdateFood: " + whichFood
+		logWriter(errMsg)
+		fmt.Println(errMsg)
 	}
+
+	return goodUpdate
 }
 
 //INSERT USER(s)

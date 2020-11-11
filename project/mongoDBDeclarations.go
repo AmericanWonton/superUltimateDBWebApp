@@ -524,6 +524,287 @@ func foodUpdateMongo(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+//A simple version of updating food in Mongo
+func mongoUpdateFood(whichFood string, hamburger MongoHamburger, hotdog MongoHotDog) bool {
+	goodUpdate := true
+
+	//Check to see which food we're updating
+	if strings.Contains(strings.ToUpper(whichFood), "HOTDOG") {
+		canPost := true
+		if containsLanguage(hotdog.HotDogType) {
+			canPost = false
+		} else if containsLanguage(hotdog.Name) {
+			canPost = false
+		} else {
+			canPost = true
+		}
+		for j := 0; j < len(hotdog.Condiments); j++ {
+			if containsLanguage(hotdog.Condiments[j]) {
+				canPost = false
+			}
+		}
+		if canPost == true {
+			//Declare hotdog for usage
+			//Find the food item
+			hotdogCollection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
+			//Query Mongo for all hotdogs for a User
+			theFilter := bson.M{"foodid": hotdog.FoodID}
+			findOptions := options.Find()
+			curHDog, err := hotdogCollection.Find(theContext, theFilter, findOptions)
+			if err != nil {
+				if strings.Contains(err.Error(), "no documents in result") {
+					goodUpdate = false
+					fmt.Printf("No documents were returned for hotdogs in MongoDB: %v\n", err.Error())
+					logWriter("No documents were returned in MongoDB for Hotdogs: " + err.Error())
+				} else {
+					goodUpdate = false
+					fmt.Printf("There was an error returning hotdogs for this User, %v: %v\n", hotdog.FoodID, err.Error())
+					logWriter("There was an error returning hotdogs in Mongo for this User " + err.Error())
+				}
+			}
+			//Loop over query results and fill hotdogs array
+			var returnedDog MongoHotDog
+			for curHDog.Next(theContext) {
+				// create a value into which the single document can be decoded
+				err := curHDog.Decode(&aHotDog)
+				if err != nil {
+					fmt.Printf("Error decoding hotdogs in MongoDB for this User, %v: %v\n", hotdog.UserID, err.Error())
+					logWriter("Error decoding hotdogs in MongoDB: " + err.Error())
+				}
+			}
+			// Close the cursor once finished
+			curHDog.Close(theContext)
+
+			//update food
+			theTimeNow := time.Now()
+			ic_collection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
+			theFilterTwo := bson.M{
+				"userid": bson.M{
+					"$eq": hotdog.FoodID, // check if bool field has value of 'false'
+				},
+			}
+
+			updatedDocument := bson.M{
+				"$set": bson.M{
+					"hotdogtype":  hotdog.HotDogType,
+					"condiments":  hotdog.Condiments,
+					"calories":    hotdog.Calories,
+					"name":        hotdog.Name,
+					"foodid":      hotdog.FoodID,
+					"userid":      hotdog.UserID,
+					"photoid":     hotdog.PhotoID,
+					"photosrc":    hotdog.PhotoSrc,
+					"datecreated": returnedDog.DateCreated,
+					"dateupdated": theTimeNow.Format("2006-01-02 15:04:05"),
+				},
+			}
+			_, err2 := ic_collection.UpdateOne(
+				theContext,
+				theFilterTwo,
+				updatedDocument,
+			)
+			if err2 != nil {
+				goodUpdate = false
+				errMsg := "Failed to update food in mongoUpdateFood: " + err2.Error()
+				fmt.Println(errMsg)
+				logWriter(errMsg)
+			} else {
+				/* NOW UPDATE FROM USER COLLECITON */
+				userCollection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
+				theFilter := bson.M{
+					"userid": bson.M{
+						"$eq": hotdog.UserID, // check if bool field has value of 'false'
+					},
+				}
+				var foundUser AUser
+				theTimeNow := time.Now()
+				foundUser.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
+				theErr := userCollection.FindOne(theContext, theFilter).Decode(&foundUser)
+				if theErr != nil {
+					if strings.Contains(theErr.Error(), "no documents in result") {
+						goodUpdate = false
+						fmt.Printf("It's all good, this document wasn't found for User,(%v) and our ID is clean.\n",
+							hotdog.UserID)
+					} else {
+						goodUpdate = false
+						fmt.Printf("DEBUG: We have another error for finding a UserID: %v \n%v\n",
+							hotdog.UserID, theErr)
+					}
+				} else {
+					/* UPDATE USER FOOD */
+					updatedHotDogMongo := MongoHotDog{
+						HotDogType:  hotdog.HotDogType,
+						Condiments:  hotdog.Condiments,
+						Calories:    hotdog.Calories,
+						Name:        hotdog.Name,
+						FoodID:      hotdog.FoodID,
+						UserID:      hotdog.UserID,
+						PhotoID:     hotdog.PhotoID,
+						PhotoSrc:    hotdog.PhotoSrc,
+						DateCreated: returnedDog.DateCreated,
+						DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+					}
+					newHDogSlice := []MongoHotDog{}
+					for i := 0; i < len(foundUser.Hotdogs.Hotdogs); i++ {
+						if foundUser.Hotdogs.Hotdogs[i].FoodID == hotdog.FoodID {
+							newHDogSlice = append(newHDogSlice, updatedHotDogMongo)
+						} else {
+							newHDogSlice = append(newHDogSlice, foundUser.Hotdogs.Hotdogs[i])
+						}
+					}
+					foundUser.Hotdogs.Hotdogs = newHDogSlice
+					updateUser(foundUser)
+				}
+			}
+		} else {
+			goodUpdate = false
+			errMsg := "Incorrect whichFood variable entered in mongoUpdateFood: " + whichFood
+			logWriter(errMsg)
+			fmt.Println(errMsg)
+		}
+	} else if strings.Contains(strings.ToUpper(whichFood), "HAMBURGER") {
+		canPost := true
+		if containsLanguage(hamburger.BurgerType) {
+			canPost = false
+		} else if containsLanguage(hamburger.Name) {
+			canPost = false
+		} else {
+			canPost = true
+		}
+		for j := 0; j < len(hamburger.Condiments); j++ {
+			if containsLanguage(hamburger.Condiments[j]) {
+				canPost = false
+			}
+		}
+		if canPost == true {
+			//Declare hotdog for usage
+			//Find the food item
+			hamburgerCollection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
+			//Query Mongo for all hotdogs for a User
+			theFilter := bson.M{"foodid": hamburger.FoodID}
+			findOptions := options.Find()
+			curHam, err := hamburgerCollection.Find(theContext, theFilter, findOptions)
+			if err != nil {
+				if strings.Contains(err.Error(), "no documents in result") {
+					goodUpdate = false
+					fmt.Printf("No documents were returned for hamburgers in MongoDB: %v\n", err.Error())
+					logWriter("No documents were returned in MongoDB for Hotdogs: " + err.Error())
+				} else {
+					goodUpdate = false
+					fmt.Printf("There was an error returning hamburgers for this User, %v: %v\n", hotdog.FoodID, err.Error())
+					logWriter("There was an error returning hamburgers in Mongo for this User " + err.Error())
+				}
+			}
+			//Loop over query results and fill hotdogs array
+			var returnedHamburger MongoHamburger
+			for curHam.Next(theContext) {
+				// create a value into which the single document can be decoded
+				err := curHam.Decode(&returnedHamburger)
+				if err != nil {
+					fmt.Printf("Error decoding hamburgers in MongoDB for this User, %v: %v\n", hotdog.UserID, err.Error())
+					logWriter("Error decoding hamburgers in MongoDB: " + err.Error())
+				}
+			}
+			// Close the cursor once finished
+			curHam.Close(theContext)
+
+			//update food
+			theTimeNow := time.Now()
+			ic_collection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
+			theFilterTwo := bson.M{
+				"userid": bson.M{
+					"$eq": hamburger.FoodID, // check if bool field has value of 'false'
+				},
+			}
+
+			updatedDocument := bson.M{
+				"$set": bson.M{
+					"burgertype":  hamburger.BurgerType,
+					"condiments":  hamburger.Condiments,
+					"calories":    hamburger.Calories,
+					"name":        hamburger.Name,
+					"foodid":      hamburger.FoodID,
+					"userid":      hamburger.UserID,
+					"photoid":     hamburger.PhotoID,
+					"photosrc":    hamburger.PhotoSrc,
+					"datecreated": returnedHamburger.DateCreated,
+					"dateupdated": theTimeNow.Format("2006-01-02 15:04:05"),
+				},
+			}
+			_, err2 := ic_collection.UpdateOne(
+				theContext,
+				theFilterTwo,
+				updatedDocument,
+			)
+			if err2 != nil {
+				goodUpdate = false
+				errMsg := "Failed to update food in mongoUpdateFood: " + err2.Error()
+				fmt.Println(errMsg)
+				logWriter(errMsg)
+			} else {
+				/* NOW UPDATE FROM USER COLLECITON */
+				userCollection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
+				theFilter := bson.M{
+					"userid": bson.M{
+						"$eq": hamburger.UserID, // check if bool field has value of 'false'
+					},
+				}
+				var foundUser AUser
+				theTimeNow := time.Now()
+				foundUser.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
+				theErr := userCollection.FindOne(theContext, theFilter).Decode(&foundUser)
+				if theErr != nil {
+					if strings.Contains(theErr.Error(), "no documents in result") {
+						goodUpdate = false
+						fmt.Printf("It's all good, this document wasn't found for User,(%v) and our ID is clean.\n",
+							hamburger.UserID)
+					} else {
+						goodUpdate = false
+						fmt.Printf("DEBUG: We have another error for finding a UserID: %v \n%v\n",
+							hamburger.UserID, theErr)
+					}
+				} else {
+					/* UPDATE USER FOOD */
+					updatedHamMongo := MongoHamburger{
+						BurgerType:  hamburger.BurgerType,
+						Condiments:  hamburger.Condiments,
+						Calories:    hamburger.Calories,
+						Name:        hamburger.Name,
+						FoodID:      hamburger.FoodID,
+						UserID:      hamburger.UserID,
+						PhotoID:     hamburger.PhotoID,
+						PhotoSrc:    hamburger.PhotoSrc,
+						DateCreated: returnedHamburger.DateCreated,
+						DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
+					}
+					newHamSlice := []MongoHamburger{}
+					for i := 0; i < len(foundUser.Hamburgers.Hamburgers); i++ {
+						if foundUser.Hotdogs.Hotdogs[i].FoodID == hotdog.FoodID {
+							newHamSlice = append(newHamSlice, updatedHamMongo)
+						} else {
+							newHamSlice = append(newHamSlice, foundUser.Hamburgers.Hamburgers[i])
+						}
+					}
+					foundUser.Hamburgers.Hamburgers = newHamSlice
+					updateUser(foundUser)
+				}
+			}
+		} else {
+			goodUpdate = false
+			errMsg := "Incorrect whichFood variable entered in mongoUpdateFood: " + whichFood
+			logWriter(errMsg)
+			fmt.Println(errMsg)
+		}
+	} else {
+		goodUpdate = false
+		errMsg := "Incorrect whichFood variable entered in sqlUpdateFood: " + whichFood
+		logWriter(errMsg)
+		fmt.Println(errMsg)
+	}
+
+	return goodUpdate
+}
+
 //DEBUG: Work in Progress
 func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 	//Our Food deletion struct
@@ -1185,6 +1466,16 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 	}
 
 	fmt.Fprintf(w, string(dataJSON))
+}
+
+//Gets a single hamburger
+func getHamb() {
+
+}
+
+//Gets a single hotdog
+func getHotdog() {
+
 }
 
 //This is for sorting the food into one string array for Mongo
