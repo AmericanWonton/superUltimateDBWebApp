@@ -515,9 +515,9 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 
 			file, fileHeader, err := r.FormFile("newFile") //Insert name of file element here
 			if err != nil {
-				fmt.Printf("Could not get uploaded file. Error getting file submission: %v\n", err.Error())
-				log.Println(err)
-				return
+				errMsg := "Could not get uploaded file in food submit Error getting file submission: " + err.Error()
+				fmt.Println(errMsg)
+				logWriter(errMsg)
 			}
 			defer file.Close()
 			fmt.Printf("DEBUG: Here's Fileheader: %v\n", fileHeader.Filename)
@@ -635,7 +635,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 				goodInsert := simpleFoodInsert("HOTDOG", sendHotdog, sendHamburger)
 				if goodInsert == true {
 					//Put file in directory AND send to Amazon
-					goodFileInsert, hexName := fileInsert(w, r)
+					_, goodFileInsert, hexName, _ := fileInsert(w, r)
 					if goodFileInsert == true {
 						//Add the photo details to the database
 						fmt.Printf("DEBUG: Uploading file to SQL database.\n")
@@ -682,6 +682,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 			hiddenHasPhoto := r.FormValue("hiddenHasPhoto")
 			//Determine if we need to update a photo or not
 			if strings.Contains(strings.ToLower(hiddenHasPhoto), "has_photo") {
+				fmt.Println("DEBUG: Updtaing food with photo")
 				//Parse Form
 				maxSize := int64(1024000) // allow only 1MB of file size
 				err := r.ParseMultipartForm(maxSize)
@@ -693,14 +694,15 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 
 				file, _, err := r.FormFile("newFile") //Insert name of file element here
 				if err != nil {
-					fmt.Printf("Could not get uploaded file. Error getting file submission: %v\n", err.Error())
-					log.Println(err)
-					return
+					errMsg := "Could not get uploaded file in food_update. Error getting file submission: " + err.Error()
+					fmt.Println(errMsg)
+					logWriter(errMsg)
 				}
 				//Form file is gotten in fileUpdate
 				//Determine what food this is
 				foodChoice := r.FormValue("foodChoice")
 				if strings.Contains(strings.ToUpper(foodChoice), strings.ToUpper("hotdog")) {
+					foodChoice := r.FormValue("foodChoice")
 					foodType := r.FormValue("foodType")
 					condimentType := r.FormValue("condimentType")
 					caloriesType := r.FormValue("calories")
@@ -711,10 +713,11 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					foodID := r.FormValue("foodID")
 					theFoodID, _ := strconv.Atoi(foodID)
 					//Update Photo first in directory and Amazon first
-					goodUpdate, hexFileName, photoID := fileUpdate(w, r, foodType, theFoodID, theUserID)
+					goodUpdate, hexFileName, photoID := fileUpdate(w, r, strings.ToUpper(foodChoice), theFoodID, theUserID)
 					if goodUpdate == true {
 						//Create updated photo path for food entries
-						theDir := urlFixer(filepath.Join("amazonimages", "pictures", foodID, foodType, hexFileName))
+						theDir := urlFixer(filepath.Join("amazonimages", "pictures", foodID,
+							strings.ToUpper(foodChoice), hexFileName))
 						//Declare values to be filled in later
 						aHotDog := Hotdog{
 							HotDogType:  foodType,
@@ -769,8 +772,8 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 						}
 
 						//Update SQL and Mongo
-						goodReturn := sqlUpdateFood("HOTDOG", aHamburger, aHotDog)
-						goodReturnMongo := mongoUpdateFood("HOTDOG", aMongoHamburger, aMongoHotDog)
+						goodReturn := sqlUpdateFood(strings.ToUpper(foodChoice), aHamburger, aHotDog, "file_update")
+						goodReturnMongo := mongoUpdateFood(strings.ToUpper(foodChoice), aMongoHamburger, aMongoHotDog, "file_update")
 						//Check to see if updates were successful
 						if goodReturn == true && goodReturnMongo == true {
 							succMsg := "Food successfully updated in Mongo for foodID: " + foodID
@@ -787,6 +790,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 						fmt.Println(errMsg)
 					}
 				} else if strings.Contains(strings.ToUpper(foodChoice), strings.ToUpper("hamburger")) {
+					foodChoice := r.FormValue("foodChoice")
 					foodType := r.FormValue("foodType")
 					condimentType := r.FormValue("condimentType")
 					caloriesType := r.FormValue("calories")
@@ -797,10 +801,11 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					foodID := r.FormValue("foodID")
 					theFoodID, _ := strconv.Atoi(foodID)
 					//Update Photo first in directory and Amazon first
-					goodUpdate, hexFileName, photoID := fileUpdate(w, r, foodType, theFoodID, theUserID)
+					goodUpdate, hexFileName, photoID := fileUpdate(w, r, strings.ToUpper(foodChoice), theFoodID, theUserID)
 					if goodUpdate == true {
 						//Create updated photo path for food entries
-						theDir := urlFixer(filepath.Join("amazonimages", "pictures", foodID, foodType, hexFileName))
+						theDir := urlFixer(filepath.Join("amazonimages", "pictures", foodID,
+							strings.ToUpper(foodChoice), hexFileName))
 						//Declare values to be filled in later
 						aHotDog := Hotdog{
 							HotDogType:  foodType,
@@ -855,8 +860,8 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 						}
 
 						//Update SQL and Mongo
-						goodReturn := sqlUpdateFood("HAMBURGER", aHamburger, aHotDog)
-						goodReturnMongo := mongoUpdateFood("HAMBURGER", aMongoHamburger, aMongoHotDog)
+						goodReturn := sqlUpdateFood(strings.ToUpper(foodChoice), aHamburger, aHotDog, "file_update")
+						goodReturnMongo := mongoUpdateFood(strings.ToUpper(foodChoice), aMongoHamburger, aMongoHotDog, "file_update")
 						//Check to see if updates were successful
 						if goodReturn == true && goodReturnMongo == true {
 							succMsg := "Food successfully updated in Mongo for foodID: " + foodID
@@ -879,9 +884,10 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 				}
 				file.Close() //Close the parsed file
 			} else if strings.Contains(strings.ToLower(hiddenHasPhoto), "no_photo") {
+				fmt.Println("DEBUG: Updating food with no photo")
 				//Parse Form
 				maxSize := int64(1024000) // allow only 1MB of file size
-				err := r.ParseMultipartForm(maxSize)
+				err := r.ParseForm()
 				if err != nil {
 					fmt.Printf("DEBUG: Ignoring this because no file should be submitted %v, %v\n", maxSize,
 						err.Error())
@@ -889,6 +895,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 				//Determine what food this is (no photo update)
 				foodChoice := r.FormValue("foodChoice")
 				if strings.Contains(strings.ToUpper(foodChoice), strings.ToUpper("hotdog")) {
+					foodChoice := r.FormValue("foodChoice")
 					foodType := r.FormValue("foodType")
 					condimentType := r.FormValue("condimentType")
 					caloriesType := r.FormValue("calories")
@@ -900,7 +907,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					theFoodID, _ := strconv.Atoi(foodID)
 					//No Photo update, just food
 					//Create updated photo path for food entries
-					theDir := urlFixer(filepath.Join("amazonimages", "pictures", foodID, foodType, hexFileName))
+					theDir := urlFixer(filepath.Join("amazonimages", "pictures", foodID, strings.ToUpper(foodChoice), "hexFileName"))
 					//Declare values to be filled in later
 					aHotDog := Hotdog{
 						HotDogType:  foodType,
@@ -909,7 +916,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 						Name:        foodName,
 						UserID:      theUserID,
 						FoodID:      theFoodID,
-						PhotoID:     photoID,
+						PhotoID:     0,
 						PhotoSrc:    theDir,
 						DateCreated: "",
 						DateUpdated: "",
@@ -922,7 +929,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 						Name:        foodName,
 						UserID:      theUserID,
 						FoodID:      theFoodID,
-						PhotoID:     photoID,
+						PhotoID:     0,
 						PhotoSrc:    theDir,
 						DateCreated: "",
 						DateUpdated: "",
@@ -955,8 +962,8 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					}
 
 					//Update SQL and Mongo
-					goodReturn := sqlUpdateFood("HOTDOG", aHamburger, aHotDog)
-					goodReturnMongo := mongoUpdateFood("HOTDOG", aMongoHamburger, aMongoHotDog)
+					goodReturn := sqlUpdateFood(strings.ToUpper(foodChoice), aHamburger, aHotDog, "no_photo")
+					goodReturnMongo := mongoUpdateFood(strings.ToUpper(foodChoice), aMongoHamburger, aMongoHotDog, "no_photo")
 					//Check to see if updates were successful
 					if goodReturn == true && goodReturnMongo == true {
 						succMsg := "Food successfully updated in Mongo for foodID: " + foodID
@@ -968,6 +975,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 						fmt.Println(errMsg)
 					}
 				} else if strings.Contains(strings.ToUpper(foodChoice), strings.ToUpper("hamburger")) {
+					foodChoice := r.FormValue("foodChoice")
 					foodType := r.FormValue("foodType")
 					condimentType := r.FormValue("condimentType")
 					caloriesType := r.FormValue("calories")
@@ -978,78 +986,72 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					foodID := r.FormValue("foodID")
 					theFoodID, _ := strconv.Atoi(foodID)
 					//Update Photo first in directory and Amazon first
-					goodUpdate, hexFileName, photoID := fileUpdate(w, r, foodType, theFoodID, theUserID)
-					if goodUpdate == true {
-						//Create updated photo path for food entries
-						theDir := urlFixer(filepath.Join("amazonimages", "pictures", foodID, foodType, hexFileName))
-						//Declare values to be filled in later
-						aHotDog := Hotdog{
-							HotDogType:  foodType,
-							Condiment:   condimentType,
-							Calories:    theCalories,
-							Name:        foodName,
-							UserID:      theUserID,
-							FoodID:      theFoodID,
-							PhotoID:     photoID,
-							PhotoSrc:    theDir,
-							DateCreated: "",
-							DateUpdated: "",
-						}
+					//goodUpdate, hexFileName, photoID := fileUpdate(w, r, strings.ToUpper(foodChoice), theFoodID, theUserID)
+					//Create updated photo path for food entries
+					theDir := urlFixer(filepath.Join("amazonimages", "pictures", foodID, strings.ToUpper(foodChoice), "hexFileName"))
+					//Declare values to be filled in later
+					aHotDog := Hotdog{
+						HotDogType:  foodType,
+						Condiment:   condimentType,
+						Calories:    theCalories,
+						Name:        foodName,
+						UserID:      theUserID,
+						FoodID:      theFoodID,
+						PhotoID:     0,
+						PhotoSrc:    theDir,
+						DateCreated: "",
+						DateUpdated: "",
+					}
 
-						aMongoHotDog := MongoHotDog{
-							HotDogType:  foodType,
-							Condiments:  turnFoodArray(condimentType),
-							Calories:    theCalories,
-							Name:        foodName,
-							UserID:      theUserID,
-							FoodID:      theFoodID,
-							PhotoID:     photoID,
-							PhotoSrc:    theDir,
-							DateCreated: "",
-							DateUpdated: "",
-						}
+					aMongoHotDog := MongoHotDog{
+						HotDogType:  foodType,
+						Condiments:  turnFoodArray(condimentType),
+						Calories:    theCalories,
+						Name:        foodName,
+						UserID:      theUserID,
+						FoodID:      theFoodID,
+						PhotoID:     0,
+						PhotoSrc:    theDir,
+						DateCreated: "",
+						DateUpdated: "",
+					}
 
-						aHamburger := Hamburger{
-							BurgerType:  foodType,
-							Condiment:   condimentType,
-							Calories:    theCalories,
-							Name:        foodName,
-							UserID:      theUserID,
-							FoodID:      theFoodID,
-							PhotoID:     photoID,
-							PhotoSrc:    theDir,
-							DateCreated: "",
-							DateUpdated: "",
-						}
+					aHamburger := Hamburger{
+						BurgerType:  foodType,
+						Condiment:   condimentType,
+						Calories:    theCalories,
+						Name:        foodName,
+						UserID:      theUserID,
+						FoodID:      theFoodID,
+						PhotoID:     0,
+						PhotoSrc:    theDir,
+						DateCreated: "",
+						DateUpdated: "",
+					}
 
-						aMongoHamburger := MongoHamburger{
-							BurgerType:  foodType,
-							Condiments:  turnFoodArray(condimentType),
-							Calories:    theCalories,
-							Name:        foodName,
-							UserID:      theUserID,
-							FoodID:      theFoodID,
-							PhotoID:     photoID,
-							PhotoSrc:    theDir,
-							DateCreated: "",
-							DateUpdated: "",
-						}
+					aMongoHamburger := MongoHamburger{
+						BurgerType:  foodType,
+						Condiments:  turnFoodArray(condimentType),
+						Calories:    theCalories,
+						Name:        foodName,
+						UserID:      theUserID,
+						FoodID:      theFoodID,
+						PhotoID:     0,
+						PhotoSrc:    theDir,
+						DateCreated: "",
+						DateUpdated: "",
+					}
 
-						//Update SQL and Mongo
-						goodReturn := sqlUpdateFood("HAMBURGER", aHamburger, aHotDog)
-						goodReturnMongo := mongoUpdateFood("HAMBURGER", aMongoHamburger, aMongoHotDog)
-						//Check to see if updates were successful
-						if goodReturn == true && goodReturnMongo == true {
-							succMsg := "Food successfully updated in Mongo for foodID: " + foodID
-							fmt.Println(succMsg)
-							logWriter(succMsg)
-						} else {
-							errMsg := "goodReturn/goodReturnMongo are false in main"
-							logWriter(errMsg)
-							fmt.Println(errMsg)
-						}
+					//Update SQL and Mongo
+					goodReturn := sqlUpdateFood(strings.ToUpper(foodChoice), aHamburger, aHotDog)
+					goodReturnMongo := mongoUpdateFood(strings.ToUpper(foodChoice), aMongoHamburger, aMongoHotDog)
+					//Check to see if updates were successful
+					if goodReturn == true && goodReturnMongo == true {
+						succMsg := "Food successfully updated in Mongo for foodID: " + foodID
+						fmt.Println(succMsg)
+						logWriter(succMsg)
 					} else {
-						errMsg := "Error updating file in main"
+						errMsg := "goodReturn/goodReturnMongo are false in main"
 						logWriter(errMsg)
 						fmt.Println(errMsg)
 					}
@@ -1075,9 +1077,9 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 
 			file, fileHeader, err := r.FormFile("newFile") //Insert name of file element here
 			if err != nil {
-				fmt.Printf("Could not get uploaded file. Error getting file submission: %v\n", err.Error())
-				log.Println(err)
-				return
+				errMsg := "DEBUG TEST: Could not get uploaded file. Error getting file submission: " + err.Error()
+				fmt.Println(errMsg)
+				logWriter(errMsg)
 			}
 			defer file.Close()
 

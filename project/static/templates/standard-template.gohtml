@@ -458,7 +458,7 @@
                             <input type="text" id="foodName" name="foodName" placeholder="foodName" minlength=1 maxlength=48>
                             <div id="photo_updater">
                                 <p>Update Photo:</p>
-                                <input id="photo-update-input" type="file" name="newFile">
+                                <input id="photo-update-input" type="file" accept=".png,.jpg" name="newFile">
                                 <input id="hiddenFoodID" type="hidden" name="hiddenFoodID">
                                 <input id="hiddenUserID" type="hidden" name="hiddenUserID">
                                 <input id="hiddenCurrentSRC" type="hidden" name="hiddenCurrentSRC">
@@ -1013,18 +1013,23 @@
         foodUpdateBtn.addEventListener("click", function(){
             //Declare input variable names to work with
             var hadPhoto = document.getElementById("hiddenHasPhoto"); //HiddenPhotoValue
+            var foodIDNumber = document.getElementById("foodID"); //foodID Numb
+            var photoInput = document.getElementById("photo-update-input"); //Photo Input
+            var updatePicForm = document.getElementById("update-picture-form"); //The photo form
+            /* CHECK TO SEE IF THERE'S A PHOTO SUBMITTED TO CHANGE */
             var photoSubmission = fileUploadCheck();
             if (photoSubmission == true){
                 //Begin process of submitting submitted photo for an update
                 hadPhoto.value = "has_photo";
             } else {
-                hadPhoto.value = "no_photo";
+                hadPhoto.value = "no_photo"; //Change to no photo form type and remove photoinput before submission
+                //updatePicForm.setAttribute("enctype", "application/x-www-form-urlencoded");
+                photoInput.parentNode.removeChild(photoInput);
             }
             var theUserID = document.getElementById("hiddenUserID"); //Set the UserID
             theUserID.value = userID; // NEED TO DO THIS FOR THE USER
             var theUpdateForm = document.getElementById("update-picture-form"); //Update Form
             
-
             //Assign fields to pass to food changer
             if (foodChoice.value == "hotdog"){
                 //See if the foodID field was assigned correctly
@@ -1034,25 +1039,17 @@
                     location.reload();
                 } else {    
                     //Good Selection
-                    /* CHECK TO SEE IF THERE'S A PHOTO SUBMITTED TO CHANGE */
                     theUpdateForm.submit();
                 }
             } else if (foodChoice.value == "hamburger"){
                 //See if the foodID field was assigned correctly
                 if (foodIDNumber < 0){
                     //bad selection
-                    console.log("User inputted a wrong selection: " + foodIDNumber);
                     alert("Please enter a foodID listed below.");
                     location.reload(true);
                 } else {    
                     //Good Selection
-                    aHamburger.BurgerType = foodType.value;
-                    aHamburger.Condiment = condimentType.value;
-                    aHamburger.Calories = caloriesNumber;
-                    aHamburger.Name = foodName.value;
-                    aHamburger.UserID = userID;
-                    aHamburger.FoodID = foodID.value;
-                    foodChanger(foodChoice.value, foodIDNumber, aHamburger, aHotDog);
+                    theUpdateForm.submit();
                 }
             } else {
                 console.log("Error, User selected nothing in the foodchoice" +

@@ -461,7 +461,7 @@ func getAllFoodUser(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, string(dataJSON))
 }
 
-func sqlUpdateFood(whichFood string, hamburger Hamburger, hotdog Hotdog) bool {
+func sqlUpdateFood(whichFood string, hamburger Hamburger, hotdog Hotdog, fileUpdate string) bool {
 	goodUpdate := true
 
 	//Check to see which food we're updating
@@ -497,16 +497,32 @@ func sqlUpdateFood(whichFood string, hamburger Hamburger, hotdog Hotdog) bool {
 			count := 0
 
 			for rows.Next() {
-				err = rows.Scan(&ourHotdog.PhotoID, &ourHotdog.PhotoSrc, &ourHotdog.DateCreated)
-				check(err)
-				//Add to count to see if anything was returned for the FoodID
-				count = count + 1
+				if strings.Contains(strings.ToLower(fileUpdate), strings.ToLower("no_photo")) {
+					err = rows.Scan(&ourHotdog.PhotoID, &ourHotdog.PhotoSrc, &ourHotdog.DateCreated)
+					check(err)
+					//Add to count to see if anything was returned for the FoodID
+					count = count + 1
+				} else if strings.Contains(strings.ToLower(fileUpdate), strings.ToLower("file_update")) {
+					var photID int  //not needed value
+					var srcy string //not needed value
+					err = rows.Scan(&photID, &srcy, &ourHotdog)
+					ourHotdog.PhotoID = hotdog.PhotoID
+					ourHotdog.PhotoSrc = hotdog.PhotoSrc
+				} else {
+					errMsg := "fileUpdate incorrect in sqlUpdateFood: " + fileUpdate
+					logWriter(errMsg)
+					fmt.Println(errMsg)
+					goodUpdate = false
+					rows.Close()
+					return goodUpdate
+				}
 			}
 			rows.Close()
 			//If nothing was returned, we had no food for the foodID and update will fail
 			if count <= 0 {
 				goodUpdate = false
-				errMsg := "No food found for the foodID to update"
+				theNumb := strconv.Itoa(hotdog.FoodID)
+				errMsg := "No food found for the foodID to update: " + theNumb
 				logWriter(errMsg)
 				fmt.Println(errMsg)
 			} else {
@@ -519,7 +535,7 @@ func sqlUpdateFood(whichFood string, hamburger Hamburger, hotdog Hotdog) bool {
 				theTimeNow := time.Now()
 				r, err := stmt.Exec(ourHotdog.HotDogType, ourHotdog.Condiment,
 					ourHotdog.Calories, ourHotdog.Name, ourHotdog.UserID,
-					hotdog.PhotoID, hotdog.PhotoSrc,
+					ourHotdog.PhotoID, ourHotdog.PhotoSrc,
 					theTimeNow.Format("2006-01-02 15:04:05"), ourHotdog.FoodID)
 				check(err)
 
@@ -575,16 +591,32 @@ func sqlUpdateFood(whichFood string, hamburger Hamburger, hotdog Hotdog) bool {
 			count := 0
 
 			for rows.Next() {
-				err = rows.Scan(&ourHamburger.PhotoID, &ourHamburger.PhotoSrc, &ourHamburger.DateCreated)
-				check(err)
-				//Add to count to see if anything was returned for the FoodID
-				count = count + 1
+				if strings.Contains(strings.ToLower(fileUpdate), strings.ToLower("no_photo")) {
+					err = rows.Scan(&ourHamburger.PhotoID, &ourHamburger.PhotoSrc, &ourHamburger.DateCreated)
+					check(err)
+					//Add to count to see if anything was returned for the FoodID
+					count = count + 1
+				} else if strings.Contains(strings.ToLower(fileUpdate), strings.ToLower("file_update")) {
+					var photID int  //not needed value
+					var srcy string //not needed value
+					err = rows.Scan(&photID, &srcy, &ourHamburger)
+					ourHamburger.PhotoID = hamburger.PhotoID
+					ourHamburger.PhotoSrc = hamburger.PhotoSrc
+				} else {
+					errMsg := "fileUpdate incorrect in sqlUpdateFood: " + fileUpdate
+					logWriter(errMsg)
+					fmt.Println(errMsg)
+					goodUpdate = false
+					rows.Close()
+					return goodUpdate
+				}
 			}
 			rows.Close()
 			//If nothing was returned, we had no food for the foodID and update will fail
 			if count <= 0 {
 				goodUpdate = false
-				errMsg := "No food found for the foodID to update"
+				theNumb := strconv.Itoa(hamburger.FoodID)
+				errMsg := "No food found for the foodID to update: " + theNumb
 				logWriter(errMsg)
 				fmt.Println(errMsg)
 			} else {
@@ -597,7 +629,7 @@ func sqlUpdateFood(whichFood string, hamburger Hamburger, hotdog Hotdog) bool {
 				theTimeNow := time.Now()
 				r, err := stmt.Exec(ourHamburger.BurgerType, ourHamburger.Condiment,
 					ourHamburger.Calories, ourHamburger.Name, ourHamburger.UserID,
-					hamburger.PhotoID, hamburger.PhotoSrc,
+					ourHamburger.PhotoID, ourHamburger.PhotoSrc,
 					theTimeNow.Format("2006-01-02 15:04:05"), ourHamburger.FoodID)
 				check(err)
 
