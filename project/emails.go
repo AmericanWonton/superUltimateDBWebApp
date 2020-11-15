@@ -53,7 +53,6 @@ func OAuthGmailService() {
 	GmailService = srv
 	if GmailService != nil {
 		succMsg := "Email service is initialized"
-		fmt.Println(succMsg)
 		logWriter(succMsg)
 	}
 }

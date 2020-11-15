@@ -112,7 +112,7 @@ function revealFoodForm(foodChoice) {
                 userIDInput.setAttribute("value", userID); 
             }
             //Give appropriate values for form to send
-            hiddenFoodAction.setAttribute("value", "food_submit")
+            hiddenFoodAction.setAttribute("value", "food_submit");
             hiddenFoodType.setAttribute("value", "HOTDOG");
             hiddenFoodNum.setAttribute("value", ""); //Not sure if needed now...
             hiddenUserNum.setAttribute("value", "");

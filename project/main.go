@@ -491,7 +491,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 	thePort := os.Getenv("PORT")
 	if thePort == "" {
 		thePort = "80"
-		fmt.Printf("DEBUG: Defaulting to this port %v\n", thePort)
+		logWriter("Defautling to this port: " + thePort)
 	}
 	vd := ViewData{aUser, aUser.UserName, aUserRole, thePort}
 	if !alreadyLoggedIn(w, r) {
@@ -500,7 +500,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 	}
 	//See if there is a submission for new food or updates/deletes
 	if r.Method == http.MethodPost {
-		fmt.Printf("We posted in main.\n")
+
 		//Determine what kind of form post this is
 		theAction := r.FormValue("hiddenFoodAction")
 		if strings.Contains(strings.ToLower(theAction), strings.ToLower("food_submit")) {
@@ -716,7 +716,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					goodUpdate, hexFileName, photoID := fileUpdate(w, r, strings.ToUpper(foodChoice), theFoodID, theUserID)
 					if goodUpdate == true {
 						//Create updated photo path for food entries
-						theDir := urlFixer(filepath.Join("amazonimages", "pictures", foodID,
+						theDir := urlFixer(filepath.Join("amazonimages", "pictures", userIDInput,
 							strings.ToUpper(foodChoice), hexFileName))
 						//Declare values to be filled in later
 						aHotDog := Hotdog{
@@ -804,7 +804,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					goodUpdate, hexFileName, photoID := fileUpdate(w, r, strings.ToUpper(foodChoice), theFoodID, theUserID)
 					if goodUpdate == true {
 						//Create updated photo path for food entries
-						theDir := urlFixer(filepath.Join("amazonimages", "pictures", foodID,
+						theDir := urlFixer(filepath.Join("amazonimages", "pictures", userIDInput,
 							strings.ToUpper(foodChoice), hexFileName))
 						//Declare values to be filled in later
 						aHotDog := Hotdog{
@@ -907,7 +907,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					theFoodID, _ := strconv.Atoi(foodID)
 					//No Photo update, just food
 					//Create updated photo path for food entries
-					theDir := urlFixer(filepath.Join("amazonimages", "pictures", foodID, strings.ToUpper(foodChoice), "hexFileName"))
+					theDir := urlFixer(filepath.Join("amazonimages", "pictures", userIDInput, strings.ToUpper(foodChoice), "hexFileName"))
 					//Declare values to be filled in later
 					aHotDog := Hotdog{
 						HotDogType:  foodType,
@@ -988,7 +988,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					//Update Photo first in directory and Amazon first
 					//goodUpdate, hexFileName, photoID := fileUpdate(w, r, strings.ToUpper(foodChoice), theFoodID, theUserID)
 					//Create updated photo path for food entries
-					theDir := urlFixer(filepath.Join("amazonimages", "pictures", foodID, strings.ToUpper(foodChoice), "hexFileName"))
+					theDir := urlFixer(filepath.Join("amazonimages", "pictures", userIDInput, strings.ToUpper(foodChoice), "hexFileName"))
 					//Declare values to be filled in later
 					aHotDog := Hotdog{
 						HotDogType:  foodType,
@@ -1043,8 +1043,8 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					}
 
 					//Update SQL and Mongo
-					goodReturn := sqlUpdateFood(strings.ToUpper(foodChoice), aHamburger, aHotDog)
-					goodReturnMongo := mongoUpdateFood(strings.ToUpper(foodChoice), aMongoHamburger, aMongoHotDog)
+					goodReturn := sqlUpdateFood(strings.ToUpper(foodChoice), aHamburger, aHotDog, "no_photo")
+					goodReturnMongo := mongoUpdateFood(strings.ToUpper(foodChoice), aMongoHamburger, aMongoHotDog, "no_photo")
 					//Check to see if updates were successful
 					if goodReturn == true && goodReturnMongo == true {
 						succMsg := "Food successfully updated in Mongo for foodID: " + foodID
@@ -1218,7 +1218,6 @@ func contact(w http.ResponseWriter, r *http.Request) {
 
 //Handles all requests coming in
 func handleRequests() {
-	fmt.Printf("DEBUG: Handling Requests...\n")
 	myRouter := mux.NewRouter().StrictSlash(true)
 
 	http.Handle("/favicon.ico", http.NotFoundHandler()) //For missing FavIcon

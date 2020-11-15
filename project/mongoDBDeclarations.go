@@ -43,11 +43,13 @@ func connectDB() *mongo.Client {
 		log.Fatal(err)
 	}
 	//List all available databases
-	databases, err := theClient.ListDatabaseNames(theContext, bson.M{})
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(databases)
+	/*
+		databases, err := theClient.ListDatabaseNames(theContext, bson.M{})
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(databases)
+	*/
 
 	return theClient
 }
@@ -579,28 +581,16 @@ func mongoUpdateFood(whichFood string, hamburger MongoHamburger, hotdog MongoHot
 			theTimeNow := time.Now()
 			ic_collection := mongoClient.Database("superdbtest1").Collection("hotdogs") //Here's our collection
 			theFilterTwo := bson.M{
-				"userid": bson.M{
+				"foodid": bson.M{
 					"$eq": hotdog.FoodID, // check if bool field has value of 'false'
 				},
 			}
 
-			updatedDocument := bson.M{
-				"$set": bson.M{
-					"hotdogtype":  hotdog.HotDogType,
-					"condiments":  hotdog.Condiments,
-					"calories":    hotdog.Calories,
-					"name":        hotdog.Name,
-					"foodid":      returnedDog.FoodID,
-					"userid":      returnedDog.UserID,
-					"photoid":     hotdog.PhotoID,
-					"photosrc":    hotdog.PhotoSrc,
-					"datecreated": returnedDog.DateCreated,
-					"dateupdated": theTimeNow.Format("2006-01-02 15:04:05"),
-				},
-			}
+			updatedDocument := bson.M{}
 
 			//Update document based on file submission
 			if strings.Contains(strings.ToLower(fileUpdate), strings.ToLower("no_photo")) {
+				fmt.Printf("DEBUG: fileUpdate in Mongo food update is: %v\n", fileUpdate)
 				updatedDocument = bson.M{
 					"$set": bson.M{
 						"hotdogtype":  hotdog.HotDogType,
@@ -616,13 +606,14 @@ func mongoUpdateFood(whichFood string, hamburger MongoHamburger, hotdog MongoHot
 					},
 				}
 			} else if strings.Contains(strings.ToLower(fileUpdate), strings.ToLower("file_update")) {
+				fmt.Printf("DEBUG: fileUpdate in Mongo food update is: %v\n", fileUpdate)
 				updatedDocument = bson.M{
 					"$set": bson.M{
 						"hotdogtype":  hotdog.HotDogType,
 						"condiments":  hotdog.Condiments,
 						"calories":    hotdog.Calories,
 						"name":        hotdog.Name,
-						"foodid":      returnedDog.FoodID,
+						"foodid":      hotdog.FoodID,
 						"userid":      returnedDog.UserID,
 						"photoid":     hotdog.PhotoID,
 						"photosrc":    hotdog.PhotoSrc,
@@ -631,6 +622,7 @@ func mongoUpdateFood(whichFood string, hamburger MongoHamburger, hotdog MongoHot
 					},
 				}
 			} else {
+				fmt.Printf("DEBUG: fileUpdate in Mongo food update is: %v\n", fileUpdate)
 				goodUpdate = false
 				errMsg := "Incorrect fileUpdate in mongoUpdateFood: " + fileUpdate
 				fmt.Println(errMsg)
@@ -638,6 +630,7 @@ func mongoUpdateFood(whichFood string, hamburger MongoHamburger, hotdog MongoHot
 				return goodUpdate
 			}
 
+			fmt.Printf("DEBUG: Here is our bson.M in mongo food update: %v\n", updatedDocument)
 			_, err2 := ic_collection.UpdateOne(
 				theContext,
 				theFilterTwo,
@@ -752,30 +745,17 @@ func mongoUpdateFood(whichFood string, hamburger MongoHamburger, hotdog MongoHot
 			theTimeNow := time.Now()
 			ic_collection := mongoClient.Database("superdbtest1").Collection("hamburgers") //Here's our collection
 			theFilterTwo := bson.M{
-				"userid": bson.M{
+				"foodid": bson.M{
 					"$eq": hamburger.FoodID, // check if bool field has value of 'false'
 				},
 			}
 
-			updatedDocument := bson.M{
-				"$set": bson.M{
-					"burgertype":  hamburger.BurgerType,
-					"condiments":  hamburger.Condiments,
-					"calories":    hamburger.Calories,
-					"name":        hamburger.Name,
-					"foodid":      returnedHamburger.FoodID,
-					"userid":      returnedHamburger.UserID,
-					"photoid":     hamburger.PhotoID,
-					"photosrc":    hamburger.PhotoSrc,
-					"datecreated": returnedHamburger.DateCreated,
-					"dateupdated": theTimeNow.Format("2006-01-02 15:04:05"),
-				},
-			}
+			updatedDocument := bson.M{}
 			//Update document based on file submission
 			if strings.Contains(strings.ToLower(fileUpdate), strings.ToLower("no_photo")) {
 				updatedDocument = bson.M{
 					"$set": bson.M{
-						"hotdogtype":  hamburger.BurgerType,
+						"burgertype":  hamburger.BurgerType,
 						"condiments":  hamburger.Condiments,
 						"calories":    hamburger.Calories,
 						"name":        hamburger.Name,
@@ -783,14 +763,14 @@ func mongoUpdateFood(whichFood string, hamburger MongoHamburger, hotdog MongoHot
 						"userid":      returnedHamburger.UserID,
 						"photoid":     returnedHamburger.PhotoID,
 						"photosrc":    returnedHamburger.PhotoSrc,
-						"datecreated": hamburger.DateCreated,
+						"datecreated": returnedHamburger.DateCreated,
 						"dateupdated": theTimeNow.Format("2006-01-02 15:04:05"),
 					},
 				}
 			} else if strings.Contains(strings.ToLower(fileUpdate), strings.ToLower("file_update")) {
 				updatedDocument = bson.M{
 					"$set": bson.M{
-						"hotdogtype":  hamburger.BurgerType,
+						"burgertype":  hamburger.BurgerType,
 						"condiments":  hamburger.Condiments,
 						"calories":    hamburger.Calories,
 						"name":        hamburger.Name,
@@ -798,7 +778,7 @@ func mongoUpdateFood(whichFood string, hamburger MongoHamburger, hotdog MongoHot
 						"userid":      returnedHamburger.UserID,
 						"photoid":     hamburger.PhotoID,
 						"photosrc":    hamburger.PhotoSrc,
-						"datecreated": hamburger.DateCreated,
+						"datecreated": returnedHamburger.DateCreated,
 						"dateupdated": theTimeNow.Format("2006-01-02 15:04:05"),
 					},
 				}

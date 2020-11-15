@@ -500,8 +500,6 @@ func sqlUpdateFood(whichFood string, hamburger Hamburger, hotdog Hotdog, fileUpd
 				if strings.Contains(strings.ToLower(fileUpdate), strings.ToLower("no_photo")) {
 					err = rows.Scan(&ourHotdog.PhotoID, &ourHotdog.PhotoSrc, &ourHotdog.DateCreated)
 					check(err)
-					//Add to count to see if anything was returned for the FoodID
-					count = count + 1
 				} else if strings.Contains(strings.ToLower(fileUpdate), strings.ToLower("file_update")) {
 					var photID int  //not needed value
 					var srcy string //not needed value
@@ -516,6 +514,8 @@ func sqlUpdateFood(whichFood string, hamburger Hamburger, hotdog Hotdog, fileUpd
 					rows.Close()
 					return goodUpdate
 				}
+				//Add to count to see if anything was returned for the FoodID
+				count = count + 1
 			}
 			rows.Close()
 			//If nothing was returned, we had no food for the foodID and update will fail
@@ -594,8 +594,6 @@ func sqlUpdateFood(whichFood string, hamburger Hamburger, hotdog Hotdog, fileUpd
 				if strings.Contains(strings.ToLower(fileUpdate), strings.ToLower("no_photo")) {
 					err = rows.Scan(&ourHamburger.PhotoID, &ourHamburger.PhotoSrc, &ourHamburger.DateCreated)
 					check(err)
-					//Add to count to see if anything was returned for the FoodID
-					count = count + 1
 				} else if strings.Contains(strings.ToLower(fileUpdate), strings.ToLower("file_update")) {
 					var photID int  //not needed value
 					var srcy string //not needed value
@@ -610,6 +608,8 @@ func sqlUpdateFood(whichFood string, hamburger Hamburger, hotdog Hotdog, fileUpd
 					rows.Close()
 					return goodUpdate
 				}
+				//Add to count to see if anything was returned for the FoodID
+				count = count + 1
 			}
 			rows.Close()
 			//If nothing was returned, we had no food for the foodID and update will fail
