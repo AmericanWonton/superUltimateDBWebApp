@@ -11,6 +11,10 @@ function navigateHeader(whichLink) {
             //Go to Documentation
             window.location.replace("/documentation");
             break;
+        case 3:
+            //Go to Index
+            window.location.replace("/");
+            break;
         default:
             console.log("Error, wrong whichLink entered: " + whichLink);
             break;
@@ -84,6 +88,25 @@ window.addEventListener('DOMContentLoaded', function(){
     }
 });
 
+//Listen for divs to hide on the documentation page
+window.addEventListener('DOMContentLoaded', function(){
+    var testDiv = document.getElementById("hedOpen1");
+
+    if (testDiv === null){
+        //Do nothing, this page dosen't have divs to hide
+        console.log("DEBUG: No documentation page...");
+    } else{
+        console.log("DEBUG: Documentation Page...");
+        var divs = document.getElementsByClassName("body_opening_div");
+        var j;
+        for (j = 0; j < divs.length; j++){
+            divs[j].display = "none";
+        }
+
+        
+    }
+});
+
 //Listen for User to click the Sign In button
 window.addEventListener('DOMContentLoaded', function(){
     var signUp = document.getElementById("signin-ask-text");
@@ -113,6 +136,29 @@ window.addEventListener('DOMContentLoaded', function(){
     }
 });
 
+
+//Open the correctDivs when clicked
+function documentDivDisplay(whichDiv){
+    console.log("DEBUG: should be displaying this link: " + whichDiv);
+    switch(whichDiv){
+        case 1:
+            //Display or not display 1st Div
+            var theDiv = document.getElementById("bodOpen1");
+            if (theDiv.style.display === "none"){
+                theDiv.style.display = "flex";
+            } else {
+                theDiv.style.display = "none";
+            }
+            break;
+        case 2:
+
+            break;
+
+        default:
+            console.log("Error, incorrect div was opened.");
+            break;
+    }
+}
 //Testing stuff
 function testFormSubmit(){
     var theForm = document.getElementById('DEBUGpostForm');

@@ -1140,10 +1140,8 @@ func documentation(w http.ResponseWriter, req *http.Request) {
 	thePort := os.Getenv("PORT")
 	if thePort == "" {
 		thePort = "80"
-		fmt.Printf("DEBUG: Defaulting to this port %v\n", thePort)
 	}
 
-	fmt.Printf("DEBUG: The port is: %v\n", thePort)
 	err1 := template1.ExecuteTemplate(w, "documentation.gohtml", nil)
 	HandleError(w, err1)
 }

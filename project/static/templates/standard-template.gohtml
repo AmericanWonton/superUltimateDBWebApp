@@ -69,7 +69,7 @@
                 <p class="documentationP">Documentation</p>
             </div>
         </div>
-    </div>
+    </header>
 {{end}}
 {{define "contact_dev_header"}}
     <header>
@@ -80,9 +80,87 @@
         </div>
     </header>
 {{end}}
+{{define "documentation_header"}}
+    <header>
+        <div class="header_selectDiv">
+            {{/******** Define both clickable links to other pages ********/}}
+            <div class="theContactDiv" onclick="navigateHeader(3)">
+                <p class="contactP">Back to Login</p>
+            </div>
+        </div>
+    </header>
+{{end}}
 {{/******** END OF HEADER SECTION ********/}}
 
 {{/******** BEGINNING OF BODY SECTION *********/}}
+{{define "documentation_intro"}}
+    <div class="documentationIntroDiv">
+        <div class="greetingDiv">
+            <div class="spheleDiv">
+                <p class="spheleP">
+                    Hello and welcome to the SuperDBWebApp. I'm Joseph Keller, the web Dev
+                    behind this site!
+                </p>
+                <p class="spheleP">
+                    The purpose of this site is to test and demonstrate various Web Development
+                    and DevOps technologies. These include Docker, MongoDB, mySQL, Javascript,
+                    Amazon AWS Storage APIs, Google APIs, Cronjobs, Golang, and plenty more
+                    to come!
+                </p>
+                <p class="spheleP">
+                    I've laid out steps to building this web app below, with links to documentation
+                    and videos to each section. If you have a question on any of these topics, please 
+                    feel free to email me in the 'Contact' section. You can also feel free to 
+                    check out this project from git, here:
+                </p>
+                <p class="spheleP">
+                    <a class="linkA" href="https://github.com/AmericanWonton/superUltimateDBWebApp"
+                    target="_blank" alt="Github Project Link">
+                        <img alt="Github Project Link" src="static/images/svg/github_pic.svg"
+                        class="linkPictures">
+                    </a>
+                </p>
+                <p class="spheleP">
+                    If you like what you see, feel free to check out my 
+                    <a class="linkA" href="http://josephkeller.me/"
+                    target="_blank" alt="My website">website!</a>
+                </p>
+            </div>
+        </div>
+    </div>
+{{end}}
+{{define "documentation_documents_block"}}
+    <div class="documentations_block_div">
+        {{/* HTML, CSS, GOLANG WEBDEV */}}
+        <div class="documentation_section_div">
+            <div class="header_opening_div">
+                <h2 class="header_opening_h2" id="hedOpen1" onclick="documentDivDisplay(1)">
+                    HTML, CSS, and Golang WebDev
+                </h2>
+            </div>
+            <div class="body_opening_div" id="bodOpen1">
+                <div class="text_body_div">
+                    <p class="text_body_p">
+                        For basic web-dev skills, I’ve got to hand it to Todd McLeod.
+                        Golang is a nifty language for building websites and APIS, but it can be
+                        Intimidating learning some of the newer concepts that take advantage of
+                        GoRoutines and Concurrent patterns for faster delivery. Todd is a fun,
+                        energetic teacher and he makes use of widely seen use-case scenarios
+                        for developers. Check out his lessons on <a class="linkA"
+                        href="https://www.udemy.com/course/learn-how-to-code/"
+                        target="_blank" alt="Todd Golang">Golang</a>, <a class="linkA"
+                        href="https://www.udemy.com/course/html-tutorial/"
+                        target="_blank" alt="Todd HTML and CSS">Creating a Website</a>, and
+                        <a class="linkA" href="https://www.udemy.com/course/go-programming-language/"
+                        target="_blank" alt="Todd Golang WebDev">WebDev with Golang</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{{end}}
+
+
 {{define "signup"}}
     <div class="signup-ask-div">
         <h2 class="signup-ask-text">
@@ -2462,63 +2540,10 @@
 {{/******* BEGINNING OF FOOTER SECTION ******/}}
 {{define "footer_div"}}
     <footer>
-        <div class="footer_div">
-            <div class="namer_div">
-                <h1 class="namername">
-                    DJ Mark Bryant
-                </h1>
-            </div>
-            <div class="contact_slide_div">
-                {{/* Here's the images for Mark's Facebook */}}
-                <div class="contact_box">
-                    <div class="image_contact_holder">
-                        <a href="https://www.facebook.com/pg/strictlydj2019/services/" target="_blank">
-                            <img src="static/img/png/facebook_512x512.png"  class="image_contact" alt="facebook_image">
-                        </a>
-                    </div>
-                    <div class="text_contact_holder">
-                        <p class="text_contact">
-                            <a href="https://www.facebook.com/pg/strictlydj2019/services/" target="_blank">
-                                Facebook: @strictlydj2019
-                            </a>
-                        </p>
-                    </div>
-                </div>
-                {{/* Here's the images for Mark's Email */}}
-                <div class="contact_box">
-                    <div class="image_contact_holder">
-                        <img src="static/img/png/gmail_512x512.png" class="image_contact" alt="gmail_image">
-                    </div>
-                    <div class="text_contact_holder">
-                        <p class="text_contact">
-                            Email: Mark.j.bryant430@gmail.com
-                        </p>
-                    </div>
-                </div>
-                {{/* Here's the images for Mark's Phone Number */}}
-                <div class="contact_box">
-                    <div class="image_contact_holder">
-                        <img src="static/img/png/phone_512x512.png" class="image_contact" alt="phone_image">
-                    </div>
-                    <div class="text_contact_holder">
-                        <p class="text_contact">
-                            Phone: 999-999-9999
-                        </p>
-                    </div>
-                </div>
-                {{/* Here's the images for Mark's LinkedIn */}}
-                <div class="contact_box">
-                    <div class="image_contact_holder">
-                        <a href="https://www.linkedin.com/in/josephbk/" target="_blank">
-                            <img src="static/img/png/LI-In-Bug_635x540.png"  class="image_contact" alt="linkedIn_image">
-                        </a>
-                    </div>
-                    <div class="text_contact_holder">
-                        <p class="text_contact">
-                            LinkedIn: URL.COM
-                        </p>
-                    </div>
-                </div>
+        <div class="footer_ContactDiv">
+            {{/******** Define both clickable links to other pages ********/}}
+            <div class="theContactDiv" onclick="navigateHeader(3)">
+                <p class="contactP">Back to Login</p>
             </div>
         </div>
     </footer>
