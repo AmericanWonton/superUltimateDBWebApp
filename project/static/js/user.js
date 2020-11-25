@@ -88,25 +88,6 @@ window.addEventListener('DOMContentLoaded', function(){
     }
 });
 
-//Listen for divs to hide on the documentation page
-window.addEventListener('DOMContentLoaded', function(){
-    var testDiv = document.getElementById("hedOpen1");
-
-    if (testDiv === null){
-        //Do nothing, this page dosen't have divs to hide
-        console.log("DEBUG: No documentation page...");
-    } else{
-        console.log("DEBUG: Documentation Page...");
-        var divs = document.getElementsByClassName("body_opening_div");
-        var j;
-        for (j = 0; j < divs.length; j++){
-            divs[j].display = "none";
-        }
-
-        
-    }
-});
-
 //Listen for User to click the Sign In button
 window.addEventListener('DOMContentLoaded', function(){
     var signUp = document.getElementById("signin-ask-text");
@@ -136,6 +117,30 @@ window.addEventListener('DOMContentLoaded', function(){
     }
 });
 
+//Set the divs to all closed so they can open correctly in the function below
+window.addEventListener('DOMContentLoaded', function(){
+    var bod1 = document.getElementById("bodOpen1");
+    if (bod1 === null){
+        //Nothing in here, not Documentation page
+    } else {
+        //Declare all Divs that need to start off with 'none' display value
+        var bod2 = document.getElementById("bodOpen2");
+        var bod3 = document.getElementById("bodOpen3");
+        var bod4 = document.getElementById("bodOpen4");
+        var bod5 = document.getElementById("bodOpen5");
+        var bod6 = document.getElementById("bodOpen6");
+        var bod7 = document.getElementById("bodOpen7");
+        //Set all the bodys to 'none' display
+        bod1.style.display = "none";
+        bod2.style.display = "none";
+        bod3.style.display = "none";
+        bod4.style.display = "none";
+        bod5.style.display = "none";
+        bod6.style.display = "none";
+        bod7.style.display = "none";
+        console.log("DEBUG: We should be hiding the divs.");
+    }
+});
 
 //Open the correctDivs when clicked
 function documentDivDisplay(whichDiv){
@@ -151,9 +156,59 @@ function documentDivDisplay(whichDiv){
             }
             break;
         case 2:
-
+            //Display or not display 2nd Div
+            var theDiv = document.getElementById("bodOpen2");
+            if (theDiv.style.display === "none"){
+                theDiv.style.display = "flex";
+            } else {
+                theDiv.style.display = "none";
+            }
             break;
-
+        case 3:
+            //Display or not display 3rd Div
+            var theDiv = document.getElementById("bodOpen3");
+            if (theDiv.style.display === "none"){
+                theDiv.style.display = "flex";
+            } else {
+                theDiv.style.display = "none";
+            }
+            break;
+        case 4:
+            //Display or not display 4th Div
+            var theDiv = document.getElementById("bodOpen4");
+            if (theDiv.style.display === "none"){
+                theDiv.style.display = "flex";
+            } else {
+                theDiv.style.display = "none";
+            }
+            break;
+        case 5:
+            //Display or not display 5th Div
+            var theDiv = document.getElementById("bodOpen5");
+            if (theDiv.style.display === "none"){
+                theDiv.style.display = "flex";
+            } else {
+                theDiv.style.display = "none";
+            }
+            break;
+        case 6:
+            //Display or not display 6th Div
+            var theDiv = document.getElementById("bodOpen6");
+            if (theDiv.style.display === "none"){
+                theDiv.style.display = "flex";
+            } else {
+                theDiv.style.display = "none";
+            }
+            break;
+        case 7:
+            //Display or not display 6th Div
+            var theDiv = document.getElementById("bodOpen7");
+            if (theDiv.style.display === "none"){
+                theDiv.style.display = "flex";
+            } else {
+                theDiv.style.display = "none";
+            }
+            break;
         default:
             console.log("Error, incorrect div was opened.");
             break;

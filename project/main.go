@@ -1250,13 +1250,14 @@ func handleRequests() {
 	myRouter.HandleFunc("/hotDogInsertWebPage", hotDogInsertWebPage).Methods("POST")       //Post Hotdogs
 	myRouter.HandleFunc("/hamburgerInsertWebPage", hamburgerInsertWebPage).Methods("POST") //Post Hamburgers
 	//File Handling Stuff
-	//myRouter.HandleFunc("/fileInsert", fileInsert).Methods("POST")               //Insert a file
 	myRouter.HandleFunc("/checkSRC", checkSRC).Methods("POST")                   //Check if directory exists
 	myRouter.HandleFunc("/deletePhotoFromS3", deletePhotoFromS3).Methods("POST") //Delete S3 Photo
 	//myRouter.HandleFunc("/fileUpdate", fileUpdate).Methods("POST")               //Update S3 Photo
 	//Validation Stuff
 	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
 	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames
+	//API Checking Stuff
+	myRouter.HandleFunc("/userInfoAPI", userInfoAPI).Methods("POST") //Get food information for User
 	//Middleware logging
 	myRouter.Handle("/", loggingMiddleware(http.HandlerFunc(logHandler)))
 	//Serve our static files
@@ -1306,6 +1307,73 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		logrus.Infof("uri: %v\n", req.RequestURI)
 		next.ServeHTTP(w, req)
 	})
+}
+
+//USER/Developer API Ping
+func userInfoAPI(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("DEBUG: Someone posted to the userInfoAPI.\n")
+	type UserSearch struct {
+		UserID int `json:"UserID"`
+	} //Declare incoming JSON
+
+	type InfoResponse struct {
+		ErrMsg []string `json:"ErrMsg"`
+		User   AUser    `json:"User"`
+	} //Define outgoing JSON
+
+	errMsg := "" //Define the err message to return as part of the ErrMsg array in infoResponse
+
+	responseMsg := InfoResponse{} //Declare response JSON to send back
+
+	//Unwrap from JSON
+	bs, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		errMsg = "Error reading the request coming in: " + err.Error() //Assemble Error
+		responseMsg.ErrMsg = append(responseMsg.ErrMsg, errMsg)        //Append Error data
+		fmt.Println(errMsg)
+		dataJSON, err := json.Marshal(responseMsg)
+		if err != nil {
+			fmt.Println("Sending response JSON in userInfoAPI: " + err.Error())
+			fmt.Fprintf(w, string("Sending response JSON in userInfoAPI: "+err.Error())) //Send Error back
+			return
+		} else {
+			fmt.Fprintf(w, string(dataJSON)) //Send Error back
+			return
+		}
+	}
+	//Marshal it into our type
+	var findUser UserSearch
+	json.Unmarshal(bs, &findUser)
+	fmt.Printf("DEBUG: Here is our findUser: %v\n", findUser)
+	//Query Mongo to get User to return
+	returnedUser, successFail, message := getUserMongo(findUser.UserID)
+	if successFail == true {
+		errMsg = message                                         //Initialze Message to add
+		responseMsg.ErrMsg = append(responseMsg.ErrMsg, message) //Append Message data
+		responseMsg.User = returnedUser                          //Add User to the returned JSON
+		//Marshal JSON to return
+		dataJSON, err := json.Marshal(responseMsg)
+		if err != nil {
+			fmt.Fprintf(w, string("Sending response JSON in userInfoAPI: "+err.Error())) //Send Error back
+			return
+		} else {
+			fmt.Fprintf(w, string(dataJSON)) //Send Message back
+			return
+		}
+	} else {
+		//Mongo query failure, sending JSON back to User
+		errMsg = "Error finding User in Mongo: " + message       //Assemble Error
+		responseMsg.ErrMsg = append(responseMsg.ErrMsg, message) //Append Error data
+		fmt.Println(errMsg)
+		dataJSON, err := json.Marshal(responseMsg)
+		if err != nil {
+			fmt.Fprintf(w, string("Sending response JSON in userInfoAPI: "+err.Error())) //Send Error back
+			return
+		} else {
+			fmt.Fprintf(w, string(dataJSON)) //Send Error back
+			return
+		}
+	}
 }
 
 /* DEBUG ZONE */

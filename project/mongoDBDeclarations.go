@@ -125,6 +125,58 @@ func updateUser(updatedUser AUser) bool {
 	return success
 }
 
+//This should return a single User, given a UserID from someone's Post
+func getUserMongo(userID int) (AUser, bool, string) {
+	var theUserReturned AUser //Initialize User to be returned after Mongo query
+	successfulFind := true
+	returnedErr := "" //Declare Error to be returned
+
+	//Query for the User, given the userID for the User
+	ic_collection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
+	theFilter := bson.M{
+		"userid": bson.M{
+			"$eq": userID, // check if bool field has value of 'false'
+		},
+	}
+	findOptions := options.FindOne()
+	findUser := ic_collection.FindOne(theContext, theFilter, findOptions)
+	if findUser.Err() != nil {
+		if strings.Contains(err.Error(), "no documents in result") {
+			stringNum := strconv.Itoa(userID) //int to string conversion
+			returnedErr = "For " + stringNum + ", no User was returned: " + err.Error()
+			fmt.Println(returnedErr)
+			logWriter(returnedErr)
+			successfulFind = false
+		} else {
+			stringNum := strconv.Itoa(userID) //int to string conversion
+			returnedErr = "For " + stringNum + ", there was a Mongo Error: " + err.Error()
+			fmt.Println(returnedErr)
+			logWriter(returnedErr)
+			successfulFind = false
+		}
+		return theUserReturned, successfulFind, returnedErr //Return with errors
+	} else {
+		err := findUser.Decode(theUserReturned)
+		if err != nil {
+			stringNum := strconv.Itoa(userID) //int to string conversion
+			returnedErr = "For " + stringNum +
+				", there was an error decoding document from Mongo: " + err.Error()
+			fmt.Println(returnedErr)
+			logWriter(returnedErr)
+			successfulFind = false
+			return theUserReturned, successfulFind, returnedErr
+		} else {
+			stringNum := strconv.Itoa(userID) //int to string conversion
+			returnedErr = "For " + stringNum +
+				", User should be successfully decoded."
+			fmt.Println(returnedErr)
+			logWriter(returnedErr)
+			successfulFind = true
+			return theUserReturned, successfulFind, returnedErr
+		}
+	}
+}
+
 func insertHotDogs(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("Inserting hotdog records in Mongo.")
 	//Collect JSON from Postman or wherever
@@ -1525,16 +1577,6 @@ func getAllFoodMongo(w http.ResponseWriter, req *http.Request) {
 	}
 
 	fmt.Fprintf(w, string(dataJSON))
-}
-
-//Gets a single hamburger
-func getHamb() {
-
-}
-
-//Gets a single hotdog
-func getHotdog() {
-
 }
 
 //This is for sorting the food into one string array for Mongo

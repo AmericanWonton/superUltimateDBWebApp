@@ -685,6 +685,23 @@
     text-align: center;
 }
 
+.pic_body_div{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+    /* styling */
+    margin: .1rem;
+}
+
+.pic_body_img{
+    width: auto;
+    height: auto;
+}
+
 
 
 
