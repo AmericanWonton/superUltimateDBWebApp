@@ -156,7 +156,7 @@ func getUserMongo(userID int) (AUser, bool, string) {
 		}
 		return theUserReturned, successfulFind, returnedErr //Return with errors
 	} else {
-		err := findUser.Decode(theUserReturned)
+		err := findUser.Decode(&theUserReturned)
 		if err != nil {
 			stringNum := strconv.Itoa(userID) //int to string conversion
 			returnedErr = "For " + stringNum +

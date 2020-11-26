@@ -324,6 +324,35 @@
                 </div>
             </div>
         </div>
+        {{/* USER API */}}
+        <div class="documentation_section_div">
+            <div class="header_opening_div">
+                <h2 class="header_opening_h2" id="hedOpen8" onclick="documentDivDisplay(8)">
+                    User API
+                </h2>
+            </div>
+            <div class="body_opening_div" id="bodOpen8">
+                <div class="text_body_div">
+                    <p class="text_body_p">
+                       I’ve got my foot in the water for some DevOps research.
+                        For Cloud Technologies, it involves a lot of APIS and 
+                        refactoring JSON to fit certain data structures. There’s
+                         nothing TOO complex about a food database, so I’ve decided 
+                         to make one simple API example for this project. Given a User’s
+                          ‘UserID’ in JSON format, this ‘userInfoAPI’ will return a User
+                           after doing a MongoDB search. Feel free to give it a try! 
+                    </p>
+                </div>
+                <div class="text_body_div">
+                    <p class="text_body_p">
+                       Send the following post request to http://superultimatedbwebapp.com/userInfoAPI:
+                    </p>
+                    <p class="text_body_p">
+                       {"UserID": YOUR_USERID_HERE} <---------
+                    </p>
+                </div>
+            </div>
+        </div>
         {{/* AMAZON FILE STORAGE AND HOSTING */}}
         <div class="documentation_section_div">
             <div class="header_opening_div">
@@ -1454,8 +1483,8 @@
             </div>
             <br>
         </div>
-        {{/* DEBUG posting section */}}  
-        <div id="DEBUGpostDiv">
+        {{/* DEBUG posting section
+            <div id="DEBUGpostDiv">
             <form id="DEBUGpostForm" enctype="multipart/form-data" method="POST" action="/mainPage">
                 <input type="text" id="DEBUGfakeInput" name="DEBUGfakeInput">
                 <input type="file" id="theTestFile" name="newFile">
@@ -1466,6 +1495,7 @@
                 </button>
             </form>
         </div>
+         */}}  
     </div>
     <script>
         //On clicked, get all data food data for this User
@@ -2077,7 +2107,6 @@
     {{/* Divs for javascript refference*/}}
     <div class="actionDiv">
         <img src="static/images/jpg/IT-GUY.jpg"  class="actionimg" alt="IT Person">
-        <img src="amazonimages/bunnytest.jpg" class="actionimg" alt="testbunny">
         <br><br>
         <p class="actionInstructionText">Okay IT person, what data would you like to read/make?</p>
         <br>
@@ -2150,8 +2179,9 @@
             </div>
             <br>
         </div>
-        {{/* DEBUG posting section */}}  
-        <div id="DEBUGpostDiv">
+        {{/* DEBUG posting section
+        
+            <div id="DEBUGpostDiv">
             <form id="DEBUGpostForm" enctype="multipart/form-data" method="POST" action="/mainPage">
                 <input type="text" id="DEBUGfakeInput" name="DEBUGfakeInput">
                 <input type="file" id="theTestFile" name="newFile">
@@ -2162,6 +2192,7 @@
                 </button>
             </form>
         </div>
+         */}}
     </div>
     <script>
         //On clicked, get all data food data for this User

@@ -494,10 +494,30 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 		logWriter("Defautling to this port: " + thePort)
 	}
 	vd := ViewData{aUser, aUser.UserName, aUserRole, thePort}
+	//Redirect User if they are not logged in
 	if !alreadyLoggedIn(w, r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
+	/* DEBUG */
+	//Header
+	for k, v := range r.Header {
+		fmt.Printf("Header field %v, Value %v\n", k, v)
+	}
+	fmt.Println("//////**********////")
+	//Body
+	//Unwrap from JSON
+	bs, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//Marshal it into our type
+	var whatever string
+	json.Unmarshal(bs, &whatever)
+
+	fmt.Printf("Here is our json returned: \n%v\n", whatever)
+
 	//See if there is a submission for new food or updates/deletes
 	if r.Method == http.MethodPost {
 

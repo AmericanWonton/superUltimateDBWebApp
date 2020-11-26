@@ -130,6 +130,7 @@ window.addEventListener('DOMContentLoaded', function(){
         var bod5 = document.getElementById("bodOpen5");
         var bod6 = document.getElementById("bodOpen6");
         var bod7 = document.getElementById("bodOpen7");
+        var bod7 = document.getElementById("bodOpen8");
         //Set all the bodys to 'none' display
         bod1.style.display = "none";
         bod2.style.display = "none";
@@ -138,6 +139,7 @@ window.addEventListener('DOMContentLoaded', function(){
         bod5.style.display = "none";
         bod6.style.display = "none";
         bod7.style.display = "none";
+        bod8.style.display = "none";
         console.log("DEBUG: We should be hiding the divs.");
     }
 });
@@ -203,6 +205,15 @@ function documentDivDisplay(whichDiv){
         case 7:
             //Display or not display 6th Div
             var theDiv = document.getElementById("bodOpen7");
+            if (theDiv.style.display === "none"){
+                theDiv.style.display = "flex";
+            } else {
+                theDiv.style.display = "none";
+            }
+            break;
+        case 8:
+            //Display or not display 6th Div
+            var theDiv = document.getElementById("bodOpen8");
             if (theDiv.style.display === "none"){
                 theDiv.style.display = "flex";
             } else {
