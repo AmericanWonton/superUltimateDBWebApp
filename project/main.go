@@ -144,10 +144,14 @@ type UserPhoto struct {
 
 //Here is our ViewData struct
 type ViewData struct {
-	User     User   `json:"User"`
-	UserName string `json:"UserName"`
-	Role     string `json:"Role"`
-	Port     string `json:"Port"`
+	User           User   `json:"User"`
+	UserName       string `json:"UserName"`
+	Role           string `json:"Role"`
+	Port           string `json:"Port"`
+	MessageDisplay bool   `json:"MessageDisplay"` //This is IF we need a message displayed
+	Message        string `json:"Message"`        //This is the message to display
+	FoodAction     string `json:"FoodAction"`     //This is what action we took with food
+	WhichFood      string `json:"WhichFood"`      //This is what food we updated
 }
 
 //Here's our session struct
@@ -493,30 +497,13 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 		thePort = "80"
 		logWriter("Defautling to this port: " + thePort)
 	}
-	vd := ViewData{aUser, aUser.UserName, aUserRole, thePort}
+	vd := ViewData{aUser, aUser.UserName, aUserRole, thePort, false, "Welcome to the Main page!",
+		"", ""}
 	//Redirect User if they are not logged in
 	if !alreadyLoggedIn(w, r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
-	/* DEBUG */
-	//Header
-	for k, v := range r.Header {
-		fmt.Printf("Header field %v, Value %v\n", k, v)
-	}
-	fmt.Println("//////**********////")
-	//Body
-	//Unwrap from JSON
-	bs, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	//Marshal it into our type
-	var whatever string
-	json.Unmarshal(bs, &whatever)
-
-	fmt.Printf("Here is our json returned: \n%v\n", whatever)
 
 	//See if there is a submission for new food or updates/deletes
 	if r.Method == http.MethodPost {
@@ -582,7 +569,6 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					_, goodFileInsert, hexName, _ := fileInsert(w, r)
 					if goodFileInsert == true {
 						//Add the photo details to the database
-						fmt.Printf("DEBUG: Uploading file to SQL database.\n")
 						//Upload photo details to DB
 						extension := filepath.Ext(fileHeader.Filename)
 						fileURL := filepath.Join("pictures", userIDInput, awsfoodType, hexName+extension)
@@ -601,6 +587,14 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 								succMsgTwo := "Photo information successfully submitted into MongoDB"
 								logWriter(succMsgTwo)
 								fmt.Println(succMsgTwo)
+								//Assemble data to be sent to inform User
+								fmt.Println("DEBUG: Got to the important part") //Debug
+								vd.MessageDisplay = true
+								vd.Message = succMsgTwo
+								vd.FoodAction = strings.ToLower(theAction)
+								vd.WhichFood = strings.ToUpper(hiddenFoodType)
+								err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+								HandleError(w, err1)
 							} else {
 								errMsg := "Issue inserting photo into MongoDB"
 								logWriter(errMsg)
@@ -1150,9 +1144,11 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(errMsg)
 		}
 		http.Redirect(w, r, "/mainPage", 302) //DEBUG: Maybe should add conditions to redirect?
+	} else {
+		//Serve the mainpage normally
+		err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+		HandleError(w, err1)
 	}
-	err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
-	HandleError(w, err1)
 }
 
 //Handles the documentation page

@@ -20,11 +20,17 @@
     </head>
     <body>
         {{/* Here is our header */}}
-        
+        {{template "mainpage_header"}}
         {{/* If the User session exists, (as in, we aren't passing in a 'nil' user),
         then display it here. */}}
         {{if .Role}}
             {{$theRole := .Role}}
+            {{/* Testing Request Data stuff */}}
+            {{$theMessage := .Message}}
+            <p class="HiddenMessageP" id="HiddenMessageP" hidden>
+                {{$theMessage}}
+            </p>
+            {{template "mainHeaderDisplay" $theMessage}}
             {{/* If the role is a User */}}
             {{if eq $theRole "user"}}
                 <p>Hey, you're logged in, {{$theRole}}! Now you can do stuff...</p>

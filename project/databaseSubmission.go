@@ -952,7 +952,6 @@ func insertUserPhotos(userid int, foodid int, photoid int, photoName string, fil
 			theLink := urlFixer(newLink)
 			theHamb.PhotoSrc = theLink
 			theHamb.DateUpdated = theTimeNow.Format("2006-01-02 15:04:05")
-			fmt.Printf("DEBUG: Here is our hamburger: %v\n", theHamb)
 		}
 		rows.Close()
 		hamUpdate := foodUpdate{

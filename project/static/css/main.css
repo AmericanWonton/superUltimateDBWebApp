@@ -421,6 +421,28 @@
     color: black;
 }
 
+.errordisplayer_div{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+    /* styling */
+    background-color: darkorange;
+    /* Debug styling */
+    border: 2px solid red;
+}
+
+.errordisplayer_p{
+    /* styling */ 
+    align-self: center;
+    text-align: center;
+    font-size: 2rem;
+    color: black;
+}
+
 /* Body Sections */
 .contentDiv{
     /* Flex-box formatting */

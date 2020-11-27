@@ -90,6 +90,21 @@
         </div>
     </header>
 {{end}}
+{{define "mainpage_header"}}
+    <header>
+        <div class="header_selectDiv">
+            {{/******** Define both clickable links to other pages ********/}}
+            <div class="theContactDiv" onclick="navigateHeader(3)">
+                <p class="contactP">Back to Login</p>
+            </div>
+            <div class="errordisplayer_div" id="errordisplayer_div">
+                <p class="errordisplayer_p" id="errordisplayer_p">
+                    
+                </p>
+            </div>
+        </div>
+    </header>
+{{end}}
 {{/******** END OF HEADER SECTION ********/}}
 
 {{/******** BEGINNING OF BODY SECTION *********/}}
@@ -2824,6 +2839,15 @@
 {{define "portExecutor"}}
     <script>
         getPort({{.}});
+    </script>
+{{end}}
+{{define "mainHeaderDisplay"}}
+    <script type="text/javascript">
+        console.log("Deeznuts");
+        var hiddenP = document.getElementById("HiddenMessageP");
+        var hiddenPValue = String(hiddenP.innerHTML);
+        console.log("Here is innerP: " + hiddenPValue);
+        getOtherHeaderValues(hiddenPValue);
     </script>
 {{end}}
 {{/* Food Seer */}}

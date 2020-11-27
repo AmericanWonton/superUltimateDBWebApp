@@ -1,13 +1,22 @@
 var userID;
 var thePort;
+
 function getUserID(passedID){
     userID = passedID;
     console.log("We've set userID to " + userID);
 }
 
+function getOtherHeaderValues(message){
+    console.log("DEBUG: Delivered the message value, it should be this: " + displayMessage);
+    //Define variables for execution
+    var errordisplayerDiv = document.getElementById("errordisplayer_div"); //Div Display
+    var errordisplayerP = document.getElementById("errordisplayer_p"); //Message display
+    //Set the message of the P
+    errordisplayerP.innerHTML = message;
+}
+
 function getPort(passedPort){
     thePort = "http://localhost:" + passedPort;
-    console.log("DEBUG: The port is: " + thePort)
 }
 
 function revealFoodForm(foodChoice) {
