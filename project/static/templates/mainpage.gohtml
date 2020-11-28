@@ -27,8 +27,12 @@
             {{$theRole := .Role}}
             {{/* Testing Request Data stuff */}}
             {{$theMessage := .Message}}
+            {{$displayMessage := .MessageDisplay}}
             <p class="HiddenMessageP" id="HiddenMessageP" hidden>
                 {{$theMessage}}
+            </p>
+            <p class="HiddenMessageP" id="HiddenMessageP2" hidden>
+                {{$displayMessage}}
             </p>
             {{template "mainHeaderDisplay" $theMessage}}
             {{/* If the role is a User */}}

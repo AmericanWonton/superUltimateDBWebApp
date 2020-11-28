@@ -148,10 +148,8 @@ type ViewData struct {
 	UserName       string `json:"UserName"`
 	Role           string `json:"Role"`
 	Port           string `json:"Port"`
-	MessageDisplay bool   `json:"MessageDisplay"` //This is IF we need a message displayed
+	MessageDisplay int    `json:"MessageDisplay"` //This is IF we need a message displayed
 	Message        string `json:"Message"`        //This is the message to display
-	FoodAction     string `json:"FoodAction"`     //This is what action we took with food
-	WhichFood      string `json:"WhichFood"`      //This is what food we updated
 }
 
 //Here's our session struct
@@ -497,8 +495,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 		thePort = "80"
 		logWriter("Defautling to this port: " + thePort)
 	}
-	vd := ViewData{aUser, aUser.UserName, aUserRole, thePort, false, "Welcome to the Main page!",
-		"", ""}
+	vd := ViewData{aUser, aUser.UserName, aUserRole, thePort, 1, "Welcome to the Main page!"}
 	//Redirect User if they are not logged in
 	if !alreadyLoggedIn(w, r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -507,7 +504,6 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 
 	//See if there is a submission for new food or updates/deletes
 	if r.Method == http.MethodPost {
-
 		//Determine what kind of form post this is
 		theAction := r.FormValue("hiddenFoodAction")
 		if strings.Contains(strings.ToLower(theAction), strings.ToLower("food_submit")) {
@@ -588,30 +584,50 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 								logWriter(succMsgTwo)
 								fmt.Println(succMsgTwo)
 								//Assemble data to be sent to inform User
-								fmt.Println("DEBUG: Got to the important part") //Debug
-								vd.MessageDisplay = true
+								vd.MessageDisplay = 0
 								vd.Message = succMsgTwo
-								vd.FoodAction = strings.ToLower(theAction)
-								vd.WhichFood = strings.ToUpper(hiddenFoodType)
 								err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 								HandleError(w, err1)
 							} else {
 								errMsg := "Issue inserting photo into MongoDB"
 								logWriter(errMsg)
 								fmt.Println("DEBUG: Issue inserting photo into MongoDB")
+								//Assemble data to be sent to inform User
+								vd.MessageDisplay = 0
+								vd.Message = errMsg
+								err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+								HandleError(w, err1)
+								return
 							}
 						} else {
 							errMsg := "Issue inserting photo information into SQL DB; insertedPhoto is false"
 							logWriter(errMsg)
 							fmt.Println(errMsg)
+							//Assemble data to be sent to inform User
+							vd.MessageDisplay = 0
+							vd.Message = errMsg
+							err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+							HandleError(w, err1)
+							return
 						}
 					} else {
-
+						//Assemble data to be sent to inform User
+						vd.MessageDisplay = 0
+						vd.Message = "File was unable to be inserted for food"
+						err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+						HandleError(w, err1)
+						return
 					}
 				} else {
 					errMsg := "Error, goodInsert is false"
 					logWriter(errMsg)
 					fmt.Println(errMsg)
+					//Assemble data to be sent to inform User
+					vd.MessageDisplay = 0
+					vd.Message = errMsg
+					err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+					HandleError(w, err1)
+					return
 				}
 			} else if strings.Contains(strings.ToUpper(hiddenFoodType), "HOTDOG") {
 				foodType := r.FormValue("hDogType")
@@ -644,7 +660,6 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					DateCreated: theTimeNow.Format("2006-01-02 15:04:05"),
 					DateUpdated: theTimeNow.Format("2006-01-02 15:04:05"),
 				}
-				fmt.Printf("DEBUG, here's our hdog: %v\n and Ham: %v\n", sendHamburger, sendHotdog)
 				//InsertFood to dbs and activate AWS variables
 				goodInsert := simpleFoodInsert("HOTDOG", sendHotdog, sendHamburger)
 				if goodInsert == true {
@@ -671,26 +686,60 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 								succMsgTwo := "Photo information successfully submitted into MongoDB"
 								logWriter(succMsgTwo)
 								fmt.Println(succMsgTwo)
+								//Assemble data to be sent to inform User
+								vd.MessageDisplay = 0
+								vd.Message = succMsgTwo
+								err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+								HandleError(w, err1)
+								return
 							} else {
 								errMsg := "Issue inserting photo into MongoDB"
 								logWriter(errMsg)
 								fmt.Println("DEBUG: Issue inserting photo into MongoDB")
+								//Assemble data to be sent to inform User
+								vd.MessageDisplay = 0
+								vd.Message = errMsg
+								err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+								HandleError(w, err1)
+								return
 							}
 						} else {
 							errMsg := "Issue inserting photo information into SQL DB; insertedPhoto is false"
 							logWriter(errMsg)
 							fmt.Println(errMsg)
+							//Assemble data to be sent to inform User
+							vd.MessageDisplay = 0
+							vd.Message = errMsg
+							err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+							HandleError(w, err1)
+							return
 						}
 					} else {
-
+						//Assemble data to be sent to inform User
+						vd.MessageDisplay = 0
+						vd.Message = "File was not able to insert for the given food"
+						err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+						HandleError(w, err1)
+						return
 					}
 				} else {
 					errMsg := "Error, goodInsert is false"
 					logWriter(errMsg)
 					fmt.Println(errMsg)
+					//Assemble data to be sent to inform User
+					vd.MessageDisplay = 0
+					vd.Message = errMsg
+					err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+					HandleError(w, err1)
+					return
 				}
 			} else {
-				fmt.Printf("DEBUG: Error, incorrect hiddenFoodType: %v\n", hiddenFoodType)
+				//Assemble data to be sent to inform User
+				vd.MessageDisplay = 0
+				vd.Message = "Error, incorrect hiddenFoodType: " + hiddenFoodType
+				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+				HandleError(w, err1)
+				return
 			}
 		} else if strings.Contains(strings.ToLower(theAction), strings.ToLower("food_update")) {
 			hiddenHasPhoto := r.FormValue("hiddenHasPhoto")
@@ -703,14 +752,26 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					fmt.Printf("Image too large. Max Size: %v\n", maxSize)
 					log.Println(err)
+					//Assemble data to be sent to inform User
+					vd.MessageDisplay = 0
+					vd.Message = "Image too large."
+					err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+					HandleError(w, err1)
 					return
 				}
 
 				file, _, err := r.FormFile("newFile") //Insert name of file element here
+				defer file.Close()
 				if err != nil {
 					errMsg := "Could not get uploaded file in food_update. Error getting file submission: " + err.Error()
 					fmt.Println(errMsg)
 					logWriter(errMsg)
+					//Assemble data to be sent to inform User
+					vd.MessageDisplay = 0
+					vd.Message = "Could not get uploaded file in food_update. Error getting file submission: " + err.Error()
+					err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+					HandleError(w, err1)
+					return
 				}
 				//Form file is gotten in fileUpdate
 				//Determine what food this is
@@ -793,15 +854,33 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 							succMsg := "Food successfully updated in Mongo for foodID: " + foodID
 							fmt.Println(succMsg)
 							logWriter(succMsg)
+							//Assemble data to be sent to inform User
+							vd.MessageDisplay = 0
+							vd.Message = succMsg
+							err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+							HandleError(w, err1)
+							return
 						} else {
 							errMsg := "goodReturn/goodReturnMongo are false in main"
 							logWriter(errMsg)
 							fmt.Println(errMsg)
+							//Assemble data to be sent to inform User
+							vd.MessageDisplay = 0
+							vd.Message = errMsg
+							err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+							HandleError(w, err1)
+							return
 						}
 					} else {
 						errMsg := "Error updating file in main"
 						logWriter(errMsg)
 						fmt.Println(errMsg)
+						//Assemble data to be sent to inform User
+						vd.MessageDisplay = 0
+						vd.Message = errMsg
+						err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+						HandleError(w, err1)
+						return
 					}
 				} else if strings.Contains(strings.ToUpper(foodChoice), strings.ToUpper("hamburger")) {
 					foodChoice := r.FormValue("foodChoice")
@@ -881,22 +960,45 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 							succMsg := "Food successfully updated in Mongo for foodID: " + foodID
 							fmt.Println(succMsg)
 							logWriter(succMsg)
+							//Assemble data to be sent to inform User
+							vd.MessageDisplay = 0
+							vd.Message = succMsg
+							err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+							HandleError(w, err1)
+							return
 						} else {
 							errMsg := "goodReturn/goodReturnMongo are false in main"
 							logWriter(errMsg)
 							fmt.Println(errMsg)
+							//Assemble data to be sent to inform User
+							vd.MessageDisplay = 0
+							vd.Message = errMsg
+							err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+							HandleError(w, err1)
+							return
 						}
 					} else {
 						errMsg := "Error updating file in main"
 						logWriter(errMsg)
 						fmt.Println(errMsg)
+						//Assemble data to be sent to inform User
+						vd.MessageDisplay = 0
+						vd.Message = errMsg
+						err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+						HandleError(w, err1)
+						return
 					}
 				} else {
 					errMsg := "Incorrect foodChoice in main: " + foodChoice
 					logWriter(errMsg)
 					fmt.Println(errMsg)
+					//Assemble data to be sent to inform User
+					vd.MessageDisplay = 0
+					vd.Message = errMsg
+					err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+					HandleError(w, err1)
+					return
 				}
-				file.Close() //Close the parsed file
 			} else if strings.Contains(strings.ToLower(hiddenHasPhoto), "no_photo") {
 				fmt.Println("DEBUG: Updating food with no photo")
 				//Parse Form
@@ -1086,6 +1188,11 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				fmt.Printf("Image too large. Max Size: %v\n", maxSize)
 				log.Println(err)
+				//Assemble data to be sent to inform User
+				vd.MessageDisplay = 0
+				vd.Message = "Image too large."
+				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+				HandleError(w, err1)
 				return
 			}
 
@@ -1094,6 +1201,12 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 				errMsg := "DEBUG TEST: Could not get uploaded file. Error getting file submission: " + err.Error()
 				fmt.Println(errMsg)
 				logWriter(errMsg)
+				//Assemble data to be sent to inform User
+				vd.MessageDisplay = 0
+				vd.Message = errMsg
+				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+				HandleError(w, err1)
+				return
 			}
 			defer file.Close()
 
@@ -1111,43 +1224,78 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 
 			if err != nil {
 				fmt.Printf("Error opening this file to store on server: %v\n", err.Error())
+				//Assemble data to be sent to inform User
+				vd.MessageDisplay = 0
+				vd.Message = "Error opening this file to store on server:" + err.Error()
+				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+				HandleError(w, err1)
+				return
 			}
 			io.Copy(f, file)
 			f.Close()
-			file.Close()
+			defer file.Close()
 			//Move file to folder
 			thePath2 := filepath.Join(theDir, "amazonimages", "pictures", "testfolder", theFileName)
 			readFile, err := os.Open(theFileName)
 			if err != nil {
 				fmt.Printf("Error opening this file: %v\n", err.Error())
+				//Assemble data to be sent to inform User
+				vd.MessageDisplay = 0
+				vd.Message = "Error opening this file:" + err.Error()
+				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+				HandleError(w, err1)
+				return
 			}
 			writeToFile, err := os.Create(thePath2)
 			if err != nil {
 				fmt.Printf("DEBUG: Error creating writeToFile: \n%v\n", err.Error())
+				//Assemble data to be sent to inform User
+				vd.MessageDisplay = 0
+				vd.Message = "Error creating writeToFile: " + err.Error()
+				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+				HandleError(w, err1)
+				return
 			}
 			//Move file Contents to folder
-			n, err := io.Copy(writeToFile, readFile)
+			_, err = io.Copy(writeToFile, readFile)
 			if err != nil {
 				fmt.Printf("Error copying the contents of the one image to the other.\n%v\n", err.Error())
+				//Assemble data to be sent to inform User
+				vd.MessageDisplay = 0
+				vd.Message = "Error copying the contents of the one image to the other " + err.Error()
+				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+				HandleError(w, err1)
+				return
 			}
-			fmt.Printf("DEBUG: move the contents of n: %v\n", n)
 			readFile.Close()    //Close File
 			writeToFile.Close() //Close File
 			//Delete created file
 			removeErr := os.Remove(theFileName)
 			if removeErr != nil {
 				fmt.Printf("Error removing the file: %v\n", removeErr.Error())
+				//Assemble data to be sent to inform User
+				vd.MessageDisplay = 0
+				vd.Message = "Error removing the file: " + err.Error()
+				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+				HandleError(w, err1)
+				return
 			}
 		} else {
 			errMsg := "Error, incorrect theAction: " + theAction
 			logWriter(errMsg)
 			fmt.Println(errMsg)
+			//Assemble data to be sent to inform User
+			vd.MessageDisplay = 0
+			vd.Message = errMsg
+			err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
+			HandleError(w, err1)
+			return
 		}
-		http.Redirect(w, r, "/mainPage", 302) //DEBUG: Maybe should add conditions to redirect?
 	} else {
 		//Serve the mainpage normally
 		err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 		HandleError(w, err1)
+		return
 	}
 }
 

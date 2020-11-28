@@ -2845,9 +2845,10 @@
     <script type="text/javascript">
         console.log("Deeznuts");
         var hiddenP = document.getElementById("HiddenMessageP");
+        var hiddenPTwo = document.getElementById("HiddenMessageP2");
         var hiddenPValue = String(hiddenP.innerHTML);
-        console.log("Here is innerP: " + hiddenPValue);
-        getOtherHeaderValues(hiddenPValue);
+        var hiddenPValueTwo = Number(hiddenPTwo.innerHTML);
+        setTimeout(function() { getOtherHeaderValues(hiddenPValue, hiddenPValueTwo); }, 5000);
     </script>
 {{end}}
 {{/* Food Seer */}}

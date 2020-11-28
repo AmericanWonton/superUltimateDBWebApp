@@ -6,13 +6,40 @@ function getUserID(passedID){
     console.log("We've set userID to " + userID);
 }
 
-function getOtherHeaderValues(message){
-    console.log("DEBUG: Delivered the message value, it should be this: " + displayMessage);
+function getOtherHeaderValues(message, willDisplay){
+    console.log("DEBUG: Delivered the message value, it should be this: " + message);
     //Define variables for execution
     var errordisplayerDiv = document.getElementById("errordisplayer_div"); //Div Display
     var errordisplayerP = document.getElementById("errordisplayer_p"); //Message display
-    //Set the message of the P
-    errordisplayerP.innerHTML = message;
+    //Determine if this div should display
+    console.log("DEBUG: willDisplay: " + willDisplay);
+    if (willDisplay === 0){
+        //Set the message of the P
+        errordisplayerP.innerHTML = message;
+        errordisplayerDiv.style.display = "flex";
+        console.log("DEBUG: We should be seeing the div now: " + willDisplay);
+        //Fade pic back up after a few seconds
+
+        setTimeout(function() { rollup(); }, 3500); //Start fading away
+        setTimeout(function() { dissapearDiv(); }, 6000);
+
+        function rollup(){
+            console.log("DEBUG: We rolling up...");
+            errordisplayerDiv.style.transition = "height 2s linear 0s";
+            errordisplayerDiv.style.height = "0px";
+            errordisplayerP.style.height = "0px";
+        }
+
+        function dissapearDiv(){
+            console.log("DEBUG: Bye Bye Div");
+            errordisplayerDiv.style.display = "none";
+        }
+
+    } else if (willDisplay === 1){
+        //Do nothing, we don't mean to display anything
+    } else {
+        console.log("Error, willDisplay is incorrect: " + willDisplay);
+    }
 }
 
 function getPort(passedPort){
@@ -470,3 +497,14 @@ function revealFoodForm(foodChoice) {
         location.reload(true); //Reload Page
     }
 }
+
+//Hides the error div unless there is an error
+window.addEventListener('DOMContentLoaded', function(){
+    var errordisplayerDiv = document.getElementById("errordisplayer_div");
+
+    if (errordisplayerDiv === null){
+        //Do nothing, the div that needs hiding isn't on this page
+    } else{
+        errordisplayerDiv.style.display = "none"; //Hide this div from displaying
+    }
+});
