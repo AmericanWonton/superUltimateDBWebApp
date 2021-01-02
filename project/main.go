@@ -255,73 +255,88 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	//If a User posts a form to log in!
 	//Search for Users in Database, send JSON version of User
 	if r.Method == http.MethodPost {
-		//Get Form Values
-		username := r.FormValue("username")
-		password := r.FormValue("password")
-		//Query database for those username and password
-		rows, err := db.Query(`SELECT * FROM users WHERE USERNAME = ?;`, username)
-		check(err)
-		defer rows.Close()
-		//Count to see if password is found or not
-		var returnedTableID int = 0
-		var returnedUsername string = ""
-		var returnedPassword string = ""
-		var returnedFName string = ""
-		var returnedLName string = ""
-		var returnedRole string = ""
-		var returnedUserID int = 0
-		var returnedDateCreated string = ""
-		var returnedDateUpdated string = ""
-
-		for rows.Next() {
-			//assign variable
-			err = rows.Scan(&returnedTableID, &returnedUsername, &returnedPassword, &returnedFName, &returnedLName, &returnedRole, &returnedUserID,
-				&returnedDateCreated, &returnedDateUpdated)
+		r.ParseForm() //Needed to parse the incoming form
+		/* Determine which form this is on the index; if it's for signing in,
+		it should be 'signInForm' for the 'hiddenFormType' value */
+		hiddenFormType := r.FormValue("hiddenFormType")
+		if hiddenFormType == "signInForm" {
+			//Get Form Values
+			username := r.FormValue("username")
+			password := r.FormValue("password")
+			//Query database for those username and password
+			rows, err := db.Query(`SELECT * FROM users WHERE USERNAME = ?;`, username)
 			check(err)
-		}
-		//Count to see if password/Username returned at all
-		if (strings.Compare(returnedUsername, "") == 0) || (strings.Compare(returnedPassword, "") == 0) {
-			fmt.Printf("Username, %v and %v, and Password, %v and %v not Found!\n", returnedUsername, "", returnedPassword, "")
-			http.Redirect(w, r, "/", http.StatusSeeOther)
-			return //DEBUG Not sure if this is needed or wanted
-		} else {
-			//Check to see if Username returned
-			if strings.Compare(username, returnedUsername) == 0 {
-				//Checking to see if password matches as well
-				theReturnedByte, err := hex.DecodeString(returnedPassword)
-				if err != nil {
-					log.Fatal(err)
-				}
-				if strings.Compare(string(theReturnedByte), password) != 0 {
-					//Password not found/not hashed correctly
-					fmt.Printf("The hashed strings aren't compatable: %v %v\n", string(theReturnedByte), password)
-					http.Redirect(w, r, "/", http.StatusSeeOther)
-					return
-				} else {
-					//Username matched, password matched good stuff
-					//User logged in, directing them to the mainpage
-					//Going to main page, passing values
-					theUser := User{username, returnedPassword, returnedFName, returnedLName, returnedRole, returnedUserID,
-						returnedDateCreated, returnedDateUpdated}
-					dbUsers[username] = theUser
-					// create session
-					uuidWithHyphen := uuid.New().String()
+			defer rows.Close()
+			//Count to see if password is found or not
+			var returnedTableID int = 0
+			var returnedUsername string = ""
+			var returnedPassword string = ""
+			var returnedFName string = ""
+			var returnedLName string = ""
+			var returnedRole string = ""
+			var returnedUserID int = 0
+			var returnedDateCreated string = ""
+			var returnedDateUpdated string = ""
 
-					cookie := &http.Cookie{
-						Name:  "session",
-						Value: uuidWithHyphen,
-					}
-					cookie.MaxAge = sessionLength
-					http.SetCookie(w, cookie)
-					dbSessions[cookie.Value] = theSession{username, time.Now()}
-					http.Redirect(w, r, "/choicepage", http.StatusSeeOther)
-					return
-				}
-			} else {
-				//Passwords do not match
-				fmt.Printf("Username, %v and %v or password, %v, did not match!\n", username, returnedUsername,
-					returnedPassword)
+			for rows.Next() {
+				//assign variable
+				err = rows.Scan(&returnedTableID, &returnedUsername, &returnedPassword, &returnedFName, &returnedLName, &returnedRole, &returnedUserID,
+					&returnedDateCreated, &returnedDateUpdated)
+				check(err)
 			}
+			//Count to see if password/Username returned at all
+			if (strings.Compare(returnedUsername, "") == 0) || (strings.Compare(returnedPassword, "") == 0) {
+				fmt.Printf("Username, %v and %v, and Password, %v and %v not Found!\n", returnedUsername, "", returnedPassword, "")
+				http.Redirect(w, r, "/", http.StatusSeeOther)
+				return //DEBUG Not sure if this is needed or wanted
+			} else {
+				//Check to see if Username returned
+				if strings.Compare(username, returnedUsername) == 0 {
+					//Checking to see if password matches as well
+					theReturnedByte, err := hex.DecodeString(returnedPassword)
+					if err != nil {
+						log.Fatal(err)
+					}
+					if strings.Compare(string(theReturnedByte), password) != 0 {
+						//Password not found/not hashed correctly
+						fmt.Printf("The hashed strings aren't compatable: %v %v\n", string(theReturnedByte), password)
+						http.Redirect(w, r, "/", http.StatusSeeOther)
+						return
+					} else {
+						//Username matched, password matched good stuff
+						//User logged in, directing them to the mainpage
+						//Going to main page, passing values
+						theUser := User{username, returnedPassword, returnedFName, returnedLName, returnedRole, returnedUserID,
+							returnedDateCreated, returnedDateUpdated}
+						dbUsers[username] = theUser
+						// create session
+						uuidWithHyphen := uuid.New().String()
+
+						cookie := &http.Cookie{
+							Name:  "session",
+							Value: uuidWithHyphen,
+						}
+						cookie.MaxAge = sessionLength
+						http.SetCookie(w, cookie)
+						dbSessions[cookie.Value] = theSession{username, time.Now()}
+						http.Redirect(w, r, "/choicepage", http.StatusSeeOther)
+						return
+					}
+				} else {
+					//Passwords do not match
+					fmt.Printf("DEBUG: Username, %v and %v or password, %v, did not match!\n", username, returnedUsername,
+						returnedPassword)
+				}
+			}
+		} else if hiddenFormType == "signUpForm" {
+
+		} else {
+			//Error, form submission not taken correctly
+			errMsg := "Incorrect form submitted on the homepage: " + hiddenFormType
+			logWriter(errMsg)
+			fmt.Printf(errMsg)
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
 		}
 	}
 	/* Execute template, handle error */
@@ -1455,7 +1470,6 @@ func handleRequests() {
 	myRouter.HandleFunc("/messageboard", messageboard)
 	//SQL Database Stuff
 	myRouter.HandleFunc("/deleteFood", deleteFood).Methods("POST")
-	//myRouter.HandleFunc("/updateFood", updateFood).Methods("POST")           //Update a certain food item
 	myRouter.HandleFunc("/insertHotDog", insertHotDog).Methods("POST")       //Post a hotdog!
 	myRouter.HandleFunc("/insertHamburger", insertHamburger).Methods("POST") //Post a hamburger!
 	myRouter.HandleFunc("/getAllFoodUser", getAllFoodUser).Methods("POST")   //Get all foods for a User ID
@@ -1481,8 +1495,9 @@ func handleRequests() {
 	myRouter.HandleFunc("/checkSRC", checkSRC).Methods("POST")                   //Check if directory exists
 	myRouter.HandleFunc("/deletePhotoFromS3", deletePhotoFromS3).Methods("POST") //Delete S3 Photo
 	//Validation Stuff
-	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
-	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames
+	myRouter.HandleFunc("/canLogin", canLogin).Methods("POST") //Login
+	myRouter.HandleFunc("/checkUsername", checkUsername)       //Check Username
+	myRouter.HandleFunc("/loadUsernames", loadUsernames)       //Loads in Usernames
 	//API Checking Stuff
 	myRouter.HandleFunc("/userInfoAPI", userInfoAPI).Methods("POST") //Get food information for User
 	//Middleware logging

@@ -12,12 +12,15 @@
 		{{/* Here are our Media Query and stylesheets */}}
 		{{template "media-queries"}}
 		{{/* Here is our Javascript or additional code needed */}}
+		<script src="static/js/user.js"></script>
 	</head>
 	<body>
 		{{/* Greetings and Signup Instructions */}}
 		{{template "signup2"}}
         {{/* Here's the form to sign up */}}
-		{{template "signup-form"}}
+		<div class="mainContentDiv" id="mainContentDiv">
+			{{template "signup-form"}}
+		</div>
 		{{/* Here's the AJAX to handle our form validation */}}
 		{{template "ajax-signup"}}
 		{{/* Here is our footer */}}

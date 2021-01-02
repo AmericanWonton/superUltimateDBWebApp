@@ -14,7 +14,7 @@ dl, dt, dd,
 fieldset, form, label, legend,
 table, caption, tbody, tfoot, thead, tr, th, td,
 article, aside, canvas, details, embed, 
-figure, figcaption, footer, header, hgroup, 
+figure, figcaption, footer, hgroup, 
 menu, nav, output, ruby, section, summary,
 time, mark, audio, video {
 	margin: 0;
@@ -26,50 +26,60 @@ time, mark, audio, video {
 }
 
 /* Usage of Google Fonts */
-body, div, p, q, i, h1, h2, h3, h4, h5, h6, a, header, footer {
-    font-family: 'Bowlby One SC', cursive, sans-serif;
-    font-family: 'Open Sans Condensed', sans-serif;
-    font-family: 'Dosis', sans-serif;
-    font-family: 'Bebas Neue', cursive, sans-serif;
-    font-family: 'Odibee Sans', sans-serif;
-    font-family: 'Nunito', sans-serif;
+body, div, p, q, i, h1, h2, h3, h4, h5, h6, a, header, footer, header {
+    font-family: 'Anton', sans-serif;
+    font-family: 'Audiowide', cursive;
+    font-family: 'Goldman', cursive;
+    font-family: 'Lobster', cursive;
+    font-family: 'Teko', sans-serif;
 }
 
 
 /* You need to initialize the parent elements to 100%
 for this to work correctly in the scrollable div */
 body, html {
-    display: flex;
-    flex-flow: row wrap;
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
     border: 0;
     width: 100%;
     height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
     font: inherit;
     vertical-align: baseline;
     /* debug */
 }
 
 header {
-    display: flex;
-    flex-flow: row wrap;
+    box-sizing: border-box;
     margin: 0em;
     padding: 0em;
     width: 100%;
 }
 
 .mainContentDiv{
-    box-sizing: border-box;
+    /* flexbox styling */
+    display: flex;
+    flex-flow: wrap;
+    align-content: center;
+    justify-content: center;
     width: 100%;
-    height: 125vh;
+    margin: 0em;
+    padding: 0em;
+    height: 70%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* styling */
+    background-color: rgb(148, 148, 211);
+    /* debug styling */
 }
 
 
 /* SYTLING FOR THE FORMS */
-.divform {
+.divformDiv {
     /* Flexbox styling */
-    display: none;
+    display: flex;
     flex-flow: wrap;
     align-content: center;
     justify-content: center;
@@ -77,7 +87,7 @@ header {
     /* styling */
     padding: 1rem;
     /* debug styling */
-    border: 2px dashed rgb(0, 0, 0);
+    
 }
 
 .signInAlignmentDiv{
@@ -88,7 +98,6 @@ header {
     justify-content: center;
     width: 100%;
     /* debug styling */
-    border: 1px solid blue;
 }
 
 #sign-in-form {
@@ -104,7 +113,6 @@ header {
     width: 40%;
     margin-right: 1em;
     /* DEBUG */
-    border: 3px dashed red;
 }
 
 .labelPText {
@@ -112,8 +120,8 @@ header {
     align-self: center;
     font-size: 1rem;
     padding-right: 1rem;
-    font-family: 'Odibee Sans', sans-serif;
-    color: rgb(207, 157, 157);
+    font-family: 'Goldman', cursive;
+    color: rgb(0, 0, 0);
 }
 
 .inputDiv {
@@ -125,7 +133,6 @@ header {
     width: 40%;
     margin-left: 1em;
     /* Debug */
-    border: 2px solid green;
 }
 
 .fieldSection{
@@ -135,14 +142,17 @@ header {
     justify-content: center;
     align-content: center;
     width: 100%;
+    /* styling */
+    padding-top: 1rem;
     /* DEBUG */
 }
 
 #my-form-button{
+    display: inline-block;
+    text-align: center;
     align-self: center;
     /* styling */
-    width: 7vw;
-    height: 7vh;
+    font-size: 1rem;
 }
 
 #inputTextMobileUN{
@@ -171,6 +181,31 @@ header {
 }
 
 /* Index Page Layout */
+.mainTitleDiv{
+    /* flexbox styling */
+    display: flex;
+    flex-flow: wrap;
+    align-content: center;
+    justify-content: center;
+    width: 100%;
+    background-color: antiquewhite;
+}
+
+.pagetitleh1{
+    color: black;
+    -webkit-text-fill-color: rgb(84, 183, 187);
+    -webkit-text-stroke-width: .05em;
+    -webkit-text-stroke-color: #000000;
+    align-self: center;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: .7rem;
+    text-transform: uppercase;
+    text-decoration: underline;
+    font-family: 'Audiowide', cursive, sans-serif;
+}
+
+
 .loginStatusDiv{
     /* flexbox styling */
     display: flex;
@@ -179,6 +214,7 @@ header {
     justify-content: center;
     padding-bottom: 1em;
     width: 100%;
+    /* debug */
 }
 
 .loginStatusP{
@@ -188,6 +224,8 @@ header {
     align-content: center;
     text-align: center;
     align-self: center;
+    font-family: 'Teko', sans-serif;
+
 }
 
 .signInAndUpDiv{
@@ -196,9 +234,10 @@ header {
     flex-flow: wrap;
     align-content: center;
     justify-content: center;
-    padding: 1em;
-    margin: 1em;
+    padding-top: .5em;
+    margin-top: .5em;
     width: 100%;
+    /* debug */
 }
 
 .signup-ask-div {
@@ -209,25 +248,37 @@ header {
     justify-content: center;
     align-self: center;
     padding: 1em;
-    width: 45%;
+    width: 100%;
+    /* debug */
+    border: 1px solid orange;
+}
+
+.informtextP{
+    font-size: 1rem;
+    text-align: center;
+    font-family: 'Teko', sans-serif;
 }
 
 .signup-ask-text {
+    font-family: 'Lobster', cursive;
     color: blue;
     align-self: center;
     font-size: 3rem;
     font-weight: 1rem;
+    text-align: center;
     text-transform: uppercase;
     text-decoration: underline;
     text-shadow: .2em .2em .2em rgb(0, 0, 0);
 }
 
 .signup-ask-text:hover{
+    font-family: 'Lobster', cursive;
     color: purple;
     align-self: center;
     font-size: 4rem;
-    font-weight: 1.5rem;
+    font-weight: 1.2rem;
     text-transform: uppercase;
+    text-align: center;
     text-decoration: underline;
     text-shadow: .2em .2em .2em rgb(0, 0, 0);
 }
@@ -240,24 +291,29 @@ header {
     justify-content: center;
     align-self: center;
     padding: 1em;
-    width: 45%;
+    width: 40%;
+    /* debug */
 }
 
 .signin-ask-text {
+    font-family: 'Lobster', cursive;
     color: blue;
     align-self: center;
     font-size: 3rem;
     font-weight: 1rem;
+    text-align: center;
     text-transform: uppercase;
     text-decoration: underline;
     text-shadow: .2em .2em .2em rgb(0, 0, 0);
 }
 
 .signin-ask-text:hover {
+    font-family: 'Lobster', cursive;
     color: purple;
     align-self: center;
     font-size: 4rem;
-    font-weight: 1.5rem;
+    font-weight: 1.2rem;
+    text-align: center;
     text-transform: uppercase;
     text-decoration: underline;
     text-shadow: .2em .2em .2em rgb(0, 0, 0);
@@ -458,6 +514,15 @@ header {
 }
 
 /* Header Layouts */
+.headerContainerDiv{
+    /* Flex-box formatting */
+    box-sizing: border-box;
+    width: 100%;
+    /* styling */
+    border: 2px solid rgb(0, 0, 0);
+    background-color: antiquewhite;
+}
+
 .header_selectDiv{
     /* Flex-box formatting */
     display: flex;
@@ -467,11 +532,9 @@ header {
     align-items: center;
     align-self: center;
     width: 100%;
-
     /* styling */
-    padding: 1em;
+    margin-top: 1em;
     /* debug */
-    border: 2px solid black;
     background-color: antiquewhite;
 }
 
@@ -484,16 +547,16 @@ header {
     align-items: center;
     width: 45%;
     /* styling */
-    padding: 1em;
+    padding: .5em;
     background-color: lightblue;
-    border-radius: 70%;
+    border-radius: 20%;
     /* debug */
     border: 2px solid black;
 }
 
 .theContactDiv:hover{
-    border: 6px solid black;
-    border-radius: 70%;
+    border: 3px solid black;
+    border-radius: 20%;
 }
 
 .contactP{
@@ -501,6 +564,8 @@ header {
     margin: .5em;
     padding: .5em;
     font-size: 1rem;
+    text-align: center;
+    font-family: 'Anton', sans-serif;
 }
 
 .theDocumentationDiv{
@@ -512,17 +577,16 @@ header {
     align-items: center;
     width: 45%;
     /* styling */
-    margin: 1em;
-    padding: 1em;
-    border-radius: 70%;
+    padding: .5em;
+    border-radius: 20%;
     background-color: lightgreen;
-    /* debug */
     border: 2px solid black;
+    /* debug */
 }
 
 .theDocumentationDiv:hover{
-    border: 6px solid black;
-    border-radius: 70%;
+    border: 3px solid black;
+    border-radius: 20%;
 }
 
 .documentationP{
@@ -530,6 +594,8 @@ header {
     margin: .5em;
     padding: .5em;
     font-size: 1rem;
+    text-align: center;
+    font-family: 'Anton', sans-serif;
 }
 
 .header_ContactDiv{

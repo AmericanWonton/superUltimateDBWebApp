@@ -30,7 +30,7 @@ func connectDB() *mongo.Client {
 		fmt.Printf("Errored getting mongo client: %v\n", err)
 		log.Fatal(err)
 	}
-	theContext, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	theContext, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	err = theClient.Connect(theContext)
 	if err != nil {
 		fmt.Printf("Errored getting mongo client context: %v\n", err)

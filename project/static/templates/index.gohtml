@@ -26,7 +26,7 @@
             {{if .UserName}}
                 <div class="loginStatusDiv" id="loginStatusDiv">
                     <p class="loginStatusP" id="loginStatusP">
-                        Hey, here's your info, you should be logged in. We can sign you into stuff...
+                        Congrats! You've kept a cookie long enough to stay logged in!
                     </p>
                 </div>
                 {{/* Here is our form asking us to sign in! */}}
@@ -36,12 +36,18 @@
                     {{template "sign-in-form"}}
                 </div>
             {{else}}
-                <p align-self="center">Good sire, it's my displeasure to inform you that you are NOT signed in.</p>
-                <br>
-                <p align-self="center">You must either sign in below or sign up</p>
-                {{template "signup"}}
-                {{template "signin"}}
-                {{template "sign-in-form"}}
+                <div class="loginStatusDiv" id="loginStatusDiv">
+                    <p class="loginStatusP" id="loginStatusP">
+                        Hey, make sure to sign in and make yourself a cookie!
+                    </p>
+                </div>
+                {{/* Here is our form asking us to sign in! */}}
+                <div class="signInAndUpDiv" id="signInAndUpDiv">
+                    {{template "signup"}}
+                    {{template "signin"}}
+                    {{template "signInFormAjax"}}
+                    {{template "ajaxsignup"}}
+                </div>
             {{end}}
         </div>
         {{/* Here is our footer */}}

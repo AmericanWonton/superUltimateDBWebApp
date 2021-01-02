@@ -13,7 +13,8 @@
 {{end}}
 
 {{define "fonts1"}}
-    <link href="https://fonts.googleapis.com/css?family=Bebas+Neue|Bowlby+One+SC|Dosis|Nunito|Odibee+Sans|Open+Sans+Condensed:300&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Audiowide&family=Goldman:wght@700&family=Lobster&family=Teko:wght@500&display=swap" rel="stylesheet">
 {{end}}
 
 {{define "media-queries"}}
@@ -60,13 +61,20 @@
 {{end}}
 {{define "index_header"}}
     <header>
-        <div class="header_selectDiv">
-            {{/******** Define both clickable links to other pages ********/}}
-            <div class="theContactDiv" onclick="navigateHeader(1)">
-                <p class="contactP">Contact the Dev</p>
+        <div class="headerContainerDiv">
+            <div class="mainTitleDiv">
+                <h1 class="pagetitleh1">
+                    super-ultimate-db-web-app
+                </h1>
             </div>
-            <div class="theDocumentationDiv" onclick="navigateHeader(2)">
-                <p class="documentationP">Documentation</p>
+            <div class="header_selectDiv">
+                {{/******** Define both clickable links to other pages ********/}}
+                <div class="theContactDiv" onclick="navigateHeader(1)">
+                    <p class="contactP">Contact the Dev</p>
+                </div>
+                <div class="theDocumentationDiv" onclick="navigateHeader(2)">
+                    <p class="documentationP">Documentation</p>
+                </div>
             </div>
         </div>
     </header>
@@ -453,16 +461,12 @@
 {{end}}
 {{define "signup2"}}
     <div class="signup-ask-div">
-        <h2 class="signup-ask-text">
-            Sign Up!
-        </h2>
-        <p>Just a heads up, Users can get instant access to create and read data.</p>
-        <br>
-        <p>
-            If you'd like an IT/Admin Role, fill out the form and provide your email. I'll 
-            add your access as soon as I can ;) 
+        <p class="informtextP" id="informtextP">
+            Please create an account to alter your own data and use the messageboard.
+            Just a heads up, the Admin role requires access granted from me,
+            (along with the ability to create/delete certain tables). I would select
+            User/IT for now!
         </p>
-        <br>
     </div>
 {{end}}
 {{define "signin"}}
@@ -526,7 +530,7 @@
 
 {{/* BEGINNING OF 'SIGN-UP' FORM DEFINITION */}}
 {{define "signup-form"}}
-    <div id="divform">
+    <div id="divformDiv" class="">
         <form id="signup-form"
         name="signup-form"
         action=""
@@ -557,7 +561,87 @@
     </div>
 {{end}}
 {{/* SIGN-UP FORM AJAX BEGINNING */}}
-{{define "ajax-signup"}}
+{{define "ajaxsignup"}}
+    {{/* Here is the form setup,(which starts off hidden */}}
+    <div id="divformDivSignUp" class="divformDiv">
+        <div class="signInAlignmentDiv">
+            {{/* USERNAME */}}
+            <div class="labelDiv">
+                <p class="labelPText">
+                    USERNAME:
+                </p>
+            </div>
+            <div class="inputDiv">
+                <input type="text" id="username" name="username" placeholder="username" minlength=1 maxlength=20 required>
+                <br>
+                <p id="form-input-info"></p>
+            </div>
+            {{/* PASSWORD */}}
+            <div class="labelDiv">
+                <p class="labelPText">
+                    PASSWORD:
+                </p>
+            </div>
+            <div class="inputDiv">
+                <input type="password" id="password" name="password" placeholder="password" minlength=8 maxlength=20 required>
+                <br>
+                <p id="form-input-info2"></p>
+            </div>
+            {{/* FIRST NAME */}}
+            <div class="labelDiv">
+                <p class="labelPText">
+                    First Name:
+                </p>
+            </div>
+            <div class="inputDiv">
+                <input type="text" id="firstname" name="firstname" placeholder="first name" minlength=1 maxlength=20 required>
+                <br>
+                <p id="form-input-info3"></p>
+            </div>
+            {{/* LAST NAME */}}
+            <div class="labelDiv">
+                <p class="labelPText">
+                    Last Name:
+                </p>
+            </div>
+            <div class="inputDiv">
+                <input type="text" id="lastname" name="lastname" placeholder="last name" minlength=1 maxlength=20 required>
+                <br>
+                <p id="form-input-info4"></p>
+            </div>
+            {{/* EMAIL */}}
+            <div class="labelDiv">
+                <p class="labelPText">
+                    Email:
+                </p>
+            </div>
+            <div class="inputDiv">
+                <input type="text" id="email" name="email" placeholder="email" maxlength=50>
+                <br>
+            </div>
+            {{/* ROLE */}}
+            <div class="labelDiv">
+                <p class="labelPText">
+                    Role:
+                </p>
+            </div>
+            <div class="inputDiv">
+                <select name="role" id="sr">
+                    <option value="user">USER</option>
+                    <option value="admin">ADMIN</option>
+                    <option value="IT">IT</option>
+                </select>
+            </div>
+            {{/* SUBMIT BUTTON */}}
+            <div class="fieldSection">
+                <button id="submitSignUpButton">Submit</button>
+            </div>
+            {{/* INFORMITIVE DIV */}}
+            <div class="informativeDiv" id="informativeDivSignUp">
+                <p class="informtextP" id="informtextPSignUp"></p>
+            </div>
+        </div>
+    </div>
     {{/* On load, query available Usernames */}}
     <script>
         var theForm = document.querySelector('#signup-form');
@@ -696,7 +780,6 @@
                     TheUser: newUser,
                     Email: email.value
                 };
-                console.log("DEBUG: About to evaluate which role to send email to");
                 var jsonString = JSON.stringify(userData);
                 if (role.value == "user"){
                     //Create User
@@ -755,7 +838,7 @@
 {{/* ENDING OF 'SIGN-UP' FORM DEFINITION */}}
 {{/* BEGINNING OF 'SIGN-IN' FORM DEFINITION */}}
 {{define "sign-in-form"}}
-    <div id="divform" class="divform">
+    <div id="divformDiv" class="divformDiv">
         <form id="sign-in-form"
         method="POST">
             <div class="signInAlignmentDiv">
@@ -783,9 +866,98 @@
                 <div class="fieldSection">
                     <button id="my-form-button">Submit</button>
                 </div>
+				{{/* Hidden Form Value to tell what form this is on homepage */}}
+				<input id="hiddenFormType" type="hidden" name="hiddenFormType" value="signInForm">
             </div>
         </form>
     </div>
+{{end}}
+{{/* DEBUG: Possibly get rid of above because we have AJAX */}}
+
+{{define "signInFormAjax"}}
+    <div id="divformDivLogin" class="divformDiv">
+        <div class="signInAlignmentDiv">
+            {{/* USERNAME */}}
+            <div class="labelDiv">
+                <p class="labelPText">
+                    USERNAME:
+                </p>
+            </div>
+            <div class="inputDiv">
+                <input type="text" name="username" placeholder="username" id="inputTextMobileUN" required/>
+                <p class="form-field-err" id="username-err"></p>
+            </div>
+            {{/* PASSWORD */}}
+            <div class="labelDiv">
+                <p class="labelPText">
+                    PASSWORD:
+                </p>
+            </div>
+            <div class="inputDiv">
+                <input type="password" name="password" placeholder="password" id="inputTextMobilePW" required/>
+                <p class="form-field-err" id="password-err"></p>
+            </div>
+            {{/* SUBMIT BUTTON */}}
+            <div class="fieldSection">
+                <button id="submitLoginButton">Submit</button>
+            </div>
+            {{/* INFORMITIVE DIV */}}
+            <div class="informativeDiv" id="informativeDivSignIn">
+                <p class="informtextP" id="informtextPSignIn"></p>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        //Define elements of the 'Ajax Form'
+        var inputTextMobileUN = document.getElementById("inputTextMobileUN");
+        var inputTextMobilePW = document.getElementById("inputTextMobilePW");
+        var submitLoginButton = document.getElementById("submitLoginButton");
+        var informtextPSignIn = document.getElementById("informtextPSignIn");
+
+        /* When clicked, submit the results of the login items;
+        if successful, it will redirect to the mainpage with your newly made cookie.
+        */
+        submitLoginButton.addEventListener("click", function(){
+            var LoginData = {
+                Username: String(inputTextMobileUN.value),
+                Password: String(inputTextMobilePW.value)
+            };
+
+            var jsonString = JSON.stringify(LoginData); //stringify JSON
+
+            //Call Ajax to see if password/username are correct
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/canLogin', true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.addEventListener('readystatechange', function(){
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                    var Response = xhr.responseText;
+                    if (Number(Response.ResultNum) === 0){
+                        //Successful User Search
+                        //Clear informtextPSignIn
+                        informtextPSignIn.innerHTML = "";
+                        informtextPSignIn.innerHTML = Response.ResultMessage;
+                        //This User should have their cookie. Send them to the choice page
+                        navigateHeader(6);
+                    } else if (Number(Response.ResultNum) === 1){
+                        //Failed User Search
+                        //Clear informtextPSignIn
+                        informtextPSignIn.innerHTML = "";
+                        informtextPSignIn.innerHTML = Response.ResultMessage;
+                    } else {
+                        //Failed User Search
+                        //Clear informtextPSignIn
+                        informtextPSignIn.innerHTML = "";
+                        informtextPSignIn.innerHTML = "Wrong information returned from server";
+                        console.log("Wrong number returned from canLogin: " + Response.ResultNum);
+                        //This User should have their cookie. Send them to the choice page
+                        navigateHeader(6);
+                    }
+                }
+            });
+            xhr.send(jsonString);
+        });
+    </script>
 {{end}}
 {{/* ENDING OF THE 'SIGN-IN' FORM DEFINITION */}}
 {{/* BEGINNING OF USER ACTION PAGE */}}

@@ -1,4 +1,5 @@
 var openSignInWindow = false;
+var openSignUpWindow = false;
 
 //Used to control which link to send our user to
 function navigateHeader(whichLink) {
@@ -24,8 +25,8 @@ function navigateHeader(whichLink) {
             window.location.replace("/");
             break;
         case 6:
-            //Go to signup Page
-            window.location.replace("/signup");
+            //Go to choicepage Page
+            window.location.replace("/choicepage");
             break;
         default:
             console.log("Error, wrong whichLink entered: " + whichLink);
@@ -102,29 +103,69 @@ window.addEventListener('DOMContentLoaded', function(){
 
 //Listen for User to click the Sign In button
 window.addEventListener('DOMContentLoaded', function(){
-    var signUp = document.getElementById("signin-ask-text");
-    if (signUp === null){
+    var signIn = document.getElementById("signin-ask-text");
+    if (signIn === null){
         //Do nothing, this isn't on this page
     } else {
         //Declare the variables on the window
-        var divForm = document.getElementById("divform");
-        divForm.style = "display: none";
+        var divformDivLogin = document.getElementById("divformDivLogin");
+        divformDivLogin.style = "display: none";
         //Listen for the button click
-        signUp.addEventListener("click", function(){
-            
+        signIn.addEventListener("click", function(){
+            //First check to see if other sheet is open; if yes, close it
+            var divformDivSignUp = document.getElementById("divformDivSignUp");
+            if (openSignUpWindow === true) {
+                openSignUpWindow = false;
+                divformDivSignUp.style = "display: none";
+            }
+            //Open this form if needed
             if (openSignInWindow === false){
-                divForm.style = "display: flex";
-                divForm.style = "flex-flow: wrap";
-                divForm.style = "align-content: center";
-                divForm.style = "justify-content: center";
-                divForm.style = "width: 100%";
-                divForm.style = "padding: 1rem";
+                divformDivLogin.style = "display: flex";
+                divformDivLogin.style = "flex-flow: wrap";
+                divformDivLogin.style = "align-content: center";
+                divformDivLogin.style = "justify-content: center";
+                divformDivLogin.style = "width: 100%";
+                divformDivLogin.style = "padding: 1rem";
                 openSignInWindow = true;
             } else {
-                divForm.style = "display: none";
+                divformDivLogin.style = "display: none";
                 openSignInWindow = false;
             }
-            console.log("openSignIn is: " + openSignInWindow);
+        });
+    }
+});
+
+//Listen for User to click the Sign Up button
+window.addEventListener('DOMContentLoaded', function(){
+    var signUp = document.getElementById("signup-ask-text");
+
+    if (signUp === null){
+        //Do nothing, it isn't on this page
+    } else {
+        //Declare the variables on the window
+        var divformDivSignUp = document.getElementById("divformDivSignUp");
+        divformDivSignUp.style = "display: none";
+        //Listen for the button click
+        signUp.addEventListener("click", function(){
+            //First check to see if other sheet is open; if yes, close it
+            var divformDivLogin = document.getElementById("divformDivLogin");
+            if (openSignInWindow === true) {
+                openSignInWindow = false;
+                divformDivLogin.style = "display: none";
+            }
+            //open this sheet if needed
+            if (openSignUpWindow === false){
+                divformDivSignUp.style = "display: flex";
+                divformDivSignUp.style = "flex-flow: wrap";
+                divformDivSignUp.style = "align-content: center";
+                divformDivSignUp.style = "justify-content: center";
+                divformDivSignUp.style = "width: 100%";
+                divformDivSignUp.style = "padding: 1rem";
+                openSignUpWindow = true;
+            } else {
+                divformDivLogin.style = "display: none";
+                openSignUpWindow = false;
+            }
         });
     }
 });
@@ -237,6 +278,8 @@ function documentDivDisplay(whichDiv){
             break;
     }
 }
+
+
 //Testing stuff
 function testFormSubmit(){
     var theForm = document.getElementById('DEBUGpostForm');
