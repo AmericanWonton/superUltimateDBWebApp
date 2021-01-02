@@ -150,6 +150,7 @@ type ViewData struct {
 	Port           string `json:"Port"`
 	MessageDisplay int    `json:"MessageDisplay"` //This is IF we need a message displayed
 	Message        string `json:"Message"`        //This is the message to display
+	IsSuccess      int    `json:"IsSuccess"`      //Determines if the message is successful
 }
 
 //Here's our session struct
@@ -313,7 +314,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 					cookie.MaxAge = sessionLength
 					http.SetCookie(w, cookie)
 					dbSessions[cookie.Value] = theSession{username, time.Now()}
-					http.Redirect(w, r, "/mainPage", http.StatusSeeOther)
+					http.Redirect(w, r, "/choicepage", http.StatusSeeOther)
 					return
 				}
 			} else {
@@ -328,19 +329,18 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	HandleError(w, err1)
 }
 
-//signUp
-func signUp(w http.ResponseWriter, req *http.Request) {
+//signup
+func signup(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("DEBUG: We are in the signup endpoint\n")
 	//See if user is already logged in
-	if alreadyLoggedIn(w, req) {
+	if alreadyLoggedIn(w, r) {
 		//If already logged in, put them back at the main menu
-		http.Redirect(w, req, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
 	err1 := template1.ExecuteTemplate(w, "signup.gohtml", nil)
 	HandleError(w, err1)
-
-	fmt.Printf("Signup Endpoint Hit\n")
 }
 
 //Begins Sending Email to User and creates a User for database entry
@@ -485,7 +485,7 @@ func signUpUserUpdated(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-//mainPage
+//mainPage (also known as the database page)
 func mainPage(w http.ResponseWriter, r *http.Request) {
 	//if User is already logged in, bring them to the mainPage!
 	aUser := getUser(w, r) //Get the User, if they exist
@@ -495,7 +495,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 		thePort = "80"
 		logWriter("Defautling to this port: " + thePort)
 	}
-	vd := ViewData{aUser, aUser.UserName, aUserRole, thePort, 1, "Welcome to the Main page!"}
+	vd := ViewData{aUser, aUser.UserName, aUserRole, thePort, 1, "Welcome to the Main page!", 0}
 	//Redirect User if they are not logged in
 	if !alreadyLoggedIn(w, r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -586,6 +586,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 								//Assemble data to be sent to inform User
 								vd.MessageDisplay = 0
 								vd.Message = succMsgTwo
+								vd.IsSuccess = 0
 								err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 								HandleError(w, err1)
 							} else {
@@ -595,6 +596,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 								//Assemble data to be sent to inform User
 								vd.MessageDisplay = 0
 								vd.Message = errMsg
+								vd.IsSuccess = 1
 								err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 								HandleError(w, err1)
 								return
@@ -606,6 +608,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 							//Assemble data to be sent to inform User
 							vd.MessageDisplay = 0
 							vd.Message = errMsg
+							vd.IsSuccess = 1
 							err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 							HandleError(w, err1)
 							return
@@ -614,6 +617,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 						//Assemble data to be sent to inform User
 						vd.MessageDisplay = 0
 						vd.Message = "File was unable to be inserted for food"
+						vd.IsSuccess = 1
 						err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 						HandleError(w, err1)
 						return
@@ -625,6 +629,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					//Assemble data to be sent to inform User
 					vd.MessageDisplay = 0
 					vd.Message = errMsg
+					vd.IsSuccess = 1
 					err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 					HandleError(w, err1)
 					return
@@ -689,6 +694,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 								//Assemble data to be sent to inform User
 								vd.MessageDisplay = 0
 								vd.Message = succMsgTwo
+								vd.IsSuccess = 0
 								err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 								HandleError(w, err1)
 								return
@@ -699,6 +705,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 								//Assemble data to be sent to inform User
 								vd.MessageDisplay = 0
 								vd.Message = errMsg
+								vd.IsSuccess = 1
 								err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 								HandleError(w, err1)
 								return
@@ -710,6 +717,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 							//Assemble data to be sent to inform User
 							vd.MessageDisplay = 0
 							vd.Message = errMsg
+							vd.IsSuccess = 1
 							err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 							HandleError(w, err1)
 							return
@@ -718,6 +726,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 						//Assemble data to be sent to inform User
 						vd.MessageDisplay = 0
 						vd.Message = "File was not able to insert for the given food"
+						vd.IsSuccess = 1
 						err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 						HandleError(w, err1)
 						return
@@ -729,6 +738,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					//Assemble data to be sent to inform User
 					vd.MessageDisplay = 0
 					vd.Message = errMsg
+					vd.IsSuccess = 1
 					err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 					HandleError(w, err1)
 					return
@@ -736,6 +746,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 			} else {
 				//Assemble data to be sent to inform User
 				vd.MessageDisplay = 0
+				vd.IsSuccess = 1
 				vd.Message = "Error, incorrect hiddenFoodType: " + hiddenFoodType
 				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 				HandleError(w, err1)
@@ -755,6 +766,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					//Assemble data to be sent to inform User
 					vd.MessageDisplay = 0
 					vd.Message = "Image too large."
+					vd.IsSuccess = 1
 					err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 					HandleError(w, err1)
 					return
@@ -768,6 +780,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					logWriter(errMsg)
 					//Assemble data to be sent to inform User
 					vd.MessageDisplay = 0
+					vd.IsSuccess = 1
 					vd.Message = "Could not get uploaded file in food_update. Error getting file submission: " + err.Error()
 					err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 					HandleError(w, err1)
@@ -857,6 +870,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 							//Assemble data to be sent to inform User
 							vd.MessageDisplay = 0
 							vd.Message = succMsg
+							vd.IsSuccess = 0
 							err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 							HandleError(w, err1)
 							return
@@ -867,6 +881,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 							//Assemble data to be sent to inform User
 							vd.MessageDisplay = 0
 							vd.Message = errMsg
+							vd.IsSuccess = 1
 							err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 							HandleError(w, err1)
 							return
@@ -878,6 +893,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 						//Assemble data to be sent to inform User
 						vd.MessageDisplay = 0
 						vd.Message = errMsg
+						vd.IsSuccess = 1
 						err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 						HandleError(w, err1)
 						return
@@ -963,6 +979,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 							//Assemble data to be sent to inform User
 							vd.MessageDisplay = 0
 							vd.Message = succMsg
+							vd.IsSuccess = 0
 							err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 							HandleError(w, err1)
 							return
@@ -973,6 +990,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 							//Assemble data to be sent to inform User
 							vd.MessageDisplay = 0
 							vd.Message = errMsg
+							vd.IsSuccess = 1
 							err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 							HandleError(w, err1)
 							return
@@ -984,6 +1002,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 						//Assemble data to be sent to inform User
 						vd.MessageDisplay = 0
 						vd.Message = errMsg
+						vd.IsSuccess = 1
 						err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 						HandleError(w, err1)
 						return
@@ -995,6 +1014,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 					//Assemble data to be sent to inform User
 					vd.MessageDisplay = 0
 					vd.Message = errMsg
+					vd.IsSuccess = 1
 					err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 					HandleError(w, err1)
 					return
@@ -1191,6 +1211,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 				//Assemble data to be sent to inform User
 				vd.MessageDisplay = 0
 				vd.Message = "Image too large."
+				vd.IsSuccess = 1
 				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 				HandleError(w, err1)
 				return
@@ -1204,6 +1225,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 				//Assemble data to be sent to inform User
 				vd.MessageDisplay = 0
 				vd.Message = errMsg
+				vd.IsSuccess = 1
 				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 				HandleError(w, err1)
 				return
@@ -1227,6 +1249,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 				//Assemble data to be sent to inform User
 				vd.MessageDisplay = 0
 				vd.Message = "Error opening this file to store on server:" + err.Error()
+				vd.IsSuccess = 1
 				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 				HandleError(w, err1)
 				return
@@ -1242,6 +1265,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 				//Assemble data to be sent to inform User
 				vd.MessageDisplay = 0
 				vd.Message = "Error opening this file:" + err.Error()
+				vd.IsSuccess = 1
 				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 				HandleError(w, err1)
 				return
@@ -1252,6 +1276,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 				//Assemble data to be sent to inform User
 				vd.MessageDisplay = 0
 				vd.Message = "Error creating writeToFile: " + err.Error()
+				vd.IsSuccess = 1
 				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 				HandleError(w, err1)
 				return
@@ -1263,6 +1288,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 				//Assemble data to be sent to inform User
 				vd.MessageDisplay = 0
 				vd.Message = "Error copying the contents of the one image to the other " + err.Error()
+				vd.IsSuccess = 1
 				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 				HandleError(w, err1)
 				return
@@ -1276,6 +1302,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 				//Assemble data to be sent to inform User
 				vd.MessageDisplay = 0
 				vd.Message = "Error removing the file: " + err.Error()
+				vd.IsSuccess = 1
 				err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 				HandleError(w, err1)
 				return
@@ -1287,6 +1314,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 			//Assemble data to be sent to inform User
 			vd.MessageDisplay = 0
 			vd.Message = errMsg
+			vd.IsSuccess = 1
 			err1 := template1.ExecuteTemplate(w, "mainpage.gohtml", vd)
 			HandleError(w, err1)
 			return
@@ -1378,17 +1406,53 @@ func contact(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//Handles the messageboard page
+func messageboard(w http.ResponseWriter, r *http.Request) {
+	thePort := os.Getenv("PORT")
+	if thePort == "" {
+		thePort = "80"
+	}
+
+	err1 := template1.ExecuteTemplate(w, "messageboard.gohtml", nil)
+	HandleError(w, err1)
+}
+
+//choicepage (in-between stop between either the messageboard or the database)
+func choicepage(w http.ResponseWriter, r *http.Request) {
+	//if User is already logged in, bring them to the mainPage!
+	aUser := getUser(w, r) //Get the User, if they exist
+	aUserRole := aUser.Role
+	thePort := os.Getenv("PORT")
+	if thePort == "" {
+		thePort = "80"
+		logWriter("Defautling to this port: " + thePort)
+	}
+	vd := ViewData{aUser, aUser.UserName, aUserRole, thePort, 1, "Welcome to the Main page!", 0}
+	//Redirect User if they are not logged in
+	if !alreadyLoggedIn(w, r) {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	//See if there is a submission for new food or updates/deletes
+	//Serve the mainpage normally
+	err1 := template1.ExecuteTemplate(w, "choicepage.gohtml", vd)
+	HandleError(w, err1)
+}
+
 //Handles all requests coming in
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 
 	http.Handle("/favicon.ico", http.NotFoundHandler()) //For missing FavIcon
 	myRouter.HandleFunc("/", homePage)
-	myRouter.HandleFunc("/signup", signUp)
+	myRouter.HandleFunc("/signup", signup)
 	myRouter.HandleFunc("/mainPage", mainPage)
 	myRouter.HandleFunc("/signUpUserUpdated", signUpUserUpdated)
 	myRouter.HandleFunc("/documentation", documentation)
 	myRouter.HandleFunc("/contact", contact)
+	myRouter.HandleFunc("/choicepage", choicepage)
+	myRouter.HandleFunc("/messageboard", messageboard)
 	//SQL Database Stuff
 	myRouter.HandleFunc("/deleteFood", deleteFood).Methods("POST")
 	//myRouter.HandleFunc("/updateFood", updateFood).Methods("POST")           //Update a certain food item
@@ -1416,7 +1480,6 @@ func handleRequests() {
 	//File Handling Stuff
 	myRouter.HandleFunc("/checkSRC", checkSRC).Methods("POST")                   //Check if directory exists
 	myRouter.HandleFunc("/deletePhotoFromS3", deletePhotoFromS3).Methods("POST") //Delete S3 Photo
-	//myRouter.HandleFunc("/fileUpdate", fileUpdate).Methods("POST")               //Update S3 Photo
 	//Validation Stuff
 	myRouter.HandleFunc("/checkUsername", checkUsername) //Check Username
 	myRouter.HandleFunc("/loadUsernames", loadUsernames) //Loads in Usernames
@@ -1448,6 +1511,10 @@ func main() {
 
 	//Mongo Connect
 	mongoClient = connectDB()
+	/* Do below so our map dosen't go crazy... */
+	loadedMessagesMap = make(map[int]Message)
+	createTestMessages() //Create test board for messages
+
 	//Handle Requests
 	handleRequests()
 	defer mongoClient.Disconnect(theContext) //Disconnect in 10 seconds if you can't connect

@@ -6,37 +6,34 @@ function getUserID(passedID){
     console.log("We've set userID to " + userID);
 }
 
-function getOtherHeaderValues(message, willDisplay){
+function getOtherHeaderValues(message, willDisplay, failorsucc){
     console.log("DEBUG: Delivered the message value, it should be this: " + message);
     //Define variables for execution
     var errordisplayerDiv = document.getElementById("errordisplayer_div"); //Div Display
     var errordisplayerP = document.getElementById("errordisplayer_p"); //Message display
+    var errImg = document.getElementById("errImg"); //Exit Image
     //Determine if this div should display
     console.log("DEBUG: willDisplay: " + willDisplay);
     if (willDisplay === 0){
         //Set the message of the P
         errordisplayerP.innerHTML = message;
-        errordisplayerDiv.style.display = "flex";
-        console.log("DEBUG: We should be seeing the div now: " + willDisplay);
-        //Fade pic back up after a few seconds
-
-        setTimeout(function() { rollup(); }, 3500); //Start fading away
-        setTimeout(function() { dissapearDiv(); }, 6000);
-
-        function rollup(){
-            console.log("DEBUG: We rolling up...");
-            errordisplayerDiv.style.transition = "height 2s linear 0s";
-            errordisplayerDiv.style.height = "0px";
-            errordisplayerP.style.height = "0px";
-        }
-
-        function dissapearDiv(){
-            console.log("DEBUG: Bye Bye Div");
-            errordisplayerDiv.style.display = "none";
+        //Set background color and cursor based on failorsucc
+        if (failorsucc === 0) {
+            //It's a success
+            errordisplayerDiv.style.backgroundColor = "rgb(0, 196, 42)";
+            errImg.src = "static/images/svg/checkmark.svg";
+        } else if (failorsucc === 1){
+            //It's a failure
+            errordisplayerDiv.style.backgroundColor = "rgb(241, 30, 30)";
+            errImg.src = "static/images/svg/xmark.svg";
+        } else {
+            //display error
+            console.log("Error displaying in getOtherHeaderValues: " + failorsucc);
         }
 
     } else if (willDisplay === 1){
-        //Do nothing, we don't mean to display anything
+        //Hide the div of errors
+        errordisplayerDiv.style.display = "none";
     } else {
         console.log("Error, willDisplay is incorrect: " + willDisplay);
     }
@@ -498,13 +495,8 @@ function revealFoodForm(foodChoice) {
     }
 }
 
-//Hides the error div unless there is an error
-window.addEventListener('DOMContentLoaded', function(){
+function hideErrorDiv(){
     var errordisplayerDiv = document.getElementById("errordisplayer_div");
 
-    if (errordisplayerDiv === null){
-        //Do nothing, the div that needs hiding isn't on this page
-    } else{
-        errordisplayerDiv.style.display = "none"; //Hide this div from displaying
-    }
-});
+    errordisplayerDiv.style.display = "none";
+}

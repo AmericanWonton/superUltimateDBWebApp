@@ -1,3 +1,71 @@
+/* CSS Reset */
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+
+/* Usage of Google Fonts */
+body, div, p, q, i, h1, h2, h3, h4, h5, h6, a, header, footer {
+    font-family: 'Bowlby One SC', cursive, sans-serif;
+    font-family: 'Open Sans Condensed', sans-serif;
+    font-family: 'Dosis', sans-serif;
+    font-family: 'Bebas Neue', cursive, sans-serif;
+    font-family: 'Odibee Sans', sans-serif;
+    font-family: 'Nunito', sans-serif;
+}
+
+
+/* You need to initialize the parent elements to 100%
+for this to work correctly in the scrollable div */
+body, html {
+    display: flex;
+    flex-flow: row wrap;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    width: 100%;
+    height: 100%;
+    font: inherit;
+    vertical-align: baseline;
+    /* debug */
+}
+
+header {
+    display: flex;
+    flex-flow: row wrap;
+    margin: 0em;
+    padding: 0em;
+    width: 100%;
+}
+
+.mainContentDiv{
+    box-sizing: border-box;
+    width: 100%;
+    height: 125vh;
+}
+
+
 /* SYTLING FOR THE FORMS */
 .divform {
     /* Flexbox styling */
@@ -103,17 +171,65 @@
 }
 
 /* Index Page Layout */
-.signup-ask-div {
+.loginStatusDiv{
+    /* flexbox styling */
+    display: flex;
+    flex-flow: wrap;
+    align-content: center;
+    justify-content: center;
+    padding-bottom: 1em;
+    width: 100%;
+}
+
+.loginStatusP{
+    font-family: 'Bebas Neue', cursive, sans-serif;
+    font-size: 1.5rem;
+    color: black;
+    align-content: center;
+    text-align: center;
+    align-self: center;
+}
+
+.signInAndUpDiv{
     /* flexbox styling */
     display: flex;
     flex-flow: wrap;
     align-content: center;
     justify-content: center;
     padding: 1em;
+    margin: 1em;
+    width: 100%;
 }
-.signup-ask-text {
+
+.signup-ask-div {
+    /* flexbox styling */
+    display: flex;
+    flex-flow: wrap;
+    align-content: center;
+    justify-content: center;
     align-self: center;
-    font-size: 2rem;
+    padding: 1em;
+    width: 45%;
+}
+
+.signup-ask-text {
+    color: blue;
+    align-self: center;
+    font-size: 3rem;
+    font-weight: 1rem;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-shadow: .2em .2em .2em rgb(0, 0, 0);
+}
+
+.signup-ask-text:hover{
+    color: purple;
+    align-self: center;
+    font-size: 4rem;
+    font-weight: 1.5rem;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-shadow: .2em .2em .2em rgb(0, 0, 0);
 }
 
 .signin-ask-div {
@@ -122,19 +238,29 @@
     flex-flow: wrap;
     align-content: center;
     justify-content: center;
+    align-self: center;
     padding: 1em;
+    width: 45%;
 }
 
 .signin-ask-text {
     color: blue;
     align-self: center;
-    font-size: 2rem;
+    font-size: 3rem;
+    font-weight: 1rem;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-shadow: .2em .2em .2em rgb(0, 0, 0);
 }
 
 .signin-ask-text:hover {
-    align-self: center;
-    font-size: 2rem;
     color: purple;
+    align-self: center;
+    font-size: 4rem;
+    font-weight: 1.5rem;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-shadow: .2em .2em .2em rgb(0, 0, 0);
 }
 
 /* MainPage Layout */
@@ -339,12 +465,14 @@
     justify-content: center;
     align-content: center;
     align-items: center;
+    align-self: center;
     width: 100%;
 
     /* styling */
     padding: 1em;
     /* debug */
     border: 2px solid black;
+    background-color: antiquewhite;
 }
 
 .theContactDiv{
@@ -354,17 +482,18 @@
     justify-content: center;
     align-content: center;
     align-items: center;
-    width: 35%;
+    width: 45%;
     /* styling */
-    margin: 1em;
     padding: 1em;
     background-color: lightblue;
+    border-radius: 70%;
     /* debug */
-    border: 2px solid rgb(5, 23, 185);
+    border: 2px solid black;
 }
 
 .theContactDiv:hover{
-    border: 6px solid rgb(5, 23, 185);
+    border: 6px solid black;
+    border-radius: 70%;
 }
 
 .contactP{
@@ -381,17 +510,19 @@
     justify-content: center;
     align-content: center;
     align-items: center;
-    width: 35%;
+    width: 45%;
     /* styling */
     margin: 1em;
     padding: 1em;
+    border-radius: 70%;
     background-color: lightgreen;
     /* debug */
-    border: 2px solid rgb(5, 23, 185);
+    border: 2px solid black;
 }
 
 .theDocumentationDiv:hover{
-    border: 6px solid rgb(5, 23, 185);
+    border: 6px solid black;
+    border-radius: 70%;
 }
 
 .documentationP{
@@ -423,16 +554,59 @@
 
 .errordisplayer_div{
     /* Flex-box formatting */
+    /*
     display: flex;
     flex-flow: wrap;
     justify-content: center;
     align-content: center;
     align-items: center;
+    */
+    display: flex;
+    flex-flow: wrap;
     width: 100%;
     /* styling */
-    background-color: darkorange;
+    background-color: rgb(65, 32, 184);
     /* Debug styling */
-    border: 2px solid red;
+}
+
+.errorDisplayPDiv{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    align-self: center;
+    justify-content: center;
+    width: 35%;
+    /* styling */
+    /* Debug styling */
+    border: 1px dashed pink;
+}
+
+.errorDisplayImgDiv{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    align-self: flex-end;
+    justify-self: flex-end;
+    width: 35%;
+    /* styling */
+    background-color: white;
+    /* DEBUG STYLING */
+}
+
+.errImg{
+    width: 3em;
+    height: 3em;
+}
+
+.errImg:hover{
+    width: 3.5em;
+    height: 3.5em;
 }
 
 .errordisplayer_p{
@@ -724,10 +898,6 @@
     height: auto;
 }
 
-
-
-
-
 .linkA{
     /* font and styling */
     font-size: 1rem;
@@ -739,8 +909,44 @@
     font-size: 1rem;
     color: purple;
 }
-
 /* DOCUMENTATION PAGE END */
+
+
+/* PAGE CHOICE LAYOUTS */
+.buttonChoiceDivs{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 100%;
+    /* styling */
+    margin: .1rem;
+    padding: .5rem;
+}
+
+.buttonChoiceDiv{
+    /* Flex-box formatting */
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    align-self: center;
+    width: 45%;
+    /* styling */
+    margin: .3rem;
+    padding: 1rem;
+}
+
+.buttonChoiceButton{
+    width: 90%;
+    height: 90%;
+    padding: .3rem;
+    margin: .3rem;
+    font-size: 1rem;
+}
 
 /* FOOTER LAYOUTS */
 .footer_ContactDiv{

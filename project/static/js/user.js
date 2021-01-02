@@ -12,8 +12,20 @@ function navigateHeader(whichLink) {
             window.location.replace("/documentation");
             break;
         case 3:
+            //Go to Documentation
+            window.location.replace("/mainPage");
+            break;
+        case 4:
+            //Go to Documentation
+            window.location.replace("/messageboard");
+            break;
+        case 5:
             //Go to Index
             window.location.replace("/");
+            break;
+        case 6:
+            //Go to signup Page
+            window.location.replace("/signup");
             break;
         default:
             console.log("Error, wrong whichLink entered: " + whichLink);

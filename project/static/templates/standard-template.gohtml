@@ -84,7 +84,7 @@
     <header>
         <div class="header_selectDiv">
             {{/******** Define both clickable links to other pages ********/}}
-            <div class="theContactDiv" onclick="navigateHeader(3)">
+            <div class="theContactDiv" onclick="navigateHeader(5)">
                 <p class="contactP">Back to Login</p>
             </div>
         </div>
@@ -94,13 +94,19 @@
     <header>
         <div class="header_selectDiv">
             {{/******** Define both clickable links to other pages ********/}}
-            <div class="theContactDiv" onclick="navigateHeader(3)">
+            <div class="theContactDiv" onclick="navigateHeader(5)">
                 <p class="contactP">Back to Login</p>
             </div>
             <div class="errordisplayer_div" id="errordisplayer_div">
-                <p class="errordisplayer_p" id="errordisplayer_p">
+                <div class="errorDisplayPDiv">
+                    <p class="errordisplayer_p" id="errordisplayer_p">
                     
-                </p>
+                    </p>
+                </div>
+                <div class="errorDisplayImgDiv">
+                    <img class="errImg" src="static/images/svg/checkmark.svg" id="errImg"
+                    onclick="hideErrorDiv()">
+                </div>
             </div>
         </div>
     </header>
@@ -440,8 +446,8 @@
 
 {{define "signup"}}
     <div class="signup-ask-div">
-        <h2 class="signup-ask-text">
-                <a href="/signup">Sign Up!</a>
+        <h2 class="signup-ask-text" onclick="navigateHeader(6)">
+            Sign Up!
         </h2>
     </div>
 {{end}}
@@ -452,8 +458,10 @@
         </h2>
         <p>Just a heads up, Users can get instant access to create and read data.</p>
         <br>
-        <p>If you'd like an IT/Admin Role, fill out the form and provide your email. I'll 
-        add your access as soon as I can ;) </p>
+        <p>
+            If you'd like an IT/Admin Role, fill out the form and provide your email. I'll 
+            add your access as soon as I can ;) 
+        </p>
         <br>
     </div>
 {{end}}
@@ -747,7 +755,7 @@
 {{/* ENDING OF 'SIGN-UP' FORM DEFINITION */}}
 {{/* BEGINNING OF 'SIGN-IN' FORM DEFINITION */}}
 {{define "sign-in-form"}}
-    <div id="divform">
+    <div id="divform" class="divform">
         <form id="sign-in-form"
         method="POST">
             <div class="signInAlignmentDiv">
@@ -2821,7 +2829,7 @@
     <footer>
         <div class="footer_ContactDiv">
             {{/******** Define both clickable links to other pages ********/}}
-            <div class="theContactDiv" onclick="navigateHeader(3)">
+            <div class="theContactDiv" onclick="navigateHeader(5)">
                 <p class="contactP">Back to Login</p>
             </div>
         </div>
@@ -2843,12 +2851,13 @@
 {{end}}
 {{define "mainHeaderDisplay"}}
     <script type="text/javascript">
-        console.log("Deeznuts");
         var hiddenP = document.getElementById("HiddenMessageP");
         var hiddenPTwo = document.getElementById("HiddenMessageP2");
+        var hiddenPThree = document.getElementById("HiddenMessageP3");
         var hiddenPValue = String(hiddenP.innerHTML);
         var hiddenPValueTwo = Number(hiddenPTwo.innerHTML);
-        setTimeout(function() { getOtherHeaderValues(hiddenPValue, hiddenPValueTwo); }, 5000);
+        var hiddenPValueThree = Number(hiddenPThree.innerHTML);
+        getOtherHeaderValues(hiddenPValue, hiddenPValueTwo, hiddenPValueThree);
     </script>
 {{end}}
 {{/* Food Seer */}}
@@ -2858,6 +2867,23 @@
     </script>
 {{end}}
 {{/* AJAX/ JAVASCRIPT ENDING */}}
+
+{{/* BEGINNING OF CHOICE PAGE BODY */}}
+{{define "pageChoiceBody"}}
+    <div class="buttonChoiceDivs"  id="buttonChoiceDivs">
+        <div class="buttonChoiceDiv" id="buttonChoiceDiv">
+            <button class="buttonChoiceButton" id="buttonChoiceButton" onclick="navigateHeader(3)">
+                Go to Database
+            </button>
+        </div>
+        <div class="buttonChoiceDiv" id="buttonChoiceDiv">
+            <button class="buttonChoiceButton" id="buttonChoiceButton" onclick="navigateHeader(4)">
+                Go to MessageBoard
+            </button>
+        </div>
+    </div>
+{{end}}
+{{/* END OF CHOICE PAGE BODY */}}
 {{/* TEST TEMPLATE BEGINNING */}}
 
 {{/* TEST TEMPLATE ENDING */}}

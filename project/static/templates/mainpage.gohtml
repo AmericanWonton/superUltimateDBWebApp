@@ -28,11 +28,15 @@
             {{/* Testing Request Data stuff */}}
             {{$theMessage := .Message}}
             {{$displayMessage := .MessageDisplay}}
+            {{$isSucc := .IsSuccess}}
             <p class="HiddenMessageP" id="HiddenMessageP" hidden>
                 {{$theMessage}}
             </p>
             <p class="HiddenMessageP" id="HiddenMessageP2" hidden>
                 {{$displayMessage}}
+            </p>
+            <p class="HiddenMessageP" id="HiddenMessageP3" hidden>
+                {{$isSucc}}
             </p>
             {{template "mainHeaderDisplay" $theMessage}}
             {{/* If the role is a User */}}

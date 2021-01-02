@@ -1091,7 +1091,6 @@ func foodDeleteMongo(w http.ResponseWriter, req *http.Request) {
 
 //This should give a random id value to both food groups
 func randomIDCreation() int {
-	fmt.Printf("DEBUG: Creating Random ID for User/Food\n")
 	finalID := 0        //The final, unique ID to return to the food/user
 	randInt := 0        //The random integer added onto ID
 	randIntString := "" //The integer built through a string...
@@ -1114,7 +1113,7 @@ func randomIDCreation() int {
 			log.Fatal(err)
 		}
 		//Search all our collections to see if this UserID is unique
-		canExit := []bool{true, true, true}
+		canExit := []bool{true, true, true, true}
 		fmt.Printf("DEBUG: We are going to see if this ID is in our food or User DBs: %v\n", theID)
 		//User collection
 		userCollection := mongoClient.Database("superdbtest1").Collection("users") //Here's our collection
@@ -1191,8 +1190,28 @@ func randomIDCreation() int {
 				canExit[2] = false
 			}
 		}
+		//Check photo collection
+		messageCollection := mongoClient.Database("messageboard").Collection("messages") //Here's our collection
+		var aMessage Message
+		//Give 0 values to determine if these IDs are found
+		theFilter4 := bson.M{
+			"$or": []interface{}{
+				bson.M{"messageid": theID},
+				bson.M{"userid": theID},
+			},
+		}
+		theErr = messageCollection.FindOne(theContext, theFilter4).Decode(&aMessage)
+		if theErr != nil {
+			if strings.Contains(theErr.Error(), "no documents in result") {
+				canExit[3] = true
+				fmt.Printf("It's all good, this document wasn't found for User/hamburger/photo/message and our ID is clean.\n")
+			} else {
+				fmt.Printf("DEBUG: We have another error for finding a unique PhotoID: \n%v\n", theErr)
+				canExit[3] = false
+			}
+		}
 		//Final check to see if we can exit this loop
-		if canExit[0] == true && canExit[1] == true && canExit[2] == true {
+		if canExit[0] == true && canExit[1] == true && canExit[2] == true && canExit[3] == true {
 			finalID = theID
 			foundID = true
 		} else {

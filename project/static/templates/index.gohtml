@@ -18,25 +18,32 @@
     <body>
         {{/* Here is our header */}}
         {{template "index_header"}}
-        {{/* If the User session exists, (as in, we aren't passing in a 'nil' user),
-        then display it here. */}}
-        {{if .UserName}}
-            <br>
-            <p align-self="center">Hey, here's your info, you should be logged in. We can sign you into stuff...</p>
-            {{/* Here is our form asking us to sign in! */}}
-            {{template "signup"}}
-            <br>
-            {{template "signin"}}
-            {{template "sign-in-form"}}
-            <br>
-        {{else}}
-            <p align-self="center">Good sire, it's my displeasure to inform you that you are NOT signed in.</p>
-            <br>
-            <p align-self="center">You must either sign in below or sign up</p>
-            {{template "signup"}}
-            {{template "signin"}}
-            {{template "sign-in-form"}}
-        {{end}}
+        {{/* This is the main styling for our page; this can change in javascript for
+        different pages */}}
+        <div class="mainContentDiv" id="mainContentDiv">
+            {{/* If the User session exists, (as in, we aren't passing in a 'nil' user),
+            then display it here. */}}
+            {{if .UserName}}
+                <div class="loginStatusDiv" id="loginStatusDiv">
+                    <p class="loginStatusP" id="loginStatusP">
+                        Hey, here's your info, you should be logged in. We can sign you into stuff...
+                    </p>
+                </div>
+                {{/* Here is our form asking us to sign in! */}}
+                <div class="signInAndUpDiv" id="signInAndUpDiv">
+                    {{template "signup"}}
+                    {{template "signin"}}
+                    {{template "sign-in-form"}}
+                </div>
+            {{else}}
+                <p align-self="center">Good sire, it's my displeasure to inform you that you are NOT signed in.</p>
+                <br>
+                <p align-self="center">You must either sign in below or sign up</p>
+                {{template "signup"}}
+                {{template "signin"}}
+                {{template "sign-in-form"}}
+            {{end}}
+        </div>
         {{/* Here is our footer */}}
     </body>
 </html>
