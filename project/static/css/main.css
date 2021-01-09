@@ -67,7 +67,7 @@ header {
     width: 100%;
     margin: 0em;
     padding: 0em;
-    height: 70%;
+    height: calc(100% - 20%);
     overflow-y: auto;
     overflow-x: hidden;
     /* styling */
@@ -250,7 +250,6 @@ header {
     padding: 1em;
     width: 100%;
     /* debug */
-    border: 1px solid orange;
 }
 
 .informtextP{
@@ -275,7 +274,7 @@ header {
     font-family: 'Lobster', cursive;
     color: purple;
     align-self: center;
-    font-size: 4rem;
+    font-size: 3.1rem;
     font-weight: 1.2rem;
     text-transform: uppercase;
     text-align: center;
@@ -311,7 +310,7 @@ header {
     font-family: 'Lobster', cursive;
     color: purple;
     align-self: center;
-    font-size: 4rem;
+    font-size: 3.1rem;
     font-weight: 1.2rem;
     text-align: center;
     text-transform: uppercase;
@@ -518,6 +517,7 @@ header {
     /* Flex-box formatting */
     box-sizing: border-box;
     width: 100%;
+    height: 20%;
     /* styling */
     border: 2px solid rgb(0, 0, 0);
     background-color: antiquewhite;

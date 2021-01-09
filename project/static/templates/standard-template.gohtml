@@ -454,7 +454,7 @@
 
 {{define "signup"}}
     <div class="signup-ask-div">
-        <h2 class="signup-ask-text" onclick="navigateHeader(6)">
+        <h2 class="signup-ask-text" id="signup-ask-text">
             Sign Up!
         </h2>
     </div>
@@ -641,9 +641,45 @@
                 <p class="informtextP" id="informtextPSignUp"></p>
             </div>
         </div>
+        <div class="informFormDiv" id="informFormDiv">
+            <p class="informFormP" id="informFormP"></p>
+        </div>
     </div>
     {{/* On load, query available Usernames */}}
     <script>
+        /* When 'Sign Up' is clicked, display the form and hide the Sign In Form */
+        var signUp = document.getElementById("signup-ask-text");
+
+        if (signUp === null){
+            //Do nothing, it isn't on this page
+        } else {
+            //Declare the variables on the window
+            var divformDivSignUp = document.getElementById("divformDivSignUp");
+            divformDivSignUp.style = "display: none";
+            //Listen for the button click
+            signUp.addEventListener("click", function(){
+                //First check to see if other sheet is open; if yes, close it
+                var divformDivLogin = document.getElementById("divformDivLogin");
+                if (openSignInWindow === true) {
+                    openSignInWindow = false;
+                    divformDivLogin.style = "display: none";
+                }
+                //open this sheet if needed
+                if (openSignUpWindow === false){
+                    divformDivSignUp.style = "display: flex";
+                    divformDivSignUp.style = "flex-flow: wrap";
+                    divformDivSignUp.style = "align-content: center";
+                    divformDivSignUp.style = "justify-content: center";
+                    divformDivSignUp.style = "width: 100%";
+                    divformDivSignUp.style = "padding: 1rem";
+                    openSignUpWindow = true;
+                } else {
+                    divformDivSignUp.style = "display: none";
+                    openSignUpWindow = false;
+                }
+            });
+        }
+
         var theForm = document.querySelector('#signup-form');
         var userName = document.querySelector('#username');
         var password = document.querySelector('#password');
@@ -656,8 +692,7 @@
         var lNameErr = document.querySelector('#form-input-info4');
         var role = document.getElementById("sr");
         // get the form elements defined in your form HTML above
-        var form = document.getElementById("signup-form");
-        var button = document.getElementById("submit_button");
+        var button = document.getElementById("submitSignUpButton");
 
         /* Query the database on page load */
         window.addEventListener('DOMContentLoaded', function(){
@@ -667,13 +702,11 @@
             fNameErr.textContent = "";
             lNameErr.textContent = "";
             //Loading Database Usernames
-            console.log("Loading Database Usernames.");
             var xhr = new XMLHttpRequest();
             xhr.open('GET', '/loadUsernames', true);
             xhr.addEventListener('readystatechange', function(){
                 if(xhr.readyState == XMLHttpRequest.DONE && xhr.status === 200) {
                     var item = xhr.responseText;
-                    console.log(item);
                     if (item == 'true') {
                         console.log("We successfully loaded all the data");
                     } else {
@@ -693,19 +726,19 @@
                     var item = xhr.responseText;
                     if (item == 'TooShort') {
                         usernameErr.textContent = 'Please enter a Username';
-                        document.querySelector('#submit_button').disabled = true;
+                        button.disabled = true;
                     } else if (item == 'TooLong'){
                         usernameErr.textContent = 'Username must be under 20 characters';
-                        document.querySelector('#submit_button').disabled = true;
+                        buttondisabled = true;
                     } else if (item == 'ContainsLanguage'){
                         usernameErr.textContent = 'Username is innapropriate';
-                        document.querySelector('#submit_button').disabled = true;
+                        button.disabled = true;
                     } else if (item == 'true') {
                         usernameErr.textContent = 'Username taken - Try another name!';
-                        document.querySelector('#submit_button').disabled = true;
+                        button.disabled = true;
                     } else {
                         usernameErr.textContent = '';
-                        document.querySelector('#submit_button').disabled = false;
+                        button.disabled = false;
                     }
                 }
             });
@@ -717,13 +750,13 @@
             passString = password.value;
             if (passString.length <= 0) {
                 passwordErr.textContent = 'Please enter a password';
-                document.querySelector('#submit_button').disabled = true;
+                button.disabled = true;
             } else if (passString.length > 20){
                 passwordErr.textContent = 'Password must be under 20 characters.';
-                document.querySelector('#submit_button').disabled = true;
+                button.disabled = true;
             } else {
                 passwordErr.textContent = '';
-                document.querySelector('#submit_button').disabled = false;
+                button.disabled = false;
             }
         });
 
@@ -732,13 +765,13 @@
             fnameString = fName.value;
             if (fnameString.length <= 0) {
                 fNameErr.textContent = 'Please enter a firstname!';
-                document.querySelector('#submit_button').disabled = true;
+                button.disabled = true;
             } else if (fnameString.length > 20){
                 fNameErr.textContent = 'Firstname must be less than 20 characters.';
-                document.querySelector('#submit_button').disabled = true;
+                button.disabled = true;
             } else {
                 fNameErr.textContent = '';
-                document.querySelector('#submit_button').disabled = false;
+                button.disabled = false;
             }
         });
 
@@ -747,13 +780,13 @@
             lnameString = lName.value;
             if (lnameString.length <= 0) {
                 lNameErr.textContent = 'Please enter a lastname!';
-                document.querySelector('#submit_button').disabled = true;
+                button.disabled = true;
             } else if (lnameString > 20){
                 lNameErr.textContent = 'Last name cannot be more than 20 characters.';
-                document.querySelector('#submit_button').disabled = true;
+                button.disabled = true;
             } else {
                 lNameErr.textContent = '';
-                document.querySelector('#submit_button').disabled = false;
+                button.disabled = false;
             }
         });
 
@@ -765,7 +798,7 @@
                 };
                 var newUser = {
                     UserName: "",
-                    Password: "", //This was formally a []byte but we are changing our code to fit the database better
+                    Password: "",
                     First:    "",
                     Last:     "",
                     Role:     "",
@@ -791,11 +824,9 @@
                             var item = xhr.responseText;
                             var successMSG = JSON.parse(item);
                             if (successMSG.SuccessNum == 0){
-                                var redirectStr = successMSG.RedirectURL
-                                console.log("DEBUG: Successful User submission, going to main page.");
-                                location.reload();
+                                var redirectStr = successMSG.RedirectURL;
+                                navigateHeader(5);
                             } else {
-                                console.log("DEBUG: Unsuccessful User submission: " + successMSG.Message);
                                 document.getElementById("informFormP").innerHTML = successMSG.Message;
                                 document.getElementById("informFormDiv").style.display = "block";
                             }
@@ -816,9 +847,8 @@
                             var item = xhr.responseText;
                             var successMSG = JSON.parse(item);
                             if (successMSG.SuccessNum == 0){
-                                var redirectStr = successMSG.RedirectURL
-                                console.log("DEBUG: Successful IT submission, going to main page.")
-                                location.reload();
+                                var redirectStr = successMSG.RedirectURL;
+                                navigateHeader(5);
                             } else {
                                 console.log("DEBUG: Unsuccessful IT submission: " + successMSG.Message);
                                 document.getElementById("informFormP").innerHTML = successMSG.Message;
@@ -830,7 +860,6 @@
                 } else {
                     alert("Whoops, got the wrong value for our role part of the form.");
                 }
-        
         });
     </script>
 {{end}}
@@ -908,6 +937,39 @@
         </div>
     </div>
     <script type="text/javascript">
+        /* When 'Sign In' Button is clicked, we un-hide the Sign-In form
+        and hide the other form */
+        var signIn = document.getElementById("signin-ask-text");
+        if (signIn === null){
+            //Do nothing, this isn't on this page
+        } else {
+            //Declare the variables on the window
+            var divformDivLogin = document.getElementById("divformDivLogin");
+            divformDivLogin.style = "display: none";
+            //Listen for the button click
+            signIn.addEventListener("click", function(){
+                //First check to see if other sheet is open; if yes, close it
+                var divformDivSignUp = document.getElementById("divformDivSignUp");
+                if (openSignUpWindow === true) {
+                    openSignUpWindow = false;
+                    divformDivSignUp.style = "display: none";
+                }
+                //Open this form if needed
+                if (openSignInWindow === false){
+                    divformDivLogin.style = "display: flex";
+                    divformDivLogin.style = "flex-flow: wrap";
+                    divformDivLogin.style = "align-content: center";
+                    divformDivLogin.style = "justify-content: center";
+                    divformDivLogin.style = "width: 100%";
+                    divformDivLogin.style = "padding: 1rem";
+                    openSignInWindow = true;
+                } else {
+                    divformDivLogin.style = "display: none";
+                    openSignInWindow = false;
+                }
+            });
+        }
+
         //Define elements of the 'Ajax Form'
         var inputTextMobileUN = document.getElementById("inputTextMobileUN");
         var inputTextMobilePW = document.getElementById("inputTextMobilePW");
