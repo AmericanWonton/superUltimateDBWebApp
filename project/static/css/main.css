@@ -58,6 +58,14 @@ header {
     width: 100%;
 }
 
+.topHeader {
+    box-sizing: border-box;
+    margin: 0em;
+    padding: 0em;
+    width: 100%;
+    height: calc(100% - 80%);
+}
+
 .mainContentDiv{
     /* flexbox styling */
     display: flex;
@@ -523,7 +531,7 @@ header {
     background-color: antiquewhite;
 }
 
-.header_selectDiv{
+.header_selectDiv {
     /* Flex-box formatting */
     display: flex;
     flex-flow: row wrap;
@@ -538,6 +546,16 @@ header {
     background-color: antiquewhite;
 }
 
+.linkDivAlignDiv {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    align-self: center;
+    width: 100%;
+}
+
 .theContactDiv{
     /* Flex-box formatting */
     display: flex;
@@ -545,6 +563,7 @@ header {
     justify-content: center;
     align-content: center;
     align-items: center;
+    align-self: center;
     width: 45%;
     /* styling */
     padding: .5em;
@@ -824,6 +843,8 @@ header {
 
 .linkA{
     font-size: 1rem;
+    align-self: center;
+    text-align: center;
 }
 
 /* DOCUMENTATION PAGE START */
@@ -859,6 +880,7 @@ header {
     align-items: center;
     width: 100%;
     /* styling */
+    padding-top: .5em;
     padding-left: .5em;
     padding-right: .5em;
 }
@@ -869,6 +891,7 @@ header {
     text-align: center;
     margin-top: .5em;
     margin-bottom: .5em;
+    font-family: 'Nunito', sans-serif;
 }
 
 .documentations_block_div{

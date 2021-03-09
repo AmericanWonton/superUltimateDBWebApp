@@ -60,7 +60,7 @@
     </header>
 {{end}}
 {{define "index_header"}}
-    <header>
+    <header class="topHeader">
         <div class="headerContainerDiv">
             <div class="mainTitleDiv">
                 <h1 class="pagetitleh1">
@@ -89,12 +89,12 @@
     </header>
 {{end}}
 {{define "documentation_header"}}
-    <header>
-        <div class="header_selectDiv">
+    <header class="topHeader">
+        <div class="headerContainerDiv">
             {{/******** Define both clickable links to other pages ********/}}
-            <div class="theContactDiv" onclick="navigateHeader(5)">
-                <p class="contactP">Back to Login</p>
-            </div>
+            <p> 
+                Test Text
+            </p>
         </div>
     </header>
 {{end}}
@@ -140,10 +140,7 @@
                     I've laid out steps to building this web app below, with links to documentation
                     and videos to each section. If you have a question on any of these topics, please 
                     feel free to email me in the 'Contact' section. You can also feel free to 
-                    check out this project from git, here:
-                </p>
-                <p class="spheleP">
-                    <a class="linkA" href="https://github.com/AmericanWonton/superUltimateDBWebApp"
+                    check out this project from git, here: <a class="linkA" href="https://github.com/AmericanWonton/superUltimateDBWebApp"
                     target="_blank" alt="Github Project Link">
                         <img alt="Github Project Link" src="static/images/svg/github_pic.svg"
                         class="linkPictures">

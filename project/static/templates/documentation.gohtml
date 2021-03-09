@@ -18,9 +18,11 @@
         {{/* Here is our header */}}
         {{template "documentation_header"}}
         {{/* Here is the body section */}}
-        {{template "documentation_intro"}}
-        {{template "documentation_documents_block"}}
+        <div class="mainContentDiv" id="mainContentDiv">
+            {{/* Content for display */}}
+            {{template "documentation_intro"}}
+            {{template "documentation_documents_block"}}
+        </div>
         {{/* Here is our footer */}}
-        {{template "footer_div"}}
     </body>
 </html>
